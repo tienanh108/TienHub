@@ -6,7 +6,7 @@
 
    - Tài khoản TienHub -> dùng tên tài khoản.
 
-   - Khách -> dùng "Khách".
+   - Không hỗ trợ Guest.
 
    - Tạo phòng -> vào lobby ngay.
 
@@ -22,260 +22,848 @@
 
 
 
-/* ================= FIREBASE ================= */
+/* ================= FIREBASE CONFIG ================= */
+
+
+
+const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB2thMfX5cl7FqnPB-qW8KH5ts7WDJqUAs",
+    authDomain: "tienhub-ca5c3.firebaseapp.com",
+    databaseURL: "https://tienhub-ca5c3-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "tienhub-ca5c3",
+    storageBucket: "tienhub-ca5c3.firebasestorage.app",
+    messagingSenderId: "51330279386",
+    appId: "1:51330279386:web:cf69c206260448f2da02e3",
+    measurementId: "G-H90525VMVN"
+};
+
+
+
+let firebaseApp = null;
 
 let auth = null;
+
 let db = null;
-let serverTimestamp = null;
 
-let currentUser = null;
-let currentUsername = "Khách";
-let currentRoomCode = null;
-let roomListener = null;
-let startedRoomCode = null;
 
-let authReadyPromise = Promise.resolve(null);
 
-/*
- * Ludo dùng chung Firebase instance của TienHub.
- * Không khởi tạo Firebase Compat riêng trong game.
- *
- * Phần dưới tạo một lớp tương thích nhỏ để giữ nguyên
- * room logic cũ đang dùng db.ref(...).once()/set()/update()...
- */
+try {
 
-function createDatabaseFacade(firebaseDatabase, api) {
-    const {
-        ref,
-        get,
-        set,
-        update,
-        remove,
-        onValue,
-        off,
-        runTransaction,
-        onDisconnect
-    } = api;
+    const existing = firebase.apps.find(app => app.name === "TienHuB");
 
-    function wrap(databaseRef) {
-        return {
-            async once(eventType) {
-                if (eventType !== "value") {
-                    throw new Error(`Ludo chỉ hỗ trợ once("value").`);
-                }
-                return await get(databaseRef);
-            },
 
-            async set(value) {
-                return await set(databaseRef, value);
-            },
 
-            async update(values) {
-                return await update(databaseRef, values);
-            },
+    firebaseApp = existing || firebase.initializeApp(
 
-            async remove() {
-                return await remove(databaseRef);
-            },
+        FIREBASE_CONFIG,
 
-            child(path) {
-                return wrap(ref(databaseRef, String(path)));
-            },
+        "TienHuB"
 
-            async transaction(updateFn) {
-                return await runTransaction(databaseRef, updateFn);
-            },
+    );
 
-            on(eventType, callback) {
-                if (eventType !== "value") {
-                    throw new Error(`Ludo chỉ hỗ trợ on("value", ...).`);
-                }
-                return onValue(databaseRef, callback);
-            },
 
-            off() {
-                off(databaseRef);
-            },
 
-            onDisconnect() {
-                const disconnectRef = onDisconnect(databaseRef);
-                return {
-                    async remove() {
-                        return await disconnectRef.remove();
-                    },
-                    async update(values) {
-                        return await disconnectRef.update(values);
-                    },
-                    async set(value) {
-                        return await disconnectRef.set(value);
-                    },
-                    async cancel() {
-                        return await disconnectRef.cancel();
-                    }
-                };
-            }
-        };
-    }
+    auth = firebaseApp.auth();
 
-    return {
-        ref(path) {
-            return wrap(ref(firebaseDatabase, String(path)));
-        }
-    };
+    db = firebaseApp.database();
+
+} catch (error) {
+
+    console.error("LUDO FIREBASE INIT ERROR:", error);
+
 }
 
-(async () => {
-    try {
-        const core = await import("../../src/core/firebase.js");
-        auth = core.auth;
-        const firebaseDatabase = core.db;
 
-        if (!auth) {
-            throw new Error("Không lấy được Firebase Auth của TienHub.");
-        }
 
-        if (!firebaseDatabase) {
-            throw new Error("Không lấy được Firebase Database của TienHub.");
-        }
+/* ================= STATE ================= */
 
-        const databaseApi = await import(
-            "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
-        );
 
-        db = createDatabaseFacade(firebaseDatabase, databaseApi);
-        serverTimestamp = databaseApi.serverTimestamp;
-        window.LudoServerTimestamp = () =>
-            typeof serverTimestamp === "function"
-                ? serverTimestamp()
-                : Date.now();
 
-        const { onAuthStateChanged } = await import(
-            "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"
-        );
+let currentUser = null;
 
-        authReadyPromise = new Promise(resolve => {
-            let resolved = false;
+let currentUsername = "Khách";
 
-            onAuthStateChanged(auth, async user => {
-                currentUser = user;
+let currentRoomCode = null;
 
-                if (user && !user.isAnonymous) {
-                    try {
-                        const snap = await databaseApi.get(
-                            databaseApi.ref(firebaseDatabase, `users/${user.uid}`)
-                        );
-                        const data = snap.val() || {};
+let roomListener = null;
 
-                        currentUsername =
-                            data.username ||
-                            data.displayName ||
-                            user.displayName ||
-                            user.email?.split("@")[0] ||
-                            localStorage.getItem("tienhub_username") ||
-                            "Người chơi";
-                    } catch (error) {
-                        console.warn("LUDO LOAD USERNAME ERROR:", error);
-                        currentUsername =
-                            user.displayName ||
-                            user.email?.split("@")[0] ||
-                            localStorage.getItem("tienhub_username") ||
-                            "Người chơi";
-                    }
-                } else {
-                    currentUsername = "Khách";
-                }
+let startedRoomCode = null;
 
-                console.log(
-                    "LUDO AUTH:",
-                    user ? user.uid : "none",
-                    currentUsername,
-                    user?.isAnonymous ? "anonymous" : "account"
-                );
 
-                if (!resolved) {
-                    resolved = true;
-                    resolve(user || null);
-                }
-            });
-        });
-    } catch (error) {
-        console.error("LUDO FIREBASE INIT ERROR:", error);
-        authReadyPromise = Promise.reject(error);
-    }
-})();
 
 /* ================= ONLINE GAME SYNC ================= */
 
+
+
 let onlineGameRef = null;
+
 let onlineGameListener = null;
+
 let onlineGameEventsBound = false;
+
 let applyingRemoteGameState = false;
 
-/* ================= AUTH HELPER ================= */
 
-async function ensureUser() {
-    await authReadyPromise;
 
-    const user = currentUser || auth?.currentUser;
+function stopOnlineGameSync() {
 
-    if (!user) {
-        throw new Error(
-            "Bạn chưa đăng nhập TienHub. Vui lòng đăng nhập trước khi chơi Ludo."
+
+
+    if (
+
+        onlineGameRef &&
+
+        onlineGameListener
+
+    ) {
+
+        onlineGameRef.off(
+
+            "value",
+
+            onlineGameListener
+
         );
+
     }
 
-    currentUser = user;
 
-    if (!currentUsername || currentUsername === "Khách") {
-        currentUsername =
-            user.displayName ||
-            user.email?.split("@")[0] ||
-            localStorage.getItem("tienhub_username") ||
-            "Người chơi";
+
+    onlineGameRef = null;
+
+    onlineGameListener = null;
+
+    applyingRemoteGameState = false;
+
+}
+
+
+
+function getCurrentOnlineBoardOwner() {
+
+
+
+    if (
+
+        !window.LudoBoard ||
+
+        !window.LudoGame
+
+    ) {
+
+        return null;
+
     }
 
-    return user;
-}
 
-/* ================= BASIC HELPERS ================= */
 
-function generateRoomCode() {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let code = "";
+    const boardPlayer =
 
-    for (let i = 0; i < 6; i++) {
-        code += chars[Math.floor(Math.random() * chars.length)];
+        LudoBoard.players?.[
+
+            LudoBoard.currentPlayer
+
+        ];
+
+
+
+    if (!boardPlayer) {
+
+        return null;
+
     }
 
-    return code;
+
+
+    /*
+
+        Board dùng màu làm id.
+
+        Firebase room dùng uid.
+
+    */
+
+    return LudoGame.players?.find(
+
+        player =>
+
+            player.color === boardPlayer.id
+
+    ) || null;
+
 }
 
-function formatRoomCode(code) {
-    return String(code || "").toUpperCase();
-}
 
-function showScreen(screenId) {
-    document
-        .querySelectorAll(".screen")
-        .forEach(screen => {
-            screen.classList.remove("active");
-        });
 
-    const screen = document.getElementById(screenId);
+function canWriteOnlineGameState() {
 
-    if (screen) {
-        screen.classList.add("active");
+
+
+    if (
+
+        !currentUser ||
+
+        !window.LudoGame ||
+
+        LudoGame.mode !== "online"
+
+    ) {
+
+        return false;
+
     }
+
+
+
+    const current =
+
+        getCurrentOnlineBoardOwner();
+
+
+
+    if (!current) {
+
+        return false;
+
+    }
+
+
+
+    /*
+
+        AI chỉ do Host điều khiển.
+
+    */
+
+    if (
+
+        current.type === "ai"
+
+    ) {
+
+        return (
+
+            currentUser.uid ===
+
+            currentRoomHostId()
+
+        );
+
+    }
+
+
+
+    return (
+
+        current.id ===
+
+        currentUser.uid
+
+    );
+
 }
+
+
+
+function currentRoomHostId() {
+
+
+
+    if (
+
+        !currentRoomCode ||
+
+        !db
+
+    ) {
+
+        return null;
+
+    }
+
+
+
+    /*
+
+        LudoGame giữ hostPlayerId là uid sau khi
+
+        startGame() nạp danh sách Firebase.
+
+    */
+
+    return (
+
+        window.LudoGame?.hostPlayerId ||
+
+        currentUser?.uid ||
+
+        null
+
+    );
+
+}
+
+
+
+async function saveOnlineGameState() {
+
+
+
+    if (
+
+        applyingRemoteGameState ||
+
+        !onlineGameRef ||
+
+        !canWriteOnlineGameState() ||
+
+        typeof window.getLudoGameState !== "function"
+
+    ) {
+
+        return;
+
+    }
+
+
+
+    try {
+
+
+
+        await onlineGameRef.set(
+
+            window.getLudoGameState()
+
+        );
+
+
+
+    } catch (error) {
+
+
+
+        console.warn(
+
+            "LUDO ONLINE SYNC WRITE ERROR:",
+
+            error
+
+        );
+
+
+
+    }
+
+}
+
+
+
+function setupOnlineGameSync() {
+
+
+
+    if (
+
+        !currentRoomCode ||
+
+        !db ||
+
+        !window.LudoGame ||
+
+        LudoGame.mode !== "online"
+
+    ) {
+
+        return;
+
+    }
+
+
+
+    stopOnlineGameSync();
+
+
+
+    onlineGameRef =
+
+        db.ref(
+
+            `ludoRooms/${currentRoomCode}/gameState`
+
+        );
+
+
+
+    onlineGameListener =
+
+        snapshot => {
+
+
+
+            const state =
+
+                snapshot.val();
+
+
+
+            if (
+
+                !state ||
+
+                applyingRemoteGameState ||
+
+                typeof window.loadLudoGameState !== "function"
+
+            ) {
+
+                return;
+
+            }
+
+
+
+            /*
+
+                Không nạp lại chính state vừa mình ghi
+
+                trong lúc animation đang chạy.
+
+                State mới từ Firebase vẫn được áp dụng
+
+                ở cuối mỗi lượt.
+
+            */
+
+            applyingRemoteGameState = true;
+
+
+
+            try {
+
+
+
+                window.loadLudoGameState(
+
+                    state
+
+                );
+
+
+
+                window.renderLudoPieces?.();
+
+                window.renderLudoVisualBoard?.();
+
+                window.renderLudoPieces?.();
+
+
+
+                if (window.LudoBoard) {
+
+                    LudoBoard.started = true;
+
+                    LudoBoard.updateBoardUI?.();
+
+                }
+
+
+
+            } catch (error) {
+
+
+
+                console.warn(
+
+                    "LUDO ONLINE SYNC READ ERROR:",
+
+                    error
+
+                );
+
+
+
+            } finally {
+
+
+
+                applyingRemoteGameState = false;
+
+
+
+            }
+
+
+
+        };
+
+
+
+    onlineGameRef.on(
+
+        "value",
+
+        onlineGameListener
+
+    );
+
+
+
+    if (
+
+        !onlineGameEventsBound
+
+    ) {
+
+
+
+        onlineGameEventsBound = true;
+
+
+
+        document.addEventListener(
+
+            "ludo:diceRolled",
+
+            () => {
+
+                if (!applyingRemoteGameState) {
+
+                    saveOnlineGameState();
+
+                }
+
+            }
+
+        );
+
+
+
+        document.addEventListener(
+
+            "ludo:turnChanged",
+
+            () => {
+
+                if (!applyingRemoteGameState) {
+
+                    saveOnlineGameState();
+
+                }
+
+            }
+
+        );
+
+
+
+        document.addEventListener(
+
+            "ludo:gameWon",
+
+            () => {
+
+                if (!applyingRemoteGameState) {
+
+                    saveOnlineGameState();
+
+                }
+
+            }
+
+        );
+
+
+
+    }
+
+}
+
+
+
+const screens = document.querySelectorAll(".screen");
+
+
+
+/* ================= UTILS ================= */
+
+
+
+function showScreen(id) {
+
+    screens.forEach(screen => screen.classList.remove("active"));
+
+
+
+    const target = document.getElementById(id);
+
+    if (target) target.classList.add("active");
+
+}
+
+
 
 function escapeHTML(value) {
-    return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+
+    const div = document.createElement("div");
+
+    div.textContent = String(value ?? "");
+
+    return div.innerHTML;
+
 }
+
+
+
+function formatRoomCode(code) {
+
+    return String(code || "")
+
+        .split("")
+
+        .join(" ");
+
+}
+
+
+
+function generateRoomCode() {
+
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+    let result = "";
+
+
+
+    for (let i = 0; i < 6; i++) {
+
+        result += chars[Math.floor(Math.random() * chars.length)];
+
+    }
+
+
+
+    return result;
+
+}
+
+
+
+/* ================= AUTH ================= */
+
+
+
+function getUserNameFromObject(user) {
+
+    if (!user) return "Khách";
+
+
+
+    if (user.isAnonymous) {
+
+        return "Khách";
+
+    }
+
+
+
+    return (
+
+        user.displayName ||
+
+        user.email?.split("@")[0] ||
+
+        "Người chơi"
+
+    );
+
+}
+
+
+
+async function loadUsername(user) {
+
+    if (!user) {
+
+        currentUsername = "Khách";
+
+        return;
+
+    }
+
+
+
+    if (user.isAnonymous) {
+
+        currentUsername = "Khách";
+
+        return;
+
+    }
+
+
+
+    currentUsername = getUserNameFromObject(user);
+
+
+
+    if (db) {
+
+        try {
+
+            const snap = await db.ref(`users/${user.uid}`).once("value");
+
+            const data = snap.val() || {};
+
+
+
+            currentUsername =
+
+                data.displayName ||
+
+                data.username ||
+
+                currentUsername;
+
+        } catch (error) {
+
+            console.warn("Không đọc được username:", error);
+
+        }
+
+    }
+
+}
+
+
+
+async function ensureUser() {
+
+    if (!auth) {
+
+        throw new Error(
+
+            "Firebase Auth chưa khởi tạo. Kiểm tra API key/config Firebase."
+
+        );
+
+    }
+
+
+
+    // Chờ Firebase khôi phục tài khoản TienHub trước.
+
+    // Nếu không chờ, trang Ludo có thể tạo tài khoản anonymous mới
+
+    // và người đã đăng nhập sẽ bị hiện thành "Khách".
+
+    await authReadyPromise;
+
+
+
+    if (currentUser) {
+
+        await loadUsername(currentUser);
+
+        return currentUser;
+
+    }
+
+
+
+    if (auth.currentUser) {
+
+        currentUser = auth.currentUser;
+
+        await loadUsername(currentUser);
+
+        return currentUser;
+
+    }
+
+    throw new Error(
+        "Bạn chưa đăng nhập TienHub. Vui lòng đăng nhập trước khi chơi Ludo."
+    );
+}
+
+
+let authReadyPromise = Promise.resolve(null);
+
+
+
+if (auth) {
+
+    auth.setPersistence(
+
+        firebase.auth.Auth.Persistence.LOCAL
+
+    ).catch(error => {
+
+        console.warn("Persistence:", error);
+
+    });
+
+
+
+    // Firebase cần một khoảng thời gian để khôi phục tài khoản
+
+    // TienHuB đã đăng nhập. Không được gọi signInAnonymously()
+
+    // trước khi trạng thái auth ban đầu được xác định.
+
+    authReadyPromise = new Promise(resolve => {
+
+        let firstAuthState = true;
+
+
+
+        auth.onAuthStateChanged(async user => {
+
+            currentUser = user;
+
+
+
+            if (user) {
+
+                await loadUsername(user);
+
+            } else {
+
+                currentUsername = "Khách";
+
+            }
+
+
+
+            console.log(
+
+                "LUDO AUTH:",
+
+                user ? user.uid : "none",
+
+                currentUsername,
+
+                user?.isAnonymous ? "anonymous" : "account"
+
+            );
+
+
+
+            if (firstAuthState) {
+
+                firstAuthState = false;
+
+                resolve(user || null);
+
+            }
+
+        });
+
+    });
+
+}
+
+
 
 /* ================= MENU ================= */
 
@@ -289,25 +877,15 @@ document
 
         let user = null;
 
-        try {
+        try { user = await ensureUser(); }
 
-            user = await ensureUser();
-
-        } catch (error) {
-
-            console.warn(error);
-
-            alert(error.message);
-
-            return;
-
-        }
+        catch (error) { console.warn(error); currentUsername = "Khách"; }
 
 
 
         const started = window.startLudoSolo?.({
 
-            id: user.uid,
+            id: user?.uid || "local-player",
 
             name: currentUsername
 
@@ -367,13 +945,7 @@ document
 
 
 
-        document.getElementById(
-
-            "joinRoomCodeInput"
-
-        ).value = "";
-
-
+        document.getElementById("joinRoomCodeInput").value = "";
 
         showScreen("joinScreen");
 
@@ -399,19 +971,13 @@ document
 
 async function createRoom() {
 
-    
-
     const user = await ensureUser();
 
 
 
     if (!db) {
 
-        throw new Error(
-
-            "Firebase Database chưa khởi tạo."
-
-        );
+        throw new Error("Firebase Database chưa khởi tạo.");
 
     }
 
@@ -455,9 +1021,7 @@ async function createRoom() {
 
         maxPlayers: 4,
 
-        createdAt:
-
-            serverTimestamp(),
+        createdAt: firebase.database.ServerValue.TIMESTAMP,
 
         players: {
 
@@ -475,9 +1039,7 @@ async function createRoom() {
 
                 ready: true,
 
-                joinedAt:
-
-                    serverTimestamp()
+                joinedAt: firebase.database.ServerValue.TIMESTAMP
 
             }
 
@@ -495,21 +1057,13 @@ async function createRoom() {
 
 
 
-    await setPlayerDisconnect(
-
-        roomCode,
-
-        user.uid
-
-    );
+    await setPlayerDisconnect(roomCode, user.uid);
 
 
 
-    document.getElementById(
+    document.getElementById("roomCode").textContent =
 
-        "roomCode"
-
-    ).textContent = formatRoomCode(roomCode);
+        formatRoomCode(roomCode);
 
 
 
@@ -527,11 +1081,7 @@ async function createRoom() {
 
 const joinInput =
 
-    document.getElementById(
-
-        "joinRoomCodeInput"
-
-    );
+    document.getElementById("joinRoomCodeInput");
 
 
 
@@ -549,23 +1099,17 @@ joinInput?.addEventListener("input", () => {
 
 
 
-joinInput?.addEventListener(
+joinInput?.addEventListener("keydown", event => {
 
-    "keydown",
+    if (event.key === "Enter") {
 
-    event => {
+        event.preventDefault();
 
-        if (event.key === "Enter") {
-
-            event.preventDefault();
-
-            joinRoom();
-
-        }
+        joinRoom();
 
     }
 
-);
+});
 
 
 
@@ -573,13 +1117,7 @@ document
 
     .getElementById("joinRoomConfirm")
 
-    ?.addEventListener(
-
-        "click",
-
-        joinRoom
-
-    );
+    ?.addEventListener("click", joinRoom);
 
 
 
@@ -593,11 +1131,7 @@ async function joinRoom() {
 
         if (!db) {
 
-            throw new Error(
-
-                "Firebase Database chưa khởi tạo."
-
-            );
+            throw new Error("Firebase Database chưa khởi tạo.");
 
         }
 
@@ -607,21 +1141,13 @@ async function joinRoom() {
 
             joinInput?.value || ""
 
-        )
-
-            .trim()
-
-            .toUpperCase();
+        ).trim().toUpperCase();
 
 
 
         if (!/^[A-Z0-9]{6}$/.test(roomCode)) {
 
-            alert(
-
-                "Mã phòng phải gồm đúng 6 ký tự."
-
-            );
+            alert("Mã phòng phải gồm đúng 6 ký tự.");
 
             return;
 
@@ -629,21 +1155,9 @@ async function joinRoom() {
 
 
 
-        const roomRef = db.ref(
+        const roomRef = db.ref(`ludoRooms/${roomCode}`);
 
-            `ludoRooms/${roomCode}`
-
-        );
-
-
-
-        const snap = await roomRef.once(
-
-            "value"
-
-        );
-
-
+        const snap = await roomRef.once("value");
 
         const room = snap.val();
 
@@ -651,11 +1165,7 @@ async function joinRoom() {
 
         if (!room) {
 
-            alert(
-
-                "Không tìm thấy phòng này."
-
-            );
+            alert("Không tìm thấy phòng này.");
 
             return;
 
@@ -665,11 +1175,7 @@ async function joinRoom() {
 
         if (room.status !== "waiting") {
 
-            alert(
-
-                "Trận đấu trong phòng đã bắt đầu."
-
-            );
+            alert("Trận đấu trong phòng đã bắt đầu.");
 
             return;
 
@@ -677,35 +1183,15 @@ async function joinRoom() {
 
 
 
-        const players = Object.values(
-
-            room.players || {}
-
-        );
+        const players = Object.values(room.players || {});
 
 
 
-        if (
-
-            players.some(
-
-                player =>
-
-                    player.uid === user.uid
-
-            )
-
-        ) {
+        if (players.some(player => player.uid === user.uid)) {
 
             currentRoomCode = roomCode;
 
-            await setPlayerDisconnect(
-
-                roomCode,
-
-                user.uid
-
-            );
+            await setPlayerDisconnect(roomCode, user.uid);
 
             updateLobby(room);
 
@@ -721,11 +1207,7 @@ async function joinRoom() {
 
         if (players.length >= 4) {
 
-            alert(
-
-                "Phòng đã đủ 4 người."
-
-            );
+            alert("Phòng đã đủ 4 người.");
 
             return;
 
@@ -747,21 +1229,7 @@ async function joinRoom() {
 
          */
 
-
-
-        const colors = [
-
-            "red",
-
-            "green",
-
-            "yellow",
-
-            "blue"
-
-        ];
-
-
+        const colors = ["red", "green", "yellow", "blue"];
 
         let joinedPlayer = null;
 
@@ -769,169 +1237,91 @@ async function joinRoom() {
 
 
 
-        for (
+        for (let attempt = 0; attempt < 5; attempt++) {
 
-            let attempt = 0;
+            const playersRef = roomRef.child("players");
 
-            attempt < 5;
 
-            attempt++
 
-        ) {
+            const result = await playersRef.transaction(currentPlayers => {
 
-            const playersRef =
+                const nextPlayers = currentPlayers || {};
 
-                roomRef.child("players");
 
 
+                if (nextPlayers[user.uid]) {
 
-            const result =
+                    return nextPlayers;
 
-                await playersRef.transaction(
+                }
 
-                    currentPlayers => {
 
-                        const nextPlayers =
 
-                            currentPlayers || {};
+                if (Object.keys(nextPlayers).length >= 4) {
 
+                    return;
 
+                }
 
-                        if (
 
-                            nextPlayers[user.uid]
 
-                        ) {
+                const used = new Set(
 
-                            return nextPlayers;
+                    Object.values(nextPlayers)
 
-                        }
+                        .map(player => player?.color)
 
-
-
-                        if (
-
-                            Object.keys(
-
-                                nextPlayers
-
-                            ).length >= 4
-
-                        ) {
-
-                            return;
-
-                        }
-
-
-
-                        const used = new Set(
-
-                            Object.values(
-
-                                nextPlayers
-
-                            )
-
-                                .map(
-
-                                    player =>
-
-                                        player?.color
-
-                                )
-
-                                .filter(
-
-                                    color =>
-
-                                        colors.includes(
-
-                                            color
-
-                                        )
-
-                                )
-
-                        );
-
-
-
-                        const available =
-
-                            colors.filter(
-
-                                color =>
-
-                                    !used.has(
-
-                                        color
-
-                                    )
-
-                            );
-
-
-
-                        if (
-
-                            available.length === 0
-
-                        ) {
-
-                            return;
-
-                        }
-
-
-
-                        const color =
-
-                            available[
-
-                                Math.floor(
-
-                                    Math.random() *
-
-                                    available.length
-
-                                )
-
-                            ];
-
-
-
-                        nextPlayers[user.uid] = {
-
-                            uid: user.uid,
-
-                            name:
-
-                                currentUsername ||
-
-                                "Khách",
-
-                            color,
-
-                            type: "human",
-
-                            host: false,
-
-                            ready: true,
-
-                            joinedAt:
-
-                                serverTimestamp()
-
-                        };
-
-
-
-                        return nextPlayers;
-
-                    }
+                        .filter(color => colors.includes(color))
 
                 );
+
+
+
+                const available = colors.filter(
+
+                    color => !used.has(color)
+
+                );
+
+
+
+                if (available.length === 0) {
+
+                    return;
+
+                }
+
+
+
+                const color =
+
+                    available[Math.floor(Math.random() * available.length)];
+
+
+
+                nextPlayers[user.uid] = {
+
+                    uid: user.uid,
+
+                    name: currentUsername || "Khách",
+
+                    color,
+
+                    type: "human",
+
+                    host: false,
+
+                    ready: true,
+
+                    joinedAt: firebase.database.ServerValue.TIMESTAMP
+
+                };
+
+
+
+                return nextPlayers;
+
+            });
 
 
 
@@ -941,17 +1331,9 @@ async function joinRoom() {
 
             if (result.committed) {
 
-                const playersAfter =
+                const playersAfter = result.snapshot.val() || {};
 
-                    result.snapshot.val() || {};
-
-
-
-                joinedPlayer =
-
-                    playersAfter[user.uid] ||
-
-                    null;
+                joinedPlayer = playersAfter[user.uid] || null;
 
 
 
@@ -967,19 +1349,7 @@ async function joinRoom() {
 
             // Có người khác vừa cập nhật phòng. Đọc lại rồi thử lại.
 
-            await new Promise(
-
-                resolve =>
-
-                    setTimeout(
-
-                        resolve,
-
-                        150
-
-                    )
-
-            );
+            await new Promise(resolve => setTimeout(resolve, 150));
 
         }
 
@@ -987,15 +1357,7 @@ async function joinRoom() {
 
         if (!joinedPlayer?.color) {
 
-            const latestSnap =
-
-                await roomRef.once(
-
-                    "value"
-
-                );
-
-
+            const latestSnap = await roomRef.once("value");
 
             const latest = latestSnap.val();
 
@@ -1003,11 +1365,7 @@ async function joinRoom() {
 
             if (!latest) {
 
-                throw new Error(
-
-                    "Phòng không còn tồn tại."
-
-                );
+                throw new Error("Phòng không còn tồn tại.");
 
             }
 
@@ -1015,37 +1373,15 @@ async function joinRoom() {
 
             if (latest.status !== "waiting") {
 
-                throw new Error(
-
-                    "Trận đấu đã bắt đầu."
-
-                );
+                throw new Error("Trận đấu đã bắt đầu.");
 
             }
 
 
 
-            const latestPlayers =
+            const latestPlayers = Object.values(latest.players || {});
 
-                Object.values(
-
-                    latest.players || {}
-
-                );
-
-
-
-            const me =
-
-                latestPlayers.find(
-
-                    player =>
-
-                        player.uid ===
-
-                        user.uid
-
-                );
+            const me = latestPlayers.find(player => player.uid === user.uid);
 
 
 
@@ -1057,49 +1393,25 @@ async function joinRoom() {
 
                 joinedPlayer = me;
 
-            } else if (
+            } else if (latestPlayers.length >= 4) {
 
-                latestPlayers.length >= 4
-
-            ) {
-
-                throw new Error(
-
-                    "Phòng đã đủ 4 người."
-
-                );
+                throw new Error("Phòng đã đủ 4 người.");
 
             } else {
 
-                console.error(
+                console.error("LUDO JOIN TRANSACTION FAILED", {
 
-                    "LUDO JOIN TRANSACTION FAILED",
+                    committed: lastTransaction?.committed,
 
-                    {
+                    roomCode,
 
-                        committed:
+                    uid: user.uid,
 
-                            lastTransaction
+                    latestPlayers
 
-                                ?.committed,
+                });
 
-                        roomCode,
-
-                        uid: user.uid,
-
-                        latestPlayers
-
-                    }
-
-                );
-
-
-
-                throw new Error(
-
-                    "Không thể nhận màu. Hãy thử lại."
-
-                );
+                throw new Error("Không thể nhận màu. Hãy thử lại.");
 
             }
 
@@ -1107,9 +1419,7 @@ async function joinRoom() {
 
 
 
-        const joinedColor =
-
-            joinedPlayer.color;
+        const joinedColor = joinedPlayer.color;
 
 
 
@@ -1133,21 +1443,11 @@ async function joinRoom() {
 
 
 
-        await setPlayerDisconnect(
-
-            roomCode,
-
-            user.uid
-
-        );
+        await setPlayerDisconnect(roomCode, user.uid);
 
 
 
-        document.getElementById(
-
-            "roomCode"
-
-        ).textContent =
+        document.getElementById("roomCode").textContent =
 
             formatRoomCode(roomCode);
 
@@ -1161,13 +1461,7 @@ async function joinRoom() {
 
     } catch (error) {
 
-        console.error(
-
-            "JOIN ROOM ERROR:",
-
-            error
-
-        );
+        console.error("JOIN ROOM ERROR:", error);
 
 
 
@@ -1182,6 +1476,9 @@ async function joinRoom() {
     }
 
 }
+
+
+
 /* ================= ROOM LISTENER ================= */
 
 
@@ -1250,15 +1547,7 @@ function listenRoom(roomCode) {
 
                 startedRoomCode = roomCode;
 
-                startGame(
-
-                    Object.values(
-
-                        room.players || {}
-
-                    )
-
-                );
+                startGame(Object.values(room.players || {}));
 
             }
 
@@ -1266,13 +1555,7 @@ function listenRoom(roomCode) {
 
         error => {
 
-            console.error(
-
-                "ROOM LISTENER ERROR:",
-
-                error
-
-            );
+            console.error("ROOM LISTENER ERROR:", error);
 
         }
 
@@ -1286,13 +1569,7 @@ function listenRoom(roomCode) {
 
 
 
-async function setPlayerDisconnect(
-
-    roomCode,
-
-    uid
-
-) {
+async function setPlayerDisconnect(roomCode, uid) {
 
     if (!db || !roomCode || !uid) return;
 
@@ -1302,11 +1579,7 @@ async function setPlayerDisconnect(
 
         await db
 
-            .ref(
-
-                `ludoRooms/${roomCode}/players/${uid}`
-
-            )
+            .ref(`ludoRooms/${roomCode}/players/${uid}`)
 
             .onDisconnect()
 
@@ -1314,13 +1587,7 @@ async function setPlayerDisconnect(
 
     } catch (error) {
 
-        console.warn(
-
-            "onDisconnect:",
-
-            error
-
-        );
+        console.warn("onDisconnect:", error);
 
     }
 
@@ -1348,21 +1615,13 @@ const SLOT_COLORS = [
 
 function updateLobby(room) {
 
-    const players = Object.values(
-
-        room.players || {}
-
-    );
+    const players = Object.values(room.players || {});
 
 
 
     const roomCodeElement =
 
-        document.getElementById(
-
-            "roomCode"
-
-        );
+        document.getElementById("roomCode");
 
 
 
@@ -1370,11 +1629,7 @@ function updateLobby(room) {
 
         roomCodeElement.textContent =
 
-            formatRoomCode(
-
-                currentRoomCode
-
-            );
+            formatRoomCode(currentRoomCode);
 
     }
 
@@ -1382,11 +1637,7 @@ function updateLobby(room) {
 
     const count =
 
-        document.getElementById(
-
-            "playerCount"
-
-        );
+        document.getElementById("playerCount");
 
 
 
@@ -1402,11 +1653,7 @@ function updateLobby(room) {
 
     const slots =
 
-        document.getElementById(
-
-            "playerSlots"
-
-        );
+        document.getElementById("playerSlots");
 
 
 
@@ -1426,11 +1673,7 @@ function updateLobby(room) {
 
         const card =
 
-            document.createElement(
-
-                "div"
-
-            );
+            document.createElement("div");
 
 
 
@@ -1438,9 +1681,7 @@ function updateLobby(room) {
 
             const color =
 
-                player.color ||
-
-                SLOT_COLORS[i];
+                player.color || SLOT_COLORS[i];
 
 
 
@@ -1462,15 +1703,7 @@ function updateLobby(room) {
 
                 <div class="player-avatar">
 
-                    ${
-
-                        player.type === "ai"
-
-                            ? "🤖"
-
-                            : "🐴"
-
-                    }
+                    ${player.type === "ai" ? "🤖" : "🐴"}
 
                 </div>
 
@@ -1478,13 +1711,7 @@ function updateLobby(room) {
 
                 <strong>
 
-                    ${escapeHTML(
-
-                        player.name ||
-
-                        "Khách"
-
-                    )}
+                    ${escapeHTML(player.name || "Khách")}
 
                 </strong>
 
@@ -1512,15 +1739,7 @@ function updateLobby(room) {
 
                 <div class="ready">
 
-                    ✓ ${
-
-                        player.host
-
-                            ? "CHỦ PHÒNG"
-
-                            : "ĐÃ SẴN SÀNG"
-
-                    }
+                    ✓ ${player.host ? "CHỦ PHÒNG" : "ĐÃ SẴN SÀNG"}
 
                 </div>
 
@@ -1544,11 +1763,7 @@ function updateLobby(room) {
 
 
 
-                <div class="empty-plus">
-
-                    +
-
-                </div>
+                <div class="empty-plus">+</div>
 
 
 
@@ -1580,11 +1795,7 @@ function updateLobby(room) {
 
     const status =
 
-        document.getElementById(
-
-            "lobbyStatusText"
-
-        );
+        document.getElementById("lobbyStatusText");
 
 
 
@@ -1604,11 +1815,7 @@ function updateLobby(room) {
 
     const startButton =
 
-        document.getElementById(
-
-            "startRoomButton"
-
-        );
+        document.getElementById("startRoomButton");
 
 
 
@@ -1618,37 +1825,25 @@ function updateLobby(room) {
 
             currentUser &&
 
-            room.host ===
-
-                currentUser.uid;
+            room.host === currentUser.uid;
 
 
 
         startButton.disabled =
 
-            !isHost ||
-
-            room.status !== "waiting";
+            !isHost || room.status !== "waiting";
 
 
 
         startButton.style.opacity =
 
-            startButton.disabled
-
-                ? ".45"
-
-                : "1";
+            startButton.disabled ? ".45" : "1";
 
 
 
         startButton.style.cursor =
 
-            startButton.disabled
-
-                ? "not-allowed"
-
-                : "pointer";
+            startButton.disabled ? "not-allowed" : "pointer";
 
     }
 
@@ -1662,33 +1857,15 @@ function updateLobby(room) {
 
 document
 
-    .getElementById(
+    .getElementById("startRoomButton")
 
-        "startRoomButton"
-
-    )
-
-    ?.addEventListener(
-
-        "click",
-
-        startRoomGame
-
-    );
+    ?.addEventListener("click", startRoomGame);
 
 
 
 async function startRoomGame() {
 
-    if (
-
-        !currentRoomCode ||
-
-        !db ||
-
-        !currentUser
-
-    ) {
+    if (!currentRoomCode || !db || !currentUser) {
 
         return;
 
@@ -1700,25 +1877,19 @@ async function startRoomGame() {
 
         const roomRef =
 
-            db.ref(
-
-                `ludoRooms/${currentRoomCode}`
-
-            );
+            db.ref(`ludoRooms/${currentRoomCode}`);
 
 
 
         const snap =
 
-            await roomRef.once(
-
-                "value"
-
-            );
+            await roomRef.once("value");
 
 
 
-        const room = snap.val();
+        const room =
+
+            snap.val();
 
 
 
@@ -1726,19 +1897,9 @@ async function startRoomGame() {
 
 
 
-        if (
+        if (room.host !== currentUser.uid) {
 
-            room.host !==
-
-            currentUser.uid
-
-        ) {
-
-            alert(
-
-                "Chỉ chủ phòng mới có thể bắt đầu."
-
-            );
+            alert("Chỉ chủ phòng mới có thể bắt đầu.");
 
             return;
 
@@ -1746,13 +1907,7 @@ async function startRoomGame() {
 
 
 
-        if (
-
-            room.status !==
-
-            "waiting"
-
-        ) {
+        if (room.status !== "waiting") {
 
             return;
 
@@ -1762,19 +1917,11 @@ async function startRoomGame() {
 
         const players =
 
-            Object.values(
-
-                room.players || {}
-
-            );
+            Object.values(room.players || {});
 
 
 
-        const filled = [
-
-            ...players
-
-        ];
+        const filled = [...players];
 
 
 
@@ -1800,29 +1947,13 @@ async function startRoomGame() {
 
             const used =
 
-                new Set(
-
-                    filled.map(
-
-                        player =>
-
-                            player.color
-
-                    )
-
-                );
+                new Set(filled.map(player => player.color));
 
 
 
             const color =
 
-                colors.find(
-
-                    item =>
-
-                        !used.has(item)
-
-                ) ||
+                colors.find(item => !used.has(item)) ||
 
                 colors[filled.length];
 
@@ -1830,13 +1961,9 @@ async function startRoomGame() {
 
             filled.push({
 
-                uid:
+                uid: `ai-${currentRoomCode}-${aiIndex}`,
 
-                    `ai-${currentRoomCode}-${aiIndex}`,
-
-                name:
-
-                    `Máy ${aiIndex}`,
+                name: `Máy ${aiIndex}`,
 
                 color,
 
@@ -1862,9 +1989,7 @@ async function startRoomGame() {
 
         filled.forEach(player => {
 
-            playersObject[player.uid] =
-
-                player;
+            playersObject[player.uid] = player;
 
         });
 
@@ -1878,7 +2003,7 @@ async function startRoomGame() {
 
             startedAt:
 
-                serverTimestamp()
+                firebase.database.ServerValue.TIMESTAMP
 
         });
 
@@ -1886,13 +2011,7 @@ async function startRoomGame() {
 
     } catch (error) {
 
-        console.error(
-
-            "START ROOM ERROR:",
-
-            error
-
-        );
+        console.error("START ROOM ERROR:", error);
 
 
 
@@ -1932,47 +2051,29 @@ async function copyRoomCode() {
 
         const button =
 
-            document.getElementById(
-
-                "copyLobbyCode"
-
-            );
+            document.getElementById("copyLobbyCode");
 
 
 
         if (button) {
 
-            const old =
+            const old = button.textContent;
 
-                button.textContent;
-
-
-
-            button.textContent =
-
-                "✓ ĐÃ SAO CHÉP";
+            button.textContent = "✓ ĐÃ SAO CHÉP";
 
 
 
             setTimeout(() => {
 
-                button.textContent =
-
-                    old;
+                button.textContent = old;
 
             }, 1200);
 
         }
 
-
-
     } catch {
 
-        alert(
-
-            `Mã phòng: ${currentRoomCode}`
-
-        );
+        alert(`Mã phòng: ${currentRoomCode}`);
 
     }
 
@@ -1982,19 +2083,9 @@ async function copyRoomCode() {
 
 document
 
-    .getElementById(
+    .getElementById("copyLobbyCode")
 
-        "copyLobbyCode"
-
-    )
-
-    ?.addEventListener(
-
-        "click",
-
-        copyRoomCode
-
-    );
+    ?.addEventListener("click", copyRoomCode);
 
 
 
@@ -2004,15 +2095,7 @@ document
 
 async function leaveRoom() {
 
-    if (
-
-        !currentRoomCode ||
-
-        !db ||
-
-        !currentUser
-
-    ) {
+    if (!currentRoomCode || !db || !currentUser) {
 
         return;
 
@@ -2024,31 +2107,15 @@ async function leaveRoom() {
 
 
 
-    const code =
-
-        currentRoomCode;
+    const code = currentRoomCode;
 
 
 
     try {
 
-        const ref = db.ref(
+        const ref = db.ref(`ludoRooms/${code}`);
 
-            `ludoRooms/${code}`
-
-        );
-
-
-
-        const snap =
-
-            await ref.once(
-
-                "value"
-
-            );
-
-
+        const snap = await ref.once("value");
 
         const room = snap.val();
 
@@ -2058,13 +2125,7 @@ async function leaveRoom() {
 
 
 
-        if (
-
-            room.host ===
-
-            currentUser.uid
-
-        ) {
+        if (room.host === currentUser.uid) {
 
             await ref.remove();
 
@@ -2072,27 +2133,15 @@ async function leaveRoom() {
 
             await ref
 
-                .child(
-
-                    `players/${currentUser.uid}`
-
-                )
+                .child(`players/${currentUser.uid}`)
 
                 .remove();
 
         }
 
-
-
     } catch (error) {
 
-        console.warn(
-
-            "Leave room:",
-
-            error
-
-        );
+        console.warn("Leave room:", error);
 
     }
 
@@ -2114,69 +2163,54 @@ async function leaveRoom() {
 
 document
 
-    .querySelectorAll(
-
-        "[data-back]"
-
-    )
+    .querySelectorAll("[data-back]")
 
     .forEach(button => {
 
-        button.addEventListener(
+        button.addEventListener("click", async () => {
 
-            "click",
 
-            async () => {
 
-                // Đổi màn hình ngay, không để Firebase chặn nút MENU.
-                showScreen(button.dataset.back);
+            if (currentRoomCode) {
 
-                try {
-                    if (currentRoomCode) {
-                        await leaveRoom();
-                    }
-                } catch (error) {
-                    console.warn("LUDO BACK ERROR:", error);
-                }
+                await leaveRoom();
 
             }
 
-        );
+
+
+            showScreen(
+
+                button.dataset.back
+
+            );
+
+        });
 
     });
 
 
+
 document
 
-    .getElementById(
+    .getElementById("backToGameMenu")
 
-        "backToGameMenu"
+    ?.addEventListener("click", async () => {
 
-    )
 
-    ?.addEventListener(
 
-        "click",
+        if (currentRoomCode) {
 
-        async () => {
+            await leaveRoom();
 
-            // Hiện MENU ngay lập tức.
-            showScreen("menuScreen");
-
-            try {
-                if (currentRoomCode) {
-                    await leaveRoom();
-                }
-            } catch (error) {
-                console.warn("LUDO GAME MENU ERROR:", error);
-            }
-
-            window.clearLudoAITimer?.();
-            window.resetLudoBoard?.();
-            window.resetGameState?.();
         }
 
-    );
+
+
+        showScreen("menuScreen");
+
+    });
+
 
 
 /* ================= POLISHED VISUAL BOARD ================= */
@@ -2203,37 +2237,13 @@ const entryCells = new Map();
 
 const specialCircleCells = new Map([
 
-    [
+    [cellKey(6, 6), "yellow"],
 
-        cellKey(6, 6),
+    [cellKey(6, 8), "green"],
 
-        "yellow"
+    [cellKey(8, 8), "red"],
 
-    ],
-
-    [
-
-        cellKey(6, 8),
-
-        "green"
-
-    ],
-
-    [
-
-        cellKey(8, 8),
-
-        "red"
-
-    ],
-
-    [
-
-        cellKey(8, 6),
-
-        "blue"
-
-    ]
+    [cellKey(8, 6), "blue"]
 
 ]);
 
@@ -2241,347 +2251,75 @@ const specialCircleCells = new Map([
 
 function addCell(r, c) {
 
-    pathCells.add(
-
-        cellKey(r, c)
-
-    );
+    pathCells.add(cellKey(r, c));
 
 }
 
 
 
-for (
+for (let r = 0; r <= 5; r++) {
 
-    let r = 0;
-
-    r <= 5;
-
-    r++
-
-) {
-
-    for (
-
-        let c = 6;
-
-        c <= 8;
-
-        c++
-
-    ) {
-
-        addCell(r, c);
-
-    }
+    for (let c = 6; c <= 8; c++) addCell(r, c);
 
 }
 
 
 
-for (
+for (let r = 6; r <= 8; r++) {
 
-    let r = 6;
+    for (let c = 0; c <= 5; c++) addCell(r, c);
 
-    r <= 8;
-
-    r++
-
-) {
-
-    for (
-
-        let c = 0;
-
-        c <= 5;
-
-        c++
-
-    ) {
-
-        addCell(r, c);
-
-    }
-
-
-
-    for (
-
-        let c = 9;
-
-        c <= 14;
-
-        c++
-
-    ) {
-
-        addCell(r, c);
-
-    }
+    for (let c = 9; c <= 14; c++) addCell(r, c);
 
 }
 
 
 
-for (
+for (let r = 9; r <= 14; r++) {
 
-    let r = 9;
-
-    r <= 14;
-
-    r++
-
-) {
-
-    for (
-
-        let c = 6;
-
-        c <= 8;
-
-        c++
-
-    ) {
-
-        addCell(r, c);
-
-    }
+    for (let c = 6; c <= 8; c++) addCell(r, c);
 
 }
 
 
 
-for (
+for (let r = 0; r <= 5; r++) laneCells.set(cellKey(r, 7), "yellow");
 
-    let r = 0;
+for (let c = 0; c <= 5; c++) laneCells.set(cellKey(7, c), "blue");
 
-    r <= 5;
+for (let c = 9; c <= 14; c++) laneCells.set(cellKey(7, c), "green");
 
-    r++
+for (let r = 9; r <= 14; r++) laneCells.set(cellKey(r, 7), "red");
 
-) {
 
-    laneCells.set(
 
-        cellKey(r, 7),
+entryCells.set(cellKey(0, 7), "yellow");
 
-        "yellow"
+entryCells.set(cellKey(7, 14), "green");
 
-    );
+entryCells.set(cellKey(14, 7), "red");
 
-}
+entryCells.set(cellKey(7, 0), "blue");
 
 
 
-for (
+function armRingColor(row, col) {
 
-    let c = 0;
+    if (row <= 5 && col === 6) return "yellow";
 
-    c <= 5;
+    if (row <= 5 && col === 8) return "green";
 
-    c++
+    if (col <= 5 && row === 6) return "yellow";
 
-) {
+    if (col <= 5 && row === 8) return "blue";
 
-    laneCells.set(
+    if (col >= 9 && row === 6) return "green";
 
-        cellKey(7, c),
+    if (col >= 9 && row === 8) return "red";
 
-        "blue"
+    if (row >= 9 && col === 6) return "blue";
 
-    );
-
-}
-
-
-
-for (
-
-    let c = 9;
-
-    c <= 14;
-
-    c++
-
-) {
-
-    laneCells.set(
-
-        cellKey(7, c),
-
-        "green"
-
-    );
-
-}
-
-
-
-for (
-
-    let r = 9;
-
-    r <= 14;
-
-    r++
-
-) {
-
-    laneCells.set(
-
-        cellKey(r, 7),
-
-        "red"
-
-    );
-
-}
-
-
-
-entryCells.set(
-
-    cellKey(0, 7),
-
-    "yellow"
-
-);
-
-
-
-entryCells.set(
-
-    cellKey(7, 14),
-
-    "green"
-
-);
-
-
-
-entryCells.set(
-
-    cellKey(14, 7),
-
-    "red"
-
-);
-
-
-
-entryCells.set(
-
-    cellKey(7, 0),
-
-    "blue"
-
-);
-
-
-
-function armRingColor(
-
-    row,
-
-    col
-
-) {
-
-    if (
-
-        row <= 5 &&
-
-        col === 6
-
-    )
-
-        return "yellow";
-
-
-
-    if (
-
-        row <= 5 &&
-
-        col === 8
-
-    )
-
-        return "green";
-
-
-
-    if (
-
-        col <= 5 &&
-
-        row === 6
-
-    )
-
-        return "yellow";
-
-
-
-    if (
-
-        col <= 5 &&
-
-        row === 8
-
-    )
-
-        return "blue";
-
-
-
-    if (
-
-        col >= 9 &&
-
-        row === 6
-
-    )
-
-        return "green";
-
-
-
-    if (
-
-        col >= 9 &&
-
-        row === 8
-
-    )
-
-        return "red";
-
-
-
-    if (
-
-        row >= 9 &&
-
-        col === 6
-
-    )
-
-        return "blue";
-
-
-
-    if (
-
-        row >= 9 &&
-
-        col === 8
-
-    )
-
-        return "red";
-
-
+    if (row >= 9 && col === 8) return "red";
 
     return null;
 
@@ -2589,33 +2327,11 @@ function armRingColor(
 
 
 
-function addHomeCard(
+function addHomeCard(board, color, title, position) {
 
-    board,
+    const card = document.createElement("div");
 
-    color,
-
-    title,
-
-    position
-
-) {
-
-    const card =
-
-        document.createElement(
-
-            "div"
-
-        );
-
-
-
-    card.className =
-
-        `home-zone ${color} ${position}`;
-
-
+    card.className = `home-zone ${color} ${position}`;
 
     card.innerHTML = `
 
@@ -2627,21 +2343,11 @@ function addHomeCard(
 
         <span class="home-tick br"></span>
 
-        <div class="home-title">
+        <div class="home-title">CỜ CÁ NGỰA</div>
 
-            CỜ CÁ NGỰA
-
-        </div>
-
-        <div class="home-sub">
-
-            ${escapeHTML(title)}
-
-        </div>
+        <div class="home-sub">${escapeHTML(title)}</div>
 
     `;
-
-
 
     board.appendChild(card);
 
@@ -2651,21 +2357,7 @@ function addHomeCard(
 
 function buildVisualBoard() {
 
-    const board =
-
-        document.getElementById(
-
-            "board"
-
-        ) ||
-
-        document.getElementById(
-
-            "ludoBoard"
-
-        );
-
-
+    const board = document.getElementById("board") || document.getElementById("ludoBoard");
 
     if (!board) return null;
 
@@ -2677,135 +2369,35 @@ function buildVisualBoard() {
 
 
 
-    for (
+    for (let row = 0; row < BOARD_SIZE; row++) {
 
-        let row = 0;
+        for (let col = 0; col < BOARD_SIZE; col++) {
 
-        row < BOARD_SIZE;
+            const cell = document.createElement("div");
 
-        row++
+            cell.className = "cell";
 
-    ) {
+            const key = cellKey(row, col);
 
-        for (
 
-            let col = 0;
 
-            col < BOARD_SIZE;
+            if (entryCells.has(key)) {
 
-            col++
+                cell.classList.add("entry", `ring-${entryCells.get(key)}`);
 
-        ) {
+            } else if (specialCircleCells.has(key)) {
 
-            const cell =
+                cell.classList.add("circle", "center-circle", `ring-${specialCircleCells.get(key)}`);
 
-                document.createElement(
+            } else if (laneCells.has(key)) {
 
-                    "div"
+                cell.classList.add("lane", laneCells.get(key));
 
-                );
+            } else if (pathCells.has(key)) {
 
+                const ring = armRingColor(row, col);
 
-
-            cell.className =
-
-                "cell";
-
-
-
-            const key =
-
-                cellKey(
-
-                    row,
-
-                    col
-
-                );
-
-
-
-            if (
-
-                entryCells.has(key)
-
-            ) {
-
-                cell.classList.add(
-
-                    "entry",
-
-                    `ring-${entryCells.get(key)}`
-
-                );
-
-
-
-            } else if (
-
-                specialCircleCells.has(
-
-                    key
-
-                )
-
-            ) {
-
-                cell.classList.add(
-
-                    "circle",
-
-                    "center-circle",
-
-                    `ring-${specialCircleCells.get(key)}`
-
-                );
-
-
-
-            } else if (
-
-                laneCells.has(key)
-
-            ) {
-
-                cell.classList.add(
-
-                    "lane",
-
-                    laneCells.get(key)
-
-                );
-
-
-
-            } else if (
-
-                pathCells.has(key)
-
-            ) {
-
-                const ring =
-
-                    armRingColor(
-
-                        row,
-
-                        col
-
-                    );
-
-
-
-                cell.classList.add(
-
-                    "path",
-
-                    "circle",
-
-                    `ring-${ring || "neutral"}`
-
-                );
+                cell.classList.add("path", "circle", `ring-${ring || "neutral"}`);
 
             }
 
@@ -2819,77 +2411,19 @@ function buildVisualBoard() {
 
 
 
-    addHomeCard(
+    addHomeCard(board, "yellow", "LUYỆN", "top-left");
 
-        board,
+    addHomeCard(board, "green", "PHI", "top-right");
 
-        "yellow",
+    addHomeCard(board, "blue", "THANH", "bottom-left");
 
-        "LUYỆN",
-
-        "top-left"
-
-    );
+    addHomeCard(board, "red", "LIÊN", "bottom-right");
 
 
 
-    addHomeCard(
+    const center = document.createElement("div");
 
-        board,
-
-        "green",
-
-        "PHI",
-
-        "top-right"
-
-    );
-
-
-
-    addHomeCard(
-
-        board,
-
-        "blue",
-
-        "THANH",
-
-        "bottom-left"
-
-    );
-
-
-
-    addHomeCard(
-
-        board,
-
-        "red",
-
-        "LIÊN",
-
-        "bottom-right"
-
-    );
-
-
-
-    const center =
-
-        document.createElement(
-
-            "div"
-
-        );
-
-
-
-    center.className =
-
-        "center-goal";
-
-
+    center.className = "center-goal";
 
     center.innerHTML = `
 
@@ -2903,8 +2437,6 @@ function buildVisualBoard() {
 
     `;
 
-
-
     board.appendChild(center);
 
 
@@ -2917,11 +2449,7 @@ function buildVisualBoard() {
 
 function renderLudoVisualBoard() {
 
-    const board =
-
-        buildVisualBoard();
-
-
+    const board = buildVisualBoard();
 
     if (!board) return;
 
@@ -2931,9 +2459,7 @@ function renderLudoVisualBoard() {
 
     if (window.LudoBoard) {
 
-        LudoBoard.boardElement =
-
-            board;
+        LudoBoard.boardElement = board;
 
     }
 
@@ -2941,9 +2467,7 @@ function renderLudoVisualBoard() {
 
 
 
-window.renderLudoVisualBoard =
-
-    renderLudoVisualBoard;
+window.renderLudoVisualBoard = renderLudoVisualBoard;
 
 
 
@@ -2951,29 +2475,11 @@ window.renderLudoVisualBoard =
 
 
 
-function showLudoWinnerModal(
+function showLudoWinnerModal(detail = {}) {
 
-    detail = {}
+    const modal = document.getElementById("winnerModal");
 
-) {
-
-    const modal =
-
-        document.getElementById(
-
-            "winnerModal"
-
-        );
-
-
-
-    const nameElement =
-
-        document.getElementById(
-
-            "winnerName"
-
-        );
+    const nameElement = document.getElementById("winnerName");
 
 
 
@@ -2981,35 +2487,15 @@ function showLudoWinnerModal(
 
 
 
-    const winner =
+    const winner = detail?.winner || detail?.player || null;
 
-        detail?.winner ||
+    const winnerId = detail?.winnerId || detail?.playerId || LudoGame?.winnerId;
 
-        detail?.player ||
+    const boardPlayer = window.LudoBoard?.players?.find(
 
-        null;
+        player => player.id === winnerId
 
-
-
-    const winnerId =
-
-        detail?.winnerId ||
-
-        detail?.playerId ||
-
-        LudoGame?.winnerId;
-
-
-
-    const boardPlayer =
-
-        window.LudoBoard?.players?.find(
-
-            player =>
-
-                player.id === winnerId
-
-        );
+    );
 
 
 
@@ -3019,13 +2505,7 @@ function showLudoWinnerModal(
 
         boardPlayer?.name ||
 
-        LudoGame?.players?.find(
-
-            player =>
-
-                player.id === winnerId
-
-        )?.name ||
+        LudoGame?.players?.find(player => player.id === winnerId)?.name ||
 
         "Người chơi";
 
@@ -3033,9 +2513,7 @@ function showLudoWinnerModal(
 
     if (nameElement) {
 
-        nameElement.textContent =
-
-            winnerName;
+        nameElement.textContent = winnerName;
 
     }
 
@@ -3043,13 +2521,7 @@ function showLudoWinnerModal(
 
     modal.classList.add("show");
 
-    modal.setAttribute(
-
-        "aria-hidden",
-
-        "false"
-
-    );
+    modal.setAttribute("aria-hidden", "false");
 
 }
 
@@ -3057,125 +2529,53 @@ function showLudoWinnerModal(
 
 function hideLudoWinnerModal() {
 
-    const modal =
-
-        document.getElementById(
-
-            "winnerModal"
-
-        );
-
-
+    const modal = document.getElementById("winnerModal");
 
     if (!modal) return;
 
 
 
-    modal.classList.remove(
+    modal.classList.remove("show");
 
-        "show"
-
-    );
-
-
-
-    modal.setAttribute(
-
-        "aria-hidden",
-
-        "true"
-
-    );
+    modal.setAttribute("aria-hidden", "true");
 
 }
 
 
 
-document.addEventListener(
+document.addEventListener("ludo:finished", event => {
 
-    "ludo:finished",
+    showLudoWinnerModal(event.detail || {});
 
-    event => {
+});
 
-        showLudoWinnerModal(
 
-            event.detail || {}
 
-        );
+document.getElementById("winnerMenuButton")?.addEventListener("click", async () => {
+
+    hideLudoWinnerModal();
+
+
+
+    if (typeof leaveRoom === "function" && currentRoomCode) {
+
+        await leaveRoom();
 
     }
 
-);
+
+
+    window.clearLudoAITimer?.();
+
+    window.resetLudoBoard?.();
+
+    window.resetGameState?.();
 
 
 
-document
+    showScreen("menuScreen");
 
-    .getElementById(
-
-        "winnerMenuButton"
-
-    )
-
-    ?.addEventListener(
-
-        "click",
-
-        async () => {
-
-            hideLudoWinnerModal();
-
-
-
-            if (
-
-                typeof leaveRoom ===
-
-                    "function" &&
-
-                currentRoomCode
-
-            ) {
-
-                await leaveRoom();
-
-            }
-
-
-
-            window
-
-                .clearLudoAITimer
-
-                ?.();
-
-
-
-            window
-
-                .resetLudoBoard
-
-                ?.();
-
-
-
-            window
-
-                .resetGameState
-
-                ?.();
-
-
-
-            showScreen(
-
-                "menuScreen"
-
-            );
-
-        }
-
-    );
+});
 
 
 
@@ -3183,53 +2583,25 @@ document
 
 // showLudoWinnerModal({ player: { name: "TEST — Người chiến thắng" } });
 
+window.showLudoWinnerModal = showLudoWinnerModal;
+
+window.hideLudoWinnerModal = hideLudoWinnerModal;
 
 
-window.showLudoWinnerModal =
-
-    showLudoWinnerModal;
-
-
-
-window.hideLudoWinnerModal =
-
-    hideLudoWinnerModal;
 
 /* ================= GAME ENGINE ================= */
 
 
 
-function startGame(
+function startGame(players, mode = "online") {
 
-    players,
-
-    mode = "online"
-
-) {
-
-    if (
-
-        !Array.isArray(players) ||
-
-        !players.length
-
-    ) {
-
-        return;
-
-    }
+    if (!Array.isArray(players) || !players.length) return;
 
 
 
     showScreen("gameScreen");
 
-
-
-    renderGamePlayers(
-
-        players
-
-    );
+    renderGamePlayers(players);
 
 
 
@@ -3237,21 +2609,11 @@ function startGame(
 
         window.startLudoSolo?.({
 
-            id:
+            id: players[0]?.uid || "local-player",
 
-                players[0]?.uid ||
-
-                "local-player",
-
-            name:
-
-                players[0]?.name ||
-
-                "Bạn"
+            name: players[0]?.name || "Bạn"
 
         });
-
-
 
         return;
 
@@ -3261,139 +2623,47 @@ function startGame(
 
     resetGameState();
 
+    LudoGame.mode = "online";
 
+    LudoGame.state = "playing";
 
-    LudoGame.mode =
+    LudoGame.roomId = currentRoomCode;
 
-        "online";
+    LudoGame.players = players.map(player => ({
 
+        id: player.uid || player.id,
 
+        name: player.name || "Khách",
 
-    LudoGame.state =
+        color: player.color,
 
-        "playing";
+        type: player.type || "human",
 
+        connected: player.connected !== false,
 
+        isHost: player.host === true || player.isHost === true,
 
-    LudoGame.roomId =
+        joinedAt: Date.now(),
 
-        currentRoomCode;
+        disconnectedAt: null,
 
+        disconnectTimer: null
 
+    }));
 
-    LudoGame.players =
 
-        players.map(
 
-            player => ({
+    LudoGame.localPlayerId = currentUser?.uid || LudoGame.players[0]?.id;
 
-                id:
-
-                    player.uid ||
-
-                    player.id,
-
-
-
-                name:
-
-                    player.name ||
-
-                    "Khách",
-
-
-
-                color:
-
-                    player.color,
-
-
-
-                type:
-
-                    player.type ||
-
-                    "human",
-
-
-
-                connected:
-
-                    player.connected !==
-
-                    false,
-
-
-
-                isHost:
-
-                    player.host === true ||
-
-                    player.isHost === true,
-
-
-
-                joinedAt:
-
-                    Date.now(),
-
-
-
-                disconnectedAt:
-
-                    null,
-
-
-
-                disconnectTimer:
-
-                    null
-
-            })
-
-        );
-
-
-
-    LudoGame.localPlayerId =
-
-        currentUser?.uid ||
-
-        LudoGame.players[0]?.id;
-
-
-
-    LudoGame.hostPlayerId =
-
-        players.find(
-
-            p =>
-
-                p.host ||
-
-                p.isHost
-
-        )?.uid ||
-
-        LudoGame.players[0]?.id;
+    LudoGame.hostPlayerId = players.find(p => p.host || p.isHost)?.uid || LudoGame.players[0]?.id;
 
 
 
     applyPlayersToBoard();
 
-
-
     renderLudoVisualBoard();
 
-
-
-    window
-
-        .renderLudoPieces
-
-        ?.();
-
-
+    window.renderLudoPieces?.();
 
     startBoard();
 
@@ -3423,11 +2693,7 @@ function startGame(
 
 
 
-function getPlayerColorHex(
-
-    color
-
-) {
+function getPlayerColorHex(color) {
 
     const colors = {
 
@@ -3441,157 +2707,53 @@ function getPlayerColorHex(
 
     };
 
-
-
-    return (
-
-        colors[color] ||
-
-        "#94a3b8"
-
-    );
+    return colors[color] || "#94a3b8";
 
 }
 
 
 
-function renderGamePlayers(
+function renderGamePlayers(players) {
 
-    players
+    const raceInfo = document.getElementById("raceInfo");
 
-) {
+    const gamePlayers = document.getElementById("gamePlayers");
 
-    const raceInfo =
+    if (raceInfo) raceInfo.innerHTML = "";
 
-        document.getElementById(
+    if (gamePlayers) gamePlayers.innerHTML = "";
 
-            "raceInfo"
 
-        );
 
+    (players || []).forEach(player => {
 
+        const row = document.createElement("div");
 
-    const gamePlayers =
+        row.className = "game-player-row";
 
-        document.getElementById(
+        const color = getPlayerColorHex(player.color);
 
-            "gamePlayers"
+        row.innerHTML = `
 
-        );
+            <span class="game-player-name">
 
+                <i class="player-color-dot" style="--player-color:${color}"></i>
 
+                <span class="player-avatar-mini">${player.type === "ai" ? "🤖" : "🐴"}</span>
 
-    if (raceInfo)
+                <span>${escapeHTML(player.name || "Khách")}</span>
 
-        raceInfo.innerHTML = "";
+            </span>
 
+            <b>0/4</b>
 
+        `;
 
-    if (gamePlayers)
+        raceInfo?.appendChild(row.cloneNode(true));
 
-        gamePlayers.innerHTML = "";
+        gamePlayers?.appendChild(row);
 
-
-
-    (players || []).forEach(
-
-        player => {
-
-            const row =
-
-                document.createElement(
-
-                    "div"
-
-                );
-
-
-
-            row.className =
-
-                "game-player-row";
-
-
-
-            const color =
-
-                getPlayerColorHex(
-
-                    player.color
-
-                );
-
-
-
-            row.innerHTML = `
-
-                <span class="game-player-name">
-
-                    <i
-
-                        class="player-color-dot"
-
-                        style="--player-color:${color}"
-
-                    ></i>
-
-
-
-                    <span class="player-avatar-mini">
-
-                        ${
-
-                            player.type === "ai"
-
-                                ? "🤖"
-
-                                : "🐴"
-
-                        }
-
-                    </span>
-
-
-
-                    <span>
-
-                        ${escapeHTML(
-
-                            player.name ||
-
-                            "Khách"
-
-                        )}
-
-                    </span>
-
-                </span>
-
-
-
-                <b>0/4</b>
-
-            `;
-
-
-
-            raceInfo?.appendChild(
-
-                row.cloneNode(true)
-
-            );
-
-
-
-            gamePlayers?.appendChild(
-
-                row
-
-            );
-
-        }
-
-    );
+    });
 
 }
 
@@ -3599,45 +2761,17 @@ function renderGamePlayers(
 
 function randomColor() {
 
-    const colors = [
+    const colors = ["red", "green", "yellow", "blue"];
 
-        "red",
-
-        "green",
-
-        "yellow",
-
-        "blue"
-
-    ];
-
-
-
-    return colors[
-
-        Math.floor(
-
-            Math.random() *
-
-            colors.length
-
-        )
-
-    ];
+    return colors[Math.floor(Math.random() * colors.length)];
 
 }
 
 
 
-window.showLudoScreen =
+window.showLudoScreen = showScreen;
 
-    showScreen;
-
-
-
-window.resetGameState =
-
-    resetGameState;
+window.resetGameState = resetGameState;
 
 
 
@@ -3647,20 +2781,12 @@ try {
 
 } catch (error) {
 
-    console.error(
-
-        "LUDO INIT ERROR:",
-
-        error
-
-    );
+    console.error("LUDO INIT ERROR:", error);
 
 }
 
 
 
 /* Initial visual board */
-
-
 
 renderLudoVisualBoard();
