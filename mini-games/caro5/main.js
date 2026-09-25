@@ -1491,141 +1491,79 @@
     // 21. FIREBASE
     // =========================================================
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyA2uJ2-lHYjNeA40kFoS1-VsCaqhjYszdw",
-        authDomain: "caro-3460d.firebaseapp.com",
-        databaseURL:
-            "https://caro-3460d-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "caro-3460d",
-        storageBucket: "caro-3460d.firebasestorage.app",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
-    };
+    // =========================================================
+    // 21. FIREBASE — TienHub project
+    // Dùng chung Firebase với trang TienHub để auth + presence
+    // + rooms nằm trên cùng một Realtime Database.
+    // =========================================================
 
-    /*
-     * Nếu file gamehub.js của bạn đã có Firebase config,
-     * phần init bên dưới sẽ ưu tiên dùng GameHub.
-     */
+    const firebaseConfig = {
+        apiKey: "AIzaSyB2thMfX5cl7FqnPB-q8WKH5ts7WDJqUAs",
+        authDomain: "tienhub-ca5c3.firebaseapp.com",
+        databaseURL:
+            "https://tienhub-ca5c3-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "tienhub-ca5c3",
+        storageBucket: "tienhub-ca5c3.firebasestorage.app",
+        messagingSenderId: "51330279386",
+        appId: "1:51330279386:web:cf69c206260448f2da02e3",
+        measurementId: "G-H90525VMVN"
+    };
 
     async function initFirebase() {
         try {
-            if (
-                window.GameHub &&
-                window.GameHub.ready
-            ) {
-                await window.GameHub.ready;
-
-                if (
-                    typeof window.GameHub.getAuth ===
-                    "function"
-                ) {
-                    firebaseAuth =
-                        window.GameHub.getAuth();
-                }
-
-                if (
-                    typeof window.GameHub.getDatabase ===
-                    "function"
-                ) {
-                    firebaseDB =
-                        window.GameHub.getDatabase();
-                }
-
-                if (
-                    typeof window.GameHub.getUser ===
-                    "function"
-                ) {
-                    firebaseUser =
-                        window.GameHub.getUser();
-                }
-            }
-
-            // -------------------------------------------------
-            // Fallback nếu GameHub không cung cấp
-            // -------------------------------------------------
-
-            if (
-                !firebaseApp &&
-                window.firebase
-            ) {
+            // Ưu tiên Firebase Compat instance đã có trên trang Caro.
+            if (!firebaseApp && window.firebase) {
                 try {
-                    if (
-                        firebase.apps &&
-                        firebase.apps.length > 0
-                    ) {
-                        firebaseApp =
-                            firebase.apps[0];
-                    } else {
-                        firebaseApp =
-                            firebase.initializeApp(
-                                firebaseConfig,
-                                "Caro5"
-                            );
-                    }
+                    firebaseApp =
+                        firebase.apps.find(app => app.name === "TienHubCaro") ||
+                        firebase.initializeApp(firebaseConfig, "TienHubCaro");
                 } catch (error) {
-                    console.warn(
-                        "Firebase app init:",
-                        error
-                    );
-
+                    console.warn("Caro Firebase app init:", error);
                     try {
-                        firebaseApp =
-                            firebase.app();
-                    } catch (_) {}
+                        firebaseApp = firebase.app("TienHubCaro");
+                    } catch (_) {
+                        firebaseApp = firebase.app();
+                    }
                 }
             }
 
-            if (
-                !firebaseAuth &&
-                firebaseApp &&
-                window.firebase
-            ) {
-                firebaseAuth =
-                    firebase.auth(firebaseApp);
+            if (!firebaseAuth && firebaseApp && window.firebase) {
+                firebaseAuth = firebase.auth(firebaseApp);
             }
 
-            if (
-                !firebaseDB &&
-                firebaseApp &&
-                window.firebase
-            ) {
-                firebaseDB =
-                    firebase.database(firebaseApp);
+            if (!firebaseDB && firebaseApp && window.firebase) {
+                firebaseDB = firebase.database(firebaseApp);
             }
 
-            // -------------------------------------------------
-            // Chờ anonymous auth
-            // -------------------------------------------------
-
-            if (
-                firebaseAuth &&
-                !firebaseUser
-            ) {
-                if (firebaseAuth.currentUser) {
-                    firebaseUser =
-                        firebaseAuth.currentUser;
-                } else {
-                    const result =
-                        await firebaseAuth.signInAnonymously();
-
-                    firebaseUser =
-                        result.user;
-                }
+            if (!firebaseAuth || !firebaseDB) {
+                throw new Error("Không khởi tạo được Firebase TienHub.");
             }
 
-            if (
-                !firebaseDB ||
-                !firebaseUser
-            ) {
-                throw new Error(
-                    "Không lấy được Firebase Database hoặc User."
-                );
+            // Chờ Firebase khôi phục tài khoản thật trên máy.
+            if (!firebaseUser) {
+                firebaseUser = await new Promise(resolve => {
+                    let settled = false;
+                    const unsubscribe = firebaseAuth.onAuthStateChanged(user => {
+                        if (settled) return;
+                        settled = true;
+                        try { unsubscribe(); } catch (_) {}
+                        resolve(user || null);
+                    });
+                });
             }
 
-            // =================================================
-            // GLOBAL PRESENCE — CARO 5
-            // Để TienHub homepage biết chính xác ai đang ở Caro.
-            // =================================================
+            // Khách vẫn được phép chơi Caro: tạo anonymous UID trong
+            // cùng project TienHub để presence cũng xuất hiện trên Hub.
+            if (!firebaseUser) {
+                const result = await firebaseAuth.signInAnonymously();
+                firebaseUser = result.user;
+            }
+
+            if (!firebaseUser) {
+                throw new Error("Không lấy được Firebase User.");
+            }
+
+            // Global presence: cả tài khoản thật và khách đều được tính.
             try {
                 const presenceSessionId =
                     `caro5_${Date.now()}_${Math.random().toString(36).slice(2)}`;
@@ -1644,24 +1582,16 @@
 
                 window.addEventListener("beforeunload", () => {
                     presenceRef.remove().catch(() => {});
-                });
+                }, { once: true });
             } catch (presenceError) {
                 console.warn("Caro5 presence error:", presenceError);
             }
 
             setStatus("🟢 Đã kết nối online");
-
             return true;
         } catch (error) {
-            console.error(
-                "Firebase initialization error:",
-                error
-            );
-
-            setStatus(
-                "🔴 Chưa kết nối online"
-            );
-
+            console.error("Firebase initialization error:", error);
+            setStatus("🔴 Chưa kết nối online");
             return false;
         }
     }
