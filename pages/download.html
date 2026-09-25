@@ -2,6 +2,24 @@
 <html lang="vi">
 
 <head>
+<script type="module">
+(async () => {
+    try {
+        const { auth } = await import("../src/core/firebase.js");
+        if (typeof auth.authStateReady === "function") {
+            await auth.authStateReady();
+        }
+        const user = auth.currentUser;
+        if (!user || user.isAnonymous) {
+            window.location.replace("auth.html");
+        }
+    } catch (error) {
+        console.error("TienHub download auth guard error:", error);
+        window.location.replace("auth.html");
+    }
+})();
+</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
