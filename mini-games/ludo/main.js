@@ -98,19 +98,9 @@ function createDatabaseFacade(firebaseDatabase, api) {
             },
 
             onDisconnect() {
-                const disconnectRef = onDisconnect(databaseRef);
                 return {
                     async remove() {
-                        return await disconnectRef.remove();
-                    },
-                    async update(values) {
-                        return await disconnectRef.update(values);
-                    },
-                    async set(value) {
-                        return await disconnectRef.set(value);
-                    },
-                    async cancel() {
-                        return await disconnectRef.cancel();
+                        return await onDisconnect(databaseRef).remove();
                     }
                 };
             }
@@ -144,60 +134,16 @@ function createDatabaseFacade(firebaseDatabase, api) {
 
         db = createDatabaseFacade(firebaseDatabase, databaseApi);
         serverTimestamp = databaseApi.serverTimestamp;
-        window.LudoServerTimestamp = () =>
-            typeof serverTimestamp === "function"
-                ? serverTimestamp()
-                : Date.now();
 
         const { onAuthStateChanged } = await import(
             "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"
         );
 
-        authReadyPromise = (async () => {
-            // Safari/iPhone có thể khôi phục phiên đăng nhập chậm.
-            // Chờ Firebase xác định auth state trước khi kiểm tra user.
-            if (typeof auth.authStateReady === "function") {
-                await auth.authStateReady();
-            }
+        authReadyPromise = new Promise(resolve => {
+            let resolved = false;
 
-            currentUser = auth.currentUser || null;
-
-            if (currentUser && !currentUser.isAnonymous) {
-                try {
-                    const snap = await databaseApi.get(
-                        databaseApi.ref(firebaseDatabase, `users/${currentUser.uid}`)
-                    );
-                    const data = snap.val() || {};
-
-                    currentUsername =
-                        data.username ||
-                        data.displayName ||
-                        currentUser.displayName ||
-                        currentUser.email?.split("@")[0] ||
-                        localStorage.getItem("tienhub_username") ||
-                        "Người chơi";
-                } catch (error) {
-                    console.warn("LUDO LOAD USERNAME ERROR:", error);
-                    currentUsername =
-                        currentUser.displayName ||
-                        currentUser.email?.split("@")[0] ||
-                        localStorage.getItem("tienhub_username") ||
-                        "Người chơi";
-                }
-            } else {
-                currentUsername = "Khách";
-            }
-
-            console.log(
-                "LUDO AUTH READY:",
-                currentUser ? currentUser.uid : "none",
-                currentUsername,
-                currentUser?.isAnonymous ? "anonymous" : "account"
-            );
-
-            // Giữ theo dõi thay đổi đăng nhập/đăng xuất trong lúc đang ở Ludo.
             onAuthStateChanged(auth, async user => {
-                currentUser = user || null;
+                currentUser = user;
 
                 if (user && !user.isAnonymous) {
                     try {
@@ -205,6 +151,7 @@ function createDatabaseFacade(firebaseDatabase, api) {
                             databaseApi.ref(firebaseDatabase, `users/${user.uid}`)
                         );
                         const data = snap.val() || {};
+
                         currentUsername =
                             data.username ||
                             data.displayName ||
@@ -212,7 +159,8 @@ function createDatabaseFacade(firebaseDatabase, api) {
                             user.email?.split("@")[0] ||
                             localStorage.getItem("tienhub_username") ||
                             "Người chơi";
-                    } catch {
+                    } catch (error) {
+                        console.warn("LUDO LOAD USERNAME ERROR:", error);
                         currentUsername =
                             user.displayName ||
                             user.email?.split("@")[0] ||
@@ -222,10 +170,20 @@ function createDatabaseFacade(firebaseDatabase, api) {
                 } else {
                     currentUsername = "Khách";
                 }
-            });
 
-            return currentUser;
-        })();
+                console.log(
+                    "LUDO AUTH:",
+                    user ? user.uid : "none",
+                    currentUsername,
+                    user?.isAnonymous ? "anonymous" : "account"
+                );
+
+                if (!resolved) {
+                    resolved = true;
+                    resolve(user || null);
+                }
+            });
+        });
     } catch (error) {
         console.error("LUDO FIREBASE INIT ERROR:", error);
         authReadyPromise = Promise.reject(error);
@@ -246,7 +204,7 @@ async function ensureUser() {
 
     const user = currentUser || auth?.currentUser;
 
-    if (!user || user.isAnonymous) {
+    if (!user) {
         throw new Error(
             "Bạn chưa đăng nhập TienHub. Vui lòng đăng nhập trước khi chơi Ludo."
         );
@@ -2156,22 +2114,28 @@ document
 
             async () => {
 
-                // Đổi màn hình ngay, không để Firebase chặn nút MENU.
-                showScreen(button.dataset.back);
 
-                try {
-                    if (currentRoomCode) {
-                        await leaveRoom();
-                    }
-                } catch (error) {
-                    console.warn("LUDO BACK ERROR:", error);
+
+                if (currentRoomCode) {
+
+                    await leaveRoom();
+
                 }
+
+
+
+                showScreen(
+
+                    button.dataset.back
+
+                );
 
             }
 
         );
 
     });
+
 
 
 document
@@ -2188,23 +2152,26 @@ document
 
         async () => {
 
-            // Hiện MENU ngay lập tức.
-            showScreen("menuScreen");
 
-            try {
-                if (currentRoomCode) {
-                    await leaveRoom();
-                }
-            } catch (error) {
-                console.warn("LUDO GAME MENU ERROR:", error);
+
+            if (currentRoomCode) {
+
+                await leaveRoom();
+
             }
 
-            window.clearLudoAITimer?.();
-            window.resetLudoBoard?.();
-            window.resetGameState?.();
+
+
+            showScreen(
+
+                "menuScreen"
+
+            );
+
         }
 
     );
+
 
 
 /* ================= POLISHED VISUAL BOARD ================= */
