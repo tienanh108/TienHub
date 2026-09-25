@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
             href: "../mini-games/caro5/index.html",
             visual: `
                 <div class="mini-cover caro-cover">
-                    <span class="rank"></span>
                     <span class="xo x1">×</span>
                     <span class="xo o1">○</span>
                     <span class="xo x2">×</span>
@@ -35,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
             href: "../mini-games/chess/index.html",
             visual: `
                 <div class="mini-cover chess-cover">
-                    <span class="rank"></span>
 
                     <div class="chess-board">
                         <span>♜</span><span>♞</span><span>♝</span><span>♛</span>
@@ -53,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
             href: "../mini-games/flappy/index.html",
             visual: `
                 <div class="mini-cover flappy-cover">
-                    <span class="rank"></span>
                     <span class="cloud cloud-1"></span>
                     <span class="cloud cloud-2"></span>
                     <span class="flappy-pipe pipe-top"></span>
@@ -74,7 +71,6 @@ document.addEventListener("DOMContentLoaded", () => {
             href: "#",
             visual: `
                 <div class="mini-cover snake-cover">
-                    <span class="rank"></span>
                     <span class="snake-body snake-1"></span>
                     <span class="snake-body snake-2"></span>
                     <span class="snake-body snake-3"></span>
@@ -91,7 +87,6 @@ document.addEventListener("DOMContentLoaded", () => {
             href: "#",
             visual: `
                 <div class="mini-cover stickman-cover">
-                    <span class="rank"></span>
                     <span class="stickman-head"></span>
                     <span class="stickman-body"></span>
                     <span class="stickman-arm arm-left"></span>
@@ -109,7 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
             href: "../mini-games/ludo/index.html",
             visual: `
                 <div class="mini-cover ludo-cover">
-                    <span class="rank"></span>
 
                     <div class="ludo-board">
                         <span class="ludo-home red"></span>
@@ -138,33 +132,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     function sortGames(list) {
-
-        return [...list].sort((a, b) => {
-
-            const aPlayers =
-                Number.isFinite(a.players)
-                    ? a.players
-                    : -1;
-
-            const bPlayers =
-                Number.isFinite(b.players)
-                    ? b.players
-                    : -1;
-
-            return bPlayers - aPlayers;
-        });
+        return [...list];
     }
-
-
-    function playerText(game) {
-
-        if (!Number.isFinite(game.players)) {
-            return "👥 — người chơi";
-        }
-
-        return `👥 ${game.players.toLocaleString("vi-VN")} người chơi`;
-    }
-
 
     function render() {
 
@@ -212,12 +181,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
 
-            const globalIndex =
-                start + index;
-
-            const rankNumber =
-                globalIndex + 1;
-
 
             const card =
                 document.createElement("a");
@@ -236,7 +199,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="mini-info">
                     <div>
                         <h3>${game.name}</h3>
-                        <span>${playerText(game)}</span>
                     </div>
 
                     <span class="play-button">
@@ -246,29 +208,6 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
 
 
-            /*
-             * Chỉ Top 1 / 2 / 3 có số.
-             * Game 4 trở đi vẫn được sắp đúng vị trí
-             * nhưng không hiện badge số.
-             */
-
-            const rank =
-                card.querySelector(".rank");
-
-            if (rankNumber <= 3) {
-
-                rank.textContent =
-                    String(rankNumber);
-
-                rank.classList.add(
-                    `rank-${rankNumber}`
-                );
-
-            } else {
-
-                rank.remove();
-
-            }
 
 
             grid.appendChild(card);
@@ -400,17 +339,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     );
 
-
-    /*
-     * Sau này Firebase chỉ cần cập nhật:
-     * game.players = số người chơi hiện tại
-     * rồi gọi:
-     *
-     * filteredGames = sortGames(filteredGames);
-     * render();
-     *
-     * Catalog sẽ tự đưa game đông người chơi lên đầu.
-     */
 
     filteredGames =
         sortGames(games);
