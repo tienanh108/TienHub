@@ -320,10 +320,10 @@ async function createLudoRoom(
             "lobby",
 
         createdAt:
-            firebase.database.ServerValue.TIMESTAMP,
+            window.LudoServerTimestamp ? window.LudoServerTimestamp() : Date.now(),
 
         updatedAt:
-            firebase.database.ServerValue.TIMESTAMP,
+            window.LudoServerTimestamp ? window.LudoServerTimestamp() : Date.now(),
 
         players: {
 
@@ -350,7 +350,7 @@ async function createLudoRoom(
                     true,
 
                 joinedAt:
-                    firebase.database.ServerValue.TIMESTAMP
+                    window.LudoServerTimestamp ? window.LudoServerTimestamp() : Date.now()
 
             }
 
@@ -584,7 +584,7 @@ async function joinLudoRoom(
             false,
 
         joinedAt:
-            firebase.database.ServerValue.TIMESTAMP
+            window.LudoServerTimestamp ? window.LudoServerTimestamp() : Date.now()
 
     };
 
@@ -1084,7 +1084,7 @@ async function startRoom() {
             "playing",
 
         updatedAt:
-            firebase.database.ServerValue.TIMESTAMP,
+            window.LudoServerTimestamp ? window.LudoServerTimestamp() : Date.now(),
 
         players:
             playersToObject(
@@ -1409,7 +1409,7 @@ async function syncCurrentGame() {
         await LudoMultiplayer.roomRef
             .child("updatedAt")
             .set(
-                firebase.database.ServerValue.TIMESTAMP
+                window.LudoServerTimestamp ? window.LudoServerTimestamp() : Date.now()
             );
 
 
@@ -1600,7 +1600,7 @@ async function setupPresence(
                     false,
 
                 disconnectedAt:
-                    firebase.database.ServerValue.TIMESTAMP
+                    window.LudoServerTimestamp ? window.LudoServerTimestamp() : Date.now()
 
             };
 
@@ -1666,9 +1666,9 @@ async function setupPresence(
                 false,
 
             disconnectedAt:
-                firebase.database
-                    .ServerValue
-                    .TIMESTAMP
+                window.LudoServerTimestamp
+                    ? window.LudoServerTimestamp()
+                    : Date.now()
 
         });
 
@@ -1739,9 +1739,7 @@ async function leaveRoom() {
                     false,
 
                 disconnectedAt:
-                    firebase.database
-                        .ServerValue
-                        .TIMESTAMP
+                    window.LudoServerTimestamp ? window.LudoServerTimestamp() : Date.now()
 
             });
 
