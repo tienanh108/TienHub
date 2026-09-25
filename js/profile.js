@@ -11,6 +11,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const logoutButton = document.querySelector(".profile-logout");
     const profileMenu = profileWrap?.querySelector(".profile-menu");
 
+    // profile.js được dùng ở cả trang gốc và các trang nằm trong /pages/.
+    // Dùng đường dẫn tuyệt đối theo root để tránh /pages/pages/auth.html (404).
+    const authPage = "/pages/auth.html";
+
     if (!profileWrap || !profileButton) return;
 
     let auth = null;
@@ -93,7 +97,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 localStorage.removeItem("tienhub_logged_in");
                 localStorage.removeItem("tienhub_username");
                 alert("Tài khoản này đang được đăng nhập trên một thiết bị khác.");
-                window.location.replace("pages/auth.html");
+                window.location.replace(authPage);
                 return false;
             }
 
@@ -135,7 +139,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         profileButton.setAttribute("aria-label", "Đăng nhập TienHub");
         if (profileMenu) profileMenu.hidden = true;
         profileButton.onclick = () => {
-            window.location.href = "pages/auth.html";
+            window.location.href = authPage;
         };
     }
 
@@ -186,7 +190,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         } finally {
             localStorage.removeItem("tienhub_username");
             localStorage.removeItem("tienhub_logged_in");
-            window.location.replace("pages/auth.html");
+            window.location.replace(authPage);
         }
     });
 
