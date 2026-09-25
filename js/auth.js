@@ -455,68 +455,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function acquireAccountDeviceLock(user) {
         const { core, api } = await getDeviceApi();
-        const { ref, runTransaction, set, remove } = api;
+        const { ref, runTransaction } = api;
         const uid = user.uid;
         const deviceId = getDeviceId();
         const lockRef = ref(core.db, `activeDevices/${uid}/${DEVICE_LOCK_PATH}`);
-        const now = Date.now();
 
         deviceLockLost = false;
 
-        const tx = await runTransaction(lockRef, current => {
-            if (!current || typeof current !== "object") {
-                return {
-                    uid,
-                    deviceId,
-                    lastSeen: now,
-                    online: true
-                };
-            }
-
-            const owner = String(current.deviceId || "");
-            const lastSeen = Number(current.lastSeen || 0);
-
-            // Same browser/device: refresh the existing lease.
-            if (owner === deviceId) {
-                return {
-                    uid,
-                    deviceId,
-                    lastSeen: now,
-                    online: true
-                };
-            }
-
-            // Another device is still active: abort the transaction.
-            if (lastSeen > 0 && now - lastSeen < DEVICE_LOCK_STALE_MS) {
-                return;
-            }
-
-            // Existing lease is stale, so this device may take it over.
-            return {
-                uid,
-                deviceId,
-                lastSeen: now,
-                online: true
-            };
-        });
+        // LAST LOGIN WINS:
+        // Every successful login takes ownership of the account lock.
+        // The previous browser is notified through the realtime listener below.
+        const now = Date.now();
+        const tx = await runTransaction(lockRef, () => ({
+            uid,
+            deviceId,
+            lastSeen: now,
+            online: true
+        }));
 
         if (!tx.committed) {
-            const error = new Error(
-                "Tài khoản này đang được đăng nhập trên một thiết bị khác."
-            );
-            error.code = "tienhub/device-limit";
+            const error = new Error("Không thể nhận quyền đăng nhập trên thiết bị này.");
+            error.code = "tienhub/device-lock-failed";
             throw error;
         }
 
         if (deviceHeartbeat) clearInterval(deviceHeartbeat);
-
         deviceHeartbeat = setInterval(async () => {
             try {
                 const result = await runTransaction(lockRef, current => {
-                    if (!current || current.deviceId !== deviceId) {
-                        return;
-                    }
-
+                    if (!current || current.deviceId !== deviceId) return;
                     return {
                         ...current,
                         uid,
@@ -526,22 +493,45 @@ document.addEventListener("DOMContentLoaded", () => {
                     };
                 });
 
-                // Another device has taken the lease (for example after
-                // this session went stale). Immediately sign this session out.
-                if (!result.committed) {
-                    if (!deviceLockLost) {
-                        deviceLockLost = true;
-                        clearInterval(deviceHeartbeat);
-                        deviceHeartbeat = null;
-                        try {
-                            await core.auth.signOut();
-                        } catch (_) {}
-                    }
+                if (!result.committed && !deviceLockLost) {
+                    deviceLockLost = true;
+                    clearInterval(deviceHeartbeat);
+                    deviceHeartbeat = null;
+                    try { await core.auth.signOut(); } catch (_) {}
                 }
             } catch (error) {
                 console.warn("TienHub device heartbeat error:", error);
             }
         }, 20000);
+
+        // If another device logs in later, its deviceId replaces ours.
+        // Realtime notification immediately signs this browser out.
+        const { onValue } = api;
+        const unsubscribe = onValue(lockRef, async snapshot => {
+            const lock = snapshot.val();
+            if (!lock || lock.deviceId === deviceId || deviceLockLost) return;
+
+            deviceLockLost = true;
+            if (deviceHeartbeat) {
+                clearInterval(deviceHeartbeat);
+                deviceHeartbeat = null;
+            }
+
+            // Do not remove the new device's lock.
+            try { await core.auth.signOut(); } catch (_) {}
+
+            localStorage.removeItem("tienhub_logged_in");
+            localStorage.removeItem("tienhub_username");
+
+            if (!location.pathname.includes("/pages/auth.html")) {
+                alert("Tài khoản này vừa được đăng nhập trên một thiết bị khác.");
+                const authPath = location.pathname.includes("/pages/") ? "auth.html" : "pages/auth.html";
+                window.location.replace(authPath);
+            }
+        });
+
+        // Keep the listener reference so logout can remove it.
+        window.TienHubDeviceLockListener = unsubscribe;
 
         return true;
     }
@@ -551,6 +541,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (deviceHeartbeat) {
                 clearInterval(deviceHeartbeat);
                 deviceHeartbeat = null;
+            }
+            if (typeof window.TienHubDeviceLockListener === "function") {
+                window.TienHubDeviceLockListener();
+                window.TienHubDeviceLockListener = null;
             }
 
             const { core, api } = await getDeviceApi();
@@ -657,6 +651,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             case "tienhub/device-limit":
                 return "Tài khoản này đang được đăng nhập trên một thiết bị khác.";
+
+            case "tienhub/device-lock-failed":
+                return "Không thể xác nhận phiên đăng nhập. Vui lòng thử lại.";
 
             case "auth/email-already-in-use":
                 return "Tên người dùng này đã tồn tại.";
