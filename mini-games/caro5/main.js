@@ -1622,6 +1622,33 @@
                 );
             }
 
+            // =================================================
+            // GLOBAL PRESENCE — CARO 5
+            // Để TienHub homepage biết chính xác ai đang ở Caro.
+            // =================================================
+            try {
+                const presenceSessionId =
+                    `caro5_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
+                const presenceRef = firebaseDB.ref(
+                    `presence/${firebaseUser.uid}/${presenceSessionId}`
+                );
+
+                await presenceRef.set({
+                    game: "caro5",
+                    online: true,
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                await presenceRef.onDisconnect().remove();
+
+                window.addEventListener("beforeunload", () => {
+                    presenceRef.remove().catch(() => {});
+                });
+            } catch (presenceError) {
+                console.warn("Caro5 presence error:", presenceError);
+            }
+
             setStatus("🟢 Đã kết nối online");
 
             return true;
