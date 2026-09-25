@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <title>Flappy Bird</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body data-game="flappy">
+
+
+    <main class="game-wrapper">
+
+
+        <!-- =================================================
+             TOP BAR
+        ================================================== -->
+
+        <header class="topbar">
+
+            <button
+                id="backButton"
+                class="small-button"
+            >
+                ← TienHuB
+            </button>
+
+
+            <div class="game-title">
+                🐦 Flappy Bird
+            </div>
+
+
+            <div
+                class="online-status"
+                id="onlineStatus"
+            >
+                🟢 Online
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             GAME AREA
+        ================================================== -->
+
+        <section class="game-area">
+
+
+            <canvas
+                id="gameCanvas"
+            ></canvas>
+
+
+            <!-- HUD -->
+
+            <div class="hud">
+
+                <div class="score">
+
+                    <span>
+                        Score
+                    </span>
+
+                    <strong id="score">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="high-score">
+
+                    <span>
+                        Best
+                    </span>
+
+                    <strong id="highScore">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 START SCREEN
+            ================================================== -->
+
+            <div
+                id="startScreen"
+                class="overlay"
+            >
+
+                <div class="panel">
+
+                    <div class="bird-icon">
+                        🐦
+                    </div>
+
+
+                    <h1>
+                        Flappy Bird
+                    </h1>
+
+
+                    <p>
+                        Chạm màn hình để bay
+                    </p>
+
+
+                    <button
+                        id="startButton"
+                        class="main-button"
+                    >
+                        ▶ Chơi
+                    </button>
+
+
+                    <button
+                        id="backMenuButton"
+                        class="secondary-button"
+                    >
+                        ← Menu
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 GAME OVER
+            ================================================== -->
+
+            <div
+                id="gameOverScreen"
+                class="overlay hidden"
+            >
+
+                <div class="panel">
+
+                    <h2>
+                        💥 Game Over
+                    </h2>
+
+
+                    <div class="result">
+
+                        <div>
+
+                            <span>
+                                Điểm
+                            </span>
+
+                            <strong id="finalScore">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Kỷ lục
+                            </span>
+
+                            <strong id="finalHighScore">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        id="restartButton"
+                        class="main-button"
+                    >
+                        🔄 Chơi lại
+                    </button>
+
+
+                    <button
+                        id="gameOverMenuButton"
+                        class="secondary-button"
+                    >
+                        ← Menu
+                    </button>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================================
+             HINT
+        ================================================== -->
+
+        <div class="hint">
+
+            <span>
+                ⌨️ Space
+            </span>
+
+            <span>
+                hoặc
+            </span>
+
+            <span>
+                👆 Chạm màn hình
+            </span>
+
+        </div>
+
+        <div class="game-credit">@tienanh</div>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         FLAPPY GAME
+         Firebase/Auth được dùng trực tiếp qua
+         ../../src/core/firebase.js trong main.js.
+    ====================================================== -->
+
+    <script src="main.js?v=14"></script>
+
+
+</body>
+
+</html>
