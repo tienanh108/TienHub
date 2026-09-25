@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tải về — TienHub</title>
+
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/download.css">
+</head>
+
+<body>
+
+<header class="site-header">
+    <div class="nav-shell">
+
+        <a class="brand" href="../index.html" aria-label="TienHub">
+            <span class="brand-mark">
+                <img src="../assets/icon/tienhub-mark.png" alt="TienHub">
+            </span>
+            <span class="brand-name">TienHub</span>
+        </a>
+
+        <nav class="main-nav">
+            <a href="../index.html">Trang chủ</a>
+            <a href="mini-game.html">Mini Games</a>
+            <a href="download.html" class="active">Tải về</a>
+        </nav>
+
+        <div class="nav-actions">
+
+            <label class="search">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="11" r="6.8"></circle>
+                    <path d="m16.2 16.2 4.2 4.2"></path>
+                </svg>
+                <input
+                    id="downloadSearch"
+                    type="search"
+                    placeholder="Tìm kiếm game..."
+                    aria-label="Tìm kiếm game"
+                >
+            </label>
+
+            <span class="nav-divider"></span>
+
+            <div class="profile-wrap">
+                <button
+                    class="profile"
+                    type="button"
+                    aria-label="Mở hồ sơ"
+                    aria-expanded="false"
+                >
+                    <span class="profile-avatar">T</span>
+                    <span class="profile-name">Khách</span>
+                </button>
+
+                <div class="profile-menu">
+                    <div class="profile-menu-head">
+                        <strong class="profile-menu-username">Khách</strong>
+                        <span>Thông tin tài khoản TienHub</span>
+                    </div>
+
+                    <a href="#">👤 Hồ sơ</a>
+                    <a href="#">⚙ Cài đặt</a>
+
+                    <button class="profile-logout" type="button">
+                        ↪ Đăng xuất
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</header>
+
+
+<main class="download-page">
+
+    <section class="download-hero">
+
+        <div class="download-hero-media">
+            <img
+                src="../assets/images/games/racing/sunset-coast.png"
+                alt="TienHub Racing — Sunset Coast"
+            >
+        </div>
+
+        <div class="download-hero-overlay"></div>
+
+        <div class="download-hero-content">
+
+            <span class="download-kicker">
+                TIENHUB DESKTOP
+            </span>
+
+            <h1>
+                Tải TienHub Desktop
+            </h1>
+
+            <p class="download-lead">
+                Trải nghiệm đầy đủ thế giới game của TienHub
+                trên máy tính của bạn.
+            </p>
+
+            <div class="download-points">
+                <span>✓ Trải nghiệm nhiều game hơn</span>
+                <span>✓ Thư viện game đầy đủ</span>
+                <span>✓ Hiệu năng tốt hơn</span>
+                <span>✓ Đồng bộ dữ liệu tài khoản</span>
+            </div>
+
+            <button
+                class="download-main-button"
+                id="desktopDownloadButton"
+                type="button"
+            >
+                <span class="download-button-icon">↓</span>
+                <span>
+                    <strong>TienHub Desktop</strong>
+                    <small>Đang phát triển</small>
+                </span>
+            </button>
+
+            <p class="download-note">
+                Phiên bản Desktop đang được phát triển.
+                Nút tải chính thức sẽ được cập nhật tại đây khi phát hành.
+            </p>
+
+        </div>
+
+    </section>
+
+    <section class="download-info-grid">
+
+        <article class="download-info-card">
+            <div class="info-card-title">
+                <span>▣</span>
+                <h2>Yêu cầu hệ thống</h2>
+            </div>
+
+            <div class="spec-list">
+                <div>
+                    <span>Hệ điều hành</span>
+                    <strong>Windows 10 / 11 (64-bit)</strong>
+                </div>
+                <div>
+                    <span>CPU</span>
+                    <strong>Intel Core i3 hoặc tương đương</strong>
+                </div>
+                <div>
+                    <span>RAM</span>
+                    <strong>8 GB trở lên</strong>
+                </div>
+                <div>
+                    <span>Dung lượng</span>
+                    <strong>Khoảng 2 GB trống</strong>
+                </div>
+            </div>
+        </article>
+
+
+        <article class="download-info-card">
+            <div class="info-card-title">
+                <span>▤</span>
+                <h2>Thông tin phiên bản</h2>
+            </div>
+
+            <div class="spec-list">
+                <div>
+                    <span>Phiên bản hiện tại</span>
+                    <strong>1.0.0 — Đang phát triển</strong>
+                </div>
+                <div>
+                    <span>Nền tảng</span>
+                    <strong>Windows / macOS</strong>
+                </div>
+                <div>
+                    <span>Trạng thái</span>
+                    <strong>Đang hoàn thiện</strong>
+                </div>
+            </div>
+        </article>
+
+
+        <article class="download-info-card download-notice">
+            <div class="info-card-title">
+                <span>!</span>
+                <h2>Lưu ý</h2>
+            </div>
+
+            <ul>
+                <li>TienHub Web hiện vẫn hỗ trợ Mini Games trực tiếp.</li>
+                <li>Games chính sẽ được chơi thông qua TienHub Desktop.</li>
+                <li>Nút tải chính thức sẽ xuất hiện khi Desktop phát hành.</li>
+            </ul>
+        </article>
+
+    </section>
+
+
+    <section class="download-footer-banner">
+
+        <img
+            src="../assets/images/download/tienhub-download-footer-bg.png"
+            alt=""
+        >
+
+        <div class="download-footer-overlay"></div>
+
+        <div class="download-footer-content">
+            <div class="footer-banner-brand">
+                <img src="../assets/icon/tienhub-mark.png" alt="TienHub">
+                <strong>TienHub</strong>
+            </div>
+
+            <div>
+                <h2>Một nền tảng — Vô vàn thế giới game</h2>
+                <p>Tải TienHub Desktop để trải nghiệm đầy đủ.</p>
+            </div>
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer class="site-footer">
+
+    <div class="footer-inner">
+
+        <div class="footer-brand">
+            <div class="footer-logo">
+                <img src="../assets/icon/tienhub-mark.png" alt="TienHub">
+                <strong>TienHub</strong>
+            </div>
+
+            <p>
+                Nền tảng game nơi bạn có thể khám phá,
+                chơi và kết nối cùng cộng đồng.
+            </p>
+        </div>
+
+        <div class="footer-column">
+            <strong>TIENHUB</strong>
+            <a href="../index.html">Trang chủ</a>
+            <a href="mini-game.html">Mini Games</a>
+            <a href="download.html">Tải về</a>
+        </div>
+
+        <div class="footer-column">
+            <strong>HỖ TRỢ</strong>
+            <a href="#">Trung tâm trợ giúp</a>
+            <a href="#">Báo lỗi</a>
+            <a href="#">Liên hệ</a>
+        </div>
+
+        <div class="footer-column">
+            <strong>PHÁP LÝ</strong>
+            <a href="#">Điều khoản sử dụng</a>
+            <a href="#">Chính sách bảo mật</a>
+        </div>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            Tất cả hệ thống đang hoạt động
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        © 2026 TienHub. All rights reserved.
+    </div>
+
+</footer>
+
+
+<script src="../js/download.js" defer></script>
+<script src="../js/profile.js" defer></script>
+<script type="module" src="../js/auth.js"></script>
+
+</body>
+</html>

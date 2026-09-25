@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mini Game — TienHub</title>
+
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/home.css">
+    <link rel="stylesheet" href="../css/mini-game.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+        <div class="nav-shell">
+
+            <a class="brand" href="../index.html" aria-label="TienHub">
+                <span class="brand-mark">
+                    <img src="../assets/icon/tienhub-mark.png" alt="TienHub">
+                </span>
+                <span class="brand-name">TienHub</span>
+            </a>
+
+            <nav class="main-nav">
+                <a href="../index.html">Trang chủ</a>
+                <a href="mini-game.html" class="active">Mini Games</a>
+                <a href="download.html">Tải về</a>
+</nav>
+
+            <div class="nav-actions">
+
+                <label class="search">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="11" cy="11" r="6.8"></circle>
+                        <path d="m16.2 16.2 4.2 4.2"></path>
+                    </svg>
+                    <input
+                        id="miniSearch"
+                        type="search"
+                        placeholder="Tìm kiếm game..."
+                        aria-label="Tìm kiếm game"
+                    >
+                </label>
+
+                <span class="nav-divider"></span>
+
+                <div class="profile-wrap">
+
+                    <button
+                        class="profile"
+                        type="button"
+                        aria-label="Mở hồ sơ"
+                        aria-expanded="false"
+                    >
+                        <span class="profile-avatar">T</span>
+                        <span class="profile-name">Khách</span>
+                    </button>
+
+                    <div class="profile-menu">
+                        <div class="profile-menu-head">
+                            <strong class="profile-menu-username">Khách</strong>
+                            <span>Thông tin tài khoản TienHub</span>
+                        </div>
+
+                        <a href="#">👤 Hồ sơ</a>
+                        <a href="#">⚙ Cài đặt</a>
+
+                        <button class="profile-logout" type="button">
+                            ↪ Đăng xuất
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+
+    <main class="mini-page">
+
+        <!-- HERO: dùng đúng ảnh hero Mini Games đã duyệt -->
+        <section class="mini-hero-wrap">
+            <div class="mini-hero">
+                <img
+                    src="../assets/mini-games/mini-games-hero.png"
+                    alt="TienHub Mini Games"
+                >
+</div>
+        </section>
+
+
+        <section class="content-section mini-catalog-section">
+
+            <div class="section-heading mini-catalog-heading">
+
+                <div class="section-title-group">
+                    <span class="section-icon mini-icon">👾</span>
+
+                    <div>
+                        <h2>Mini Games</h2>
+                        <p class="mini-catalog-subtitle">
+                            Chơi nhanh, giải trí nhanh và luôn có game mới.
+                        </p>
+                    </div>
+                </div>
+
+                <span class="mini-count" id="miniCount">
+                    6 game
+                </span>
+
+            </div>
+
+
+            <div
+                class="mini-grid mini-catalog-grid"
+                id="miniGrid"
+                aria-live="polite"
+            ></div>
+
+
+            <div class="mini-pagination" id="miniPagination">
+                <button
+                    class="mini-page-arrow"
+                    id="miniPrev"
+                    type="button"
+                    aria-label="Trang trước"
+                >
+                    ‹
+                </button>
+
+                <div class="mini-page-numbers" id="miniPageNumbers"></div>
+
+                <button
+                    class="mini-page-arrow"
+                    id="miniNext"
+                    type="button"
+                    aria-label="Trang sau"
+                >
+                    ›
+                </button>
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer class="site-footer">
+
+        <div class="footer-inner">
+
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <img src="../assets/icon/tienhub-mark.png" alt="TienHub">
+                    <strong>TienHub</strong>
+                </div>
+
+                <p>
+                    Nền tảng game nơi bạn có thể khám phá,
+                    chơi và kết nối cùng cộng đồng.
+                </p>
+            </div>
+
+            <div class="footer-column">
+                <strong>TIENHUB</strong>
+                <a href="../index.html">Trang chủ</a>
+                <a href="mini-game.html">Mini Games</a>
+                <a href="download.html">Tải về</a>
+            </div>
+
+            <div class="footer-column">
+                <strong>HỖ TRỢ</strong>
+                <a href="#">Trung tâm trợ giúp</a>
+                <a href="#">Báo lỗi</a>
+                <a href="#">Liên hệ</a>
+            </div>
+
+            <div class="footer-column">
+                <strong>PHÁP LÝ</strong>
+                <a href="#">Điều khoản sử dụng</a>
+                <a href="#">Chính sách bảo mật</a>
+            </div>
+
+            <div class="system-status">
+                <span class="status-dot"></span>
+                Tất cả hệ thống đang hoạt động
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            © 2026 TienHub. All rights reserved.
+        </div>
+
+    </footer>
+
+
+    <script src="../js/mini-game.js" defer></script>
+    <script src="../js/profile.js" defer></script>
+    <script type="module" src="../js/auth.js"></script>
+
+</body>
+</html>
