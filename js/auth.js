@@ -398,6 +398,13 @@ document.addEventListener("DOMContentLoaded", () => {
             username.trim()
         );
 
+        try {
+            await acquireAccountDeviceLock(result.user);
+        } catch (error) {
+            await auth.signOut();
+            throw error;
+        }
+
 
         localStorage.setItem(
             "tienhub_logged_in",
@@ -415,6 +422,111 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+
+    // =========================================================
+    // ONE ACCOUNT / ONE DEVICE
+    // =========================================================
+
+    const DEVICE_ID_KEY = "tienhub_device_id";
+    let deviceHeartbeat = null;
+
+    function getDeviceId() {
+        let id = localStorage.getItem(DEVICE_ID_KEY);
+
+        if (!id) {
+            id =
+                (crypto?.randomUUID && crypto.randomUUID()) ||
+                `device_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+            localStorage.setItem(DEVICE_ID_KEY, id);
+        }
+
+        return id;
+    }
+
+    async function acquireAccountDeviceLock(user) {
+        const { ref, runTransaction, onDisconnect, set, remove } =
+            await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js");
+        const core = await import("../src/core/firebase.js");
+        const db = core.db;
+        const uid = user.uid;
+        const deviceId = getDeviceId();
+        const deviceRef = ref(db, `activeDevices/${uid}/${deviceId}`);
+        const rootRef = ref(db, `activeDevices/${uid}`);
+        const now = Date.now();
+        const STALE_MS = 90 * 1000;
+
+        const tx = await runTransaction(rootRef, (current) => {
+            const data = current && typeof current === "object" ? current : {};
+
+            for (const [otherDeviceId, info] of Object.entries(data)) {
+                if (!info || otherDeviceId === deviceId) continue;
+
+                const lastSeen = Number(info.lastSeen || 0);
+                if (lastSeen && now - lastSeen < STALE_MS) {
+                    return; // abort: another device is active
+                }
+            }
+
+            return {
+                [deviceId]: {
+                    uid,
+                    lastSeen: now,
+                    online: true
+                }
+            };
+        });
+
+        if (!tx.committed) {
+            const error = new Error("Tài khoản này đang được đăng nhập trên một thiết bị khác.");
+            error.code = "tienhub/device-limit";
+            throw error;
+        }
+
+        try {
+            await onDisconnect(deviceRef).remove();
+        } catch (error) {
+            console.warn("TienHub device onDisconnect error:", error);
+        }
+
+        if (deviceHeartbeat) clearInterval(deviceHeartbeat);
+        deviceHeartbeat = setInterval(async () => {
+            try {
+                await set(deviceRef, {
+                    uid,
+                    lastSeen: Date.now(),
+                    online: true
+                });
+            } catch (error) {
+                console.warn("TienHub device heartbeat error:", error);
+            }
+        }, 20000);
+    }
+
+    async function releaseAccountDeviceLock(user = null) {
+        try {
+            if (deviceHeartbeat) {
+                clearInterval(deviceHeartbeat);
+                deviceHeartbeat = null;
+            }
+
+            const core = await import("../src/core/firebase.js");
+            const { ref, remove } =
+                await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js");
+
+            const current = user || core.auth.currentUser;
+            if (!current || current.isAnonymous) return;
+
+            const deviceId = getDeviceId();
+            await remove(ref(core.db, `activeDevices/${current.uid}/${deviceId}`));
+        } catch (error) {
+            console.warn("TienHub release device lock error:", error);
+        }
+    }
+
+    window.TienHubDeviceLock = {
+        acquire: acquireAccountDeviceLock,
+        release: releaseAccountDeviceLock
+    };
 
     // =========================================================
     // LOGIN
@@ -453,6 +565,13 @@ document.addEventListener("DOMContentLoaded", () => {
             username.trim()
         );
 
+        try {
+            await acquireAccountDeviceLock(result.user);
+        } catch (error) {
+            await auth.signOut();
+            throw error;
+        }
+
 
         localStorage.setItem(
             "tienhub_logged_in",
@@ -482,6 +601,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         switch (error.code) {
+
+            case "tienhub/device-limit":
+                return "Tài khoản này đang được đăng nhập trên một thiết bị khác.";
 
             case "auth/email-already-in-use":
                 return "Tên người dùng này đã tồn tại.";
