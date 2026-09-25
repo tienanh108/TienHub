@@ -98,9 +98,19 @@ function createDatabaseFacade(firebaseDatabase, api) {
             },
 
             onDisconnect() {
+                const disconnectRef = onDisconnect(databaseRef);
                 return {
                     async remove() {
-                        return await onDisconnect(databaseRef).remove();
+                        return await disconnectRef.remove();
+                    },
+                    async update(values) {
+                        return await disconnectRef.update(values);
+                    },
+                    async set(value) {
+                        return await disconnectRef.set(value);
+                    },
+                    async cancel() {
+                        return await disconnectRef.cancel();
                     }
                 };
             }
@@ -134,6 +144,10 @@ function createDatabaseFacade(firebaseDatabase, api) {
 
         db = createDatabaseFacade(firebaseDatabase, databaseApi);
         serverTimestamp = databaseApi.serverTimestamp;
+        window.LudoServerTimestamp = () =>
+            typeof serverTimestamp === "function"
+                ? serverTimestamp()
+                : Date.now();
 
         const { onAuthStateChanged } = await import(
             "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"
@@ -2114,28 +2128,22 @@ document
 
             async () => {
 
+                // Đổi màn hình ngay, không để Firebase chặn nút MENU.
+                showScreen(button.dataset.back);
 
-
-                if (currentRoomCode) {
-
-                    await leaveRoom();
-
+                try {
+                    if (currentRoomCode) {
+                        await leaveRoom();
+                    }
+                } catch (error) {
+                    console.warn("LUDO BACK ERROR:", error);
                 }
-
-
-
-                showScreen(
-
-                    button.dataset.back
-
-                );
 
             }
 
         );
 
     });
-
 
 
 document
@@ -2152,26 +2160,23 @@ document
 
         async () => {
 
+            // Hiện MENU ngay lập tức.
+            showScreen("menuScreen");
 
-
-            if (currentRoomCode) {
-
-                await leaveRoom();
-
+            try {
+                if (currentRoomCode) {
+                    await leaveRoom();
+                }
+            } catch (error) {
+                console.warn("LUDO GAME MENU ERROR:", error);
             }
 
-
-
-            showScreen(
-
-                "menuScreen"
-
-            );
-
+            window.clearLudoAITimer?.();
+            window.resetLudoBoard?.();
+            window.resetGameState?.();
         }
 
     );
-
 
 
 /* ================= POLISHED VISUAL BOARD ================= */
