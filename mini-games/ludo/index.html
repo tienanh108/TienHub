@@ -1,0 +1,211 @@
+<!-- Ludo V9: explicit spawn mapping + AI extra turn on 6 -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Cờ Cá Ngựa - TienHub">
+<title>Cờ Cá Ngựa — TienHub</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<div class="sky"></div>
+
+<main id="app">
+
+    <!-- ================= MENU ================= -->
+    <section id="menuScreen" class="screen active">
+        <header class="topbar">
+            <a class="hub-button" href="../../index.html">← TienHub</a>
+            <div class="brand">🐴 CỜ CÁ NGỰA</div>
+            <div class="author">@tienanh</div>
+        </header>
+
+        <div class="menu-wrap">
+            <div class="game-logo">
+                <div class="logo-horse">🐴</div>
+                <div>
+                    <div class="eyebrow">TienHub BOARD GAME</div>
+                    <h1>CỜ CÁ NGỰA</h1>
+                    <p>Đua 4 quân về chuồng trước đối thủ.</p>
+                </div>
+            </div>
+
+            <div class="mode-grid">
+                <button class="mode-card single" id="singleButton" type="button">
+                    <span class="mode-icon">🤖</span>
+                    <span class="mode-text">
+                        <strong>CHƠI ĐƠN</strong>
+                    </span>
+                    <b class="mode-arrow">→</b>
+                </button>
+
+                <button class="mode-card room" id="createRoomButton" type="button">
+                    <span class="mode-icon">👥</span>
+                    <span class="mode-text">
+                        <strong>TẠO PHÒNG</strong>
+                        <small>Chơi cùng bạn bè</small>
+                    </span>
+                    <b class="mode-arrow">→</b>
+                </button>
+
+                <button class="mode-card join" id="joinRoomButton" type="button">
+                    <span class="mode-icon">🚪</span>
+                    <span class="mode-text">
+                        <strong>VÀO PHÒNG</strong>
+                        <small>Nhập mã phòng</small>
+                    </span>
+                    <b class="mode-arrow">→</b>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= JOIN ROOM ================= -->
+    <section id="joinScreen" class="screen">
+        <header class="topbar">
+            <button class="back-button" type="button" data-back="menuScreen">← MENU GAME</button>
+            <div class="brand">VÀO PHÒNG</div>
+            <div class="author">@tienanh</div>
+        </header>
+
+        <div class="center-page">
+            <div class="panel setup-panel">
+                <div class="panel-icon">🚪</div>
+                <div class="eyebrow">JOIN ROOM</div>
+                <h2>Vào phòng bạn bè</h2>
+                <p>Nhập mã 6 ký tự của phòng</p>
+
+                <label class="field">
+                    <span>MÃ PHÒNG</span>
+                    <input id="joinRoomCodeInput"
+                           maxlength="6"
+                           autocomplete="off"
+                           autocapitalize="characters"
+                           spellcheck="false"
+                           placeholder="VD: A7K2P9">
+                </label>
+
+                <button class="primary-button" id="joinRoomConfirm" type="button">
+                    VÀO PHÒNG →
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= LOBBY ================= -->
+    <section id="lobbyScreen" class="screen">
+        <header class="topbar">
+            <button class="back-button" type="button" data-back="menuScreen">← MENU GAME</button>
+            <div class="brand">PHÒNG CHƠI</div>
+            <div class="author">@tienanh</div>
+        </header>
+
+        <div class="lobby-page">
+            <div class="lobby-card">
+
+                <div class="lobby-room-header">
+                    <div class="room-title-block">
+                        <span class="room-label">MÃ PHÒNG</span>
+                        <div class="room-code-line">
+                            <strong id="roomCode">------</strong>
+                            <button class="copy-small" id="copyLobbyCode" type="button">SAO CHÉP</button>
+                        </div>
+                        <p>Gửi mã này cho bạn bè để vào phòng.</p>
+                    </div>
+
+                    <div class="players-count">
+                        <span></span>
+                        <strong id="playerCount">1/4</strong>
+                        <em>NGƯỜI CHƠI</em>
+                    </div>
+                </div>
+
+                <div class="players-grid" id="playerSlots">
+                    <!-- JS render -->
+                </div>
+
+                <div class="lobby-footer">
+                    <div class="lobby-status">
+                        <span class="status-dot"></span>
+                        <span id="lobbyStatusText">Đang chờ người chơi...</span>
+                    </div>
+
+                    <p class="lobby-note">
+                        Nếu chưa đủ 4 người khi bắt đầu, máy sẽ tự tham gia các vị trí còn thiếu.
+                    </p>
+
+                    <button class="green-action lobby-start" id="startRoomButton" type="button">
+                        BẮT ĐẦU TRẬN →
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= GAME ================= -->
+    <section id="gameScreen" class="screen game-screen">
+        <div class="game-background"></div>
+
+        <header class="topbar game-topbar">
+            <button class="back-button" id="backToGameMenu" type="button">← MENU GAME</button>
+            <div class="brand">🐴 CỜ CÁ NGỰA</div>
+            <div class="author">@tienanh</div>
+        </header>
+
+        <div class="game-layout">
+
+            <aside class="side-panel">
+                <div class="turn-badge" id="turnBadge">LƯỢT CỦA BẠN</div>
+
+                <div class="dice" id="dice">🎲</div>
+
+                <button class="primary-button" id="rollButton" type="button">
+                    TUNG XÚC XẮC
+                </button>
+
+                <div class="race-info" id="raceInfo"></div>
+            </aside>
+
+            <div class="board-wrap">
+                <div class="board-shell">
+                    <div class="board" id="board"></div>
+                </div>
+            </div>
+
+            <aside class="game-right-panel">
+                <div class="mini-title">NGƯỜI CHƠI</div>
+                <div id="gamePlayers"></div>
+            </aside>
+
+        </div>
+    </section>
+
+    <!-- ================= WINNER MODAL ================= -->
+    <div id="winnerModal" class="winner-modal" aria-hidden="true">
+        <div class="winner-card" role="dialog" aria-modal="true" aria-labelledby="winnerTitle">
+            <div class="winner-trophy">🏆</div>
+            <div class="winner-eyebrow">KẾT THÚC TRẬN ĐẤU</div>
+            <h2 id="winnerTitle">CHIẾN THẮNG!</h2>
+            <p><span id="winnerName">Người chơi</span> đã về đích đầu tiên!</p>
+            <button id="winnerMenuButton" class="primary-button winner-menu-button" type="button">
+                ← QUAY VỀ MENU GAME
+            </button>
+        </div>
+    </div>
+
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<script src="./board.js"></script>
+<script src="./game.js"></script>
+<script src="./controls.js"></script>
+<script src="./ai.js"></script>
+<script src="./multiplayer.js"></script>
+<script src="./main.js"></script>
+</body>
+</html>
