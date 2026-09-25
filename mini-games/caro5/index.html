@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <title>CARO 5</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
+</head>
+
+
+<body data-game="caro5">
+
+
+<!-- =====================================================
+     MENU
+===================================================== -->
+
+<div id="menuScreen" class="screen menu-screen">
+
+    <div class="menu-card">
+
+        <button
+            id="TienHuBButton"
+            class="small-btn TienHuB-btn"
+            type="button"
+        >
+            ← TienHuB
+        </button>
+
+
+        <div class="menu-grid">
+
+
+            <!-- =================================================
+                 LEFT
+            ================================================== -->
+
+            <aside class="menu-side menu-left">
+
+                <div class="brand-block">
+
+                    <div class="logo">
+                        <span class="logo-o">O</span>
+                        <span class="logo-x">X</span>
+                    </div>
+
+                    <div class="brand-line">
+                        ONLINE BOARD GAME
+                    </div>
+
+                    <h1>CARO 5</h1>
+
+                    <p class="subtitle">
+                        Ai xếp được 5 quân liên tiếp trước
+                        sẽ giành chiến thắng.
+                    </p>
+
+                </div>
+
+
+                <div class="mini-board-wrap">
+
+                    <div class="mini-board">
+
+                        <span></span>
+                        <span class="mini-x">×</span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+
+                        <span></span>
+                        <span></span>
+                        <span class="mini-o">○</span>
+                        <span></span>
+                        <span></span>
+
+                        <span></span>
+                        <span></span>
+                        <span class="mini-x">×</span>
+                        <span></span>
+                        <span></span>
+
+                        <span></span>
+                        <span class="mini-o">○</span>
+                        <span></span>
+                        <span class="mini-x">×</span>
+                        <span></span>
+
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span class="mini-o">○</span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="feature-list">
+
+                    <div class="feature-item">
+                        <span>🎮</span>
+
+                        <div>
+                            <strong>Chơi nhiều chế độ</strong>
+                            <small>
+                                Máy, hai người hoặc online.
+                            </small>
+                        </div>
+                    </div>
+
+
+                    <div class="feature-item">
+                        <span>⚡</span>
+
+                        <div>
+                            <strong>30 giây mỗi lượt</strong>
+                            <small>
+                                Tốc độ và chiến thuật.
+                            </small>
+                        </div>
+                    </div>
+
+
+                    <div class="feature-item">
+                        <span>🌐</span>
+
+                        <div>
+                            <strong>Online realtime</strong>
+                            <small>
+                                Chơi cùng người khác.
+                            </small>
+                        </div>
+                    </div>
+
+                </div>
+
+            </aside>
+
+
+            <!-- =================================================
+                 CENTER
+            ================================================== -->
+
+            <main class="menu-center">
+
+                <div class="panel-title">
+
+                    <div class="panel-icon">
+                        🎯
+                    </div>
+
+                    <div>
+                        <strong>Bắt đầu trận đấu</strong>
+
+                        <small>
+                            Chọn chế độ và cấu hình bàn cờ
+                        </small>
+                    </div>
+
+                </div>
+
+
+                <!-- MODE -->
+
+                <div class="section">
+
+                    <h3>CHẾ ĐỘ CHƠI</h3>
+
+                    <div class="mode-row">
+
+                        <button
+                            id="aiModeBtn"
+                            class="mode-btn active"
+                            type="button"
+                        >
+
+                            <span class="mode-icon">
+                                🤖
+                            </span>
+
+                            <span>
+                                <strong>Chơi với máy</strong>
+
+                                <small>
+                                    AI tự động
+                                </small>
+                            </span>
+
+                        </button>
+
+
+                        <button
+                            id="pvpModeBtn"
+                            class="mode-btn"
+                            type="button"
+                        >
+
+                            <span class="mode-icon">
+                                👥
+                            </span>
+
+                            <span>
+                                <strong>Hai người</strong>
+
+                                <small>
+                                    Chơi cùng bạn
+                                </small>
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BOARD SIZE -->
+
+                <div class="section">
+
+                    <h3>KÍCH THƯỚC BÀN CỜ</h3>
+
+                    <div class="select-wrap">
+
+                        <span class="grid-size-icon">
+                            <i></i>
+                            <i></i>
+                            <i></i>
+                            <i></i>
+                            <i></i>
+                            <i></i>
+                            <i></i>
+                            <i></i>
+                            <i></i>
+                        </span>
+
+                        <select id="boardSizeSelect">
+
+                            <option value="15">
+                                15 × 15
+                            </option>
+
+                            <option value="20" selected>
+                                20 × 20
+                            </option>
+
+                            <option value="25">
+                                25 × 25
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DIFFICULTY -->
+
+                <div
+                    id="difficultySection"
+                    class="difficulty-section"
+                >
+
+                    <div class="difficulty-title">
+
+                        <span>
+                            ĐỘ KHÓ AI
+                        </span>
+
+                        <small>
+                            CHỈ DÙNG KHI CHƠI VỚI MÁY
+                        </small>
+
+                    </div>
+
+
+                    <div class="difficulty-select-wrap">
+
+                        <span class="difficulty-select-icon">
+                            🤖
+                        </span>
+
+                        <select
+                            id="difficultySelect"
+                            class="difficulty-select"
+                        >
+
+                            <option value="easy">
+                                🍃 Dễ
+                            </option>
+
+                            <option
+                                value="medium"
+                                selected
+                            >
+                                📊 Trung bình
+                            </option>
+
+                            <option value="hard">
+                                🔥 Khó
+                            </option>
+
+                            <option value="extreme">
+                                👑 Rất khó
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PLAY -->
+
+                <button
+                    id="playButton"
+                    class="main-btn"
+                    type="button"
+                >
+                    ▶ Chơi ngay
+                </button>
+
+
+                <div class="online-divider">
+                    HOẶC CHƠI ONLINE
+                </div>
+
+
+                <div class="online-actions">
+
+                    <!-- JS sẽ tự chèn Ghép trận ngẫu nhiên
+                         ngay trước nút này -->
+
+                    <button
+                        id="createRoomButton"
+                        class="online-btn"
+                        type="button"
+                    >
+                        ➕ Tạo phòng
+                    </button>
+
+
+                    <div class="join-row">
+
+                        <div class="room-input-wrap">
+
+                            <span>
+                                🔑
+                            </span>
+
+                            <input
+                                id="roomInput"
+                                type="text"
+                                maxlength="6"
+                                placeholder="Mã phòng"
+                                autocomplete="off"
+                                autocorrect="off"
+                                autocapitalize="characters"
+                                spellcheck="false"
+                                inputmode="text"
+                            >
+
+                        </div>
+
+
+                        <button
+                            id="joinRoomButton"
+                            type="button"
+                        >
+                            Vào phòng
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="firebaseStatus"
+                    class="firebase-status"
+                >
+                    Đang kết nối...
+                </div>
+
+            </main>
+
+
+            <!-- =================================================
+                 RIGHT
+            ================================================== -->
+
+            <aside class="menu-side menu-right">
+
+
+                <div class="info-card feature-card">
+
+                    <div class="info-card-header">
+
+                        <div class="info-card-title">
+                            ⚡ TÍNH NĂNG
+                        </div>
+
+
+                       
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span>🧠</span>
+
+                        <div>
+                            <strong>AI thông minh</strong>
+
+                            <small>
+                                4 mức độ khó.
+                            </small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span>⏱️</span>
+
+                        <div>
+                            <strong>Timer 30 giây</strong>
+
+                            <small>
+                                Mỗi lượt có giới hạn thời gian.
+                            </small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span>🌐</span>
+
+                        <div>
+                            <strong>Chơi online</strong>
+
+                            <small>
+                                Phòng realtime qua Firebase.
+                            </small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span>🎲</span>
+
+                        <div>
+                            <strong>Ghép trận</strong>
+
+                            <small>
+                                Tìm đối thủ ngẫu nhiên.
+                            </small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="rules-card">
+
+                    <div class="rules-title">
+                        📖 LUẬT CHƠI
+                    </div>
+
+
+                    <div class="rule">
+
+                        <span class="rule-number">
+                            1
+                        </span>
+
+                        <p>
+                            Hai bên lần lượt đặt X và O
+                            lên bàn cờ.
+                        </p>
+
+                    </div>
+
+
+                    <div class="rule">
+
+                        <span class="rule-number">
+                            2
+                        </span>
+
+                        <p>
+                            Ai tạo được 5 quân liên tiếp
+                            theo hàng ngang, dọc hoặc chéo
+                            sẽ thắng.
+                        </p>
+
+                    </div>
+
+
+                    <div class="rule">
+
+                        <span class="rule-number">
+                            3
+                        </span>
+
+                        <p>
+                            Hết 30 giây trong lượt chơi
+                            sẽ bị xử thua.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="quote-card">
+
+                    <div class="quote-mark">
+                        “
+                    </div>
+
+                    <p>
+                        Một nước đi đúng lúc có thể
+                        thay đổi cả ván cờ.
+                    </p>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+
+        <div class="menu-footer">
+            CARO 5 • 5 IN A ROW
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     GAME
+===================================================== -->
+
+<div
+    id="gameScreen"
+    class="screen game-screen hidden"
+>
+
+    <div class="game-container">
+
+
+        <!-- HEADER -->
+
+        <div class="game-header">
+
+            <button
+                id="backMenuButton"
+                class="small-btn"
+                type="button"
+            >
+                ← Menu
+            </button>
+
+
+            <div class="game-title">
+
+                <div class="game-title-icon">
+                    XO
+                </div>
+
+                <div>
+                    <strong>CARO 5</strong>
+
+                    <span id="roomInfo"></span>
+                </div>
+
+            </div>
+
+
+            <div class="game-header-right">
+
+                <span class="live-dot"></span>
+
+                ONLINE
+
+            </div>
+
+        </div>
+
+
+        <!-- NOTICE -->
+
+        <div
+            id="onlineNotice"
+            class="online-notice hidden"
+        ></div>
+
+
+        <!-- RESULT -->
+
+        <div
+            id="resultBox"
+            class="result-box hidden"
+        >
+
+            <div
+                id="resultText"
+                class="result-text"
+            ></div>
+
+
+            <div class="result-buttons">
+
+                <button
+                    id="playAgainButton"
+                    class="result-btn play-again-btn"
+                    type="button"
+                >
+                    🔄 Chơi lại
+                </button>
+
+
+                <button
+                    id="exitMenuButton"
+                    class="result-btn exit-menu-btn"
+                    type="button"
+                >
+                    🏠 Thoát về menu
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- GAME AREA -->
+
+        <div class="game-area">
+
+
+            <!-- LEFT -->
+
+            <aside class="game-side game-side-left">
+
+                <div class="side-heading">
+                    👥 NGƯỜI CHƠI
+                </div>
+
+
+                <div class="info-panel">
+
+                    <div class="player-box x-player">
+
+                        <div class="player-symbol">
+                            X
+                        </div>
+
+                        <div>
+
+                            <div class="player-name">
+                                X
+                            </div>
+
+                            <div class="score-label">
+                                <span id="scoreX">0</span>
+                                điểm
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="turn-box">
+
+                        <div id="turnText">
+                            Lượt của X
+                        </div>
+
+                        <div class="timer-circle">
+
+                            <span id="timer">
+                                30
+                            </span>
+
+                            <small>
+                                SEC
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="player-box o-player">
+
+                        <div class="player-symbol">
+                            O
+                        </div>
+
+                        <div>
+
+                            <div class="player-name">
+                                O
+                            </div>
+
+                            <div class="score-label">
+                                <span id="scoreO">0</span>
+                                điểm
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="side-tip">
+
+                    <span>
+                        💡
+                    </span>
+
+                    <p>
+                        Hãy quan sát nước đi của đối thủ
+                        trước khi đặt quân.
+                    </p>
+
+                </div>
+
+            </aside>
+
+
+            <!-- BOARD -->
+
+            <main class="board-area">
+
+                <div class="board-topbar">
+
+                    <div>
+
+                        <span class="board-status-dot"></span>
+
+                        BÀN CỜ
+
+                    </div>
+
+                    <div>
+                        5 QUÂN LIÊN TIẾP
+                    </div>
+
+                </div>
+
+
+                <div class="board-scroll">
+
+                    <div
+                        id="board"
+                        class="board"
+                    ></div>
+
+                </div>
+
+
+                <div class="board-bottom-info">
+                    CARO 5 • X / O
+                </div>
+
+            </main>
+
+
+            <!-- RIGHT -->
+
+            <aside class="game-side game-side-right">
+
+                <div class="side-heading">
+                    📊 THÔNG TIN
+                </div>
+
+
+                <div class="side-card">
+
+                    <div class="stat-item">
+                        <span>Thời gian / lượt</span>
+                        <strong>30s</strong>
+                    </div>
+
+                    <div class="stat-item">
+                        <span>Điều kiện thắng</span>
+                        <strong>5 quân</strong>
+                    </div>
+
+                    <div class="stat-item">
+                        <span>Bàn cờ</span>
+                        <strong>15–25</strong>
+                    </div>
+
+                    <div class="stat-item">
+                        <span>Online</span>
+                        <strong>Realtime</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="side-card quick-rules">
+
+                    <div class="rules-title">
+                        🎯 MỤC TIÊU
+                    </div>
+
+
+                    <div class="target-line">
+
+                        <span class="target-x">
+                            X
+                        </span>
+
+                        <p>
+                            Tạo 5 quân X liên tiếp
+                            trước đối thủ.
+                        </p>
+
+                    </div>
+
+
+                    <div class="target-line">
+
+                        <span class="target-o">
+                            O
+                        </span>
+
+                        <p>
+                            Chặn đường thắng và
+                            tạo chuỗi của mình.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="online-controls">
+
+                    <button
+                        id="copyRoomButton"
+                        class="action-btn hidden"
+                        type="button"
+                    >
+                        📋 Sao chép mã phòng
+                    </button>
+
+
+                    <button
+                        id="copyLinkButton"
+                        class="action-btn hidden"
+                        type="button"
+                    >
+                        🔗 Sao chép link
+                    </button>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     SCRIPTS
+===================================================== -->
+
+<script src="game.js"></script>
+<script src="ai.js"></script>
+
+<script src="../../js/gamehub.js?v=clean"></script>
+<script src="../../js/sound.js?v=14"></script>
+
+<script src="main.js"></script>
+
+<div class="creator-tag">@tienanh</div>
+
+</body>
+</html>
