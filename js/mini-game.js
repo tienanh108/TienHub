@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
             id: "caro5",
             name: "Caro 5",
             players: null,
-            href: "../mini-games/caro5/index.html",
+            href: "/mini-games/caro5/index.html?v=20260925-2000",
             visual: `
                 <div class="mini-cover caro-cover">
                     <span class="xo x1">×</span>
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
             id: "chess",
             name: "Chess",
             players: null,
-            href: "../mini-games/chess/index.html",
+            href: "/mini-games/chess/index.html?v=20260925-2000",
             visual: `
                 <div class="mini-cover chess-cover">
 
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
             id: "flappy",
             name: "Flappy Bird",
             players: null,
-            href: "../mini-games/flappy/index.html",
+            href: "/mini-games/flappy/index.html?v=20260925-2000",
             visual: `
                 <div class="mini-cover flappy-cover">
                     <span class="cloud cloud-1"></span>
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
             id: "ludo",
             name: "Ludo",
             players: null,
-            href: "../mini-games/ludo/index.html",
+            href: "/mini-games/ludo/index.html?v=20260925-2000",
             visual: `
                 <div class="mini-cover ludo-cover">
 
