@@ -1655,68 +1655,79 @@
             onDisconnect
         } = databaseApi;
 
+        function wrapRef(databaseRef) {
+            return {
+
+                child(path) {
+                    return wrapRef(
+                        ref(databaseRef, String(path))
+                    );
+                },
+
+                once(event) {
+                    if (event !== "value") {
+                        throw new Error("Chess chỉ hỗ trợ once('value').");
+                    }
+                    return get(databaseRef);
+                },
+
+                set(value) {
+                    return set(databaseRef, value);
+                },
+
+                update(value) {
+                    return update(databaseRef, value);
+                },
+
+                remove() {
+                    return remove(databaseRef);
+                },
+
+                on(event, callback) {
+                    if (event !== "value") {
+                        throw new Error("Chess chỉ hỗ trợ on('value').");
+                    }
+                    return onValue(databaseRef, callback);
+                },
+
+                off(event, callback) {
+                    if (event && event !== "value") {
+                        return;
+                    }
+                    return off(
+                        databaseRef,
+                        event || "value",
+                        callback
+                    );
+                },
+
+                transaction(updateFn) {
+                    return runTransaction(
+                        databaseRef,
+                        updateFn
+                    );
+                },
+
+                onDisconnect() {
+                    const disconnectRef = onDisconnect(databaseRef);
+                    return {
+                        remove() {
+                            return disconnectRef.remove();
+                        },
+                        cancel() {
+                            return disconnectRef.cancel();
+                        }
+                    };
+                }
+            };
+        }
+
         return {
 
             ref(path) {
-                const databaseRef = ref(database, path);
-
-                return {
-                    once(event) {
-                        if (event !== "value") {
-                            throw new Error("Chess chỉ hỗ trợ once('value').");
-                        }
-                        return get(databaseRef);
-                    },
-
-                    set(value) {
-                        return set(databaseRef, value);
-                    },
-
-                    update(value) {
-                        return update(databaseRef, value);
-                    },
-
-                    remove() {
-                        return remove(databaseRef);
-                    },
-
-                    on(event, callback) {
-                        if (event !== "value") {
-                            throw new Error("Chess chỉ hỗ trợ on('value').");
-                        }
-                        return onValue(databaseRef, callback);
-                    },
-
-                    off(event, callback) {
-                        if (event && event !== "value") {
-                            return;
-                        }
-                        return off(
-                            databaseRef,
-                            event || "value",
-                            callback
-                        );
-                    },
-
-                    transaction(updateFn) {
-                        return runTransaction(
-                            databaseRef,
-                            updateFn
-                        );
-                    },
-
-                    onDisconnect() {
-                        const disconnectRef = onDisconnect(databaseRef);
-                        return {
-                            remove() {
-                                return disconnectRef.remove();
-                            },
-                            cancel() {
-                                return disconnectRef.cancel();
-                            }
-                        };
-                    }
-                };
+                return wrapRef(
+                    ref(database, path)
+                );
             }
         };
     }
