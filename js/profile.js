@@ -20,12 +20,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     let deviceId = null;
     let lockBusy = false;
 
-    function getAuthPath() {
-        return window.location.pathname.includes("/pages/")
-            ? "auth.html"
-            : "pages/auth.html";
-    }
-
     function getDeviceId() {
         if (deviceId) return deviceId;
         deviceId = localStorage.getItem("tienhub_device_id");
@@ -86,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 localStorage.removeItem("tienhub_logged_in");
                 localStorage.removeItem("tienhub_username");
                 alert("Tài khoản này đang được đăng nhập trên một thiết bị khác.");
-                window.location.replace(getAuthPath());
+                window.location.replace("pages/auth.html");
                 return false;
             }
 
@@ -111,7 +105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         localStorage.removeItem("tienhub_logged_in");
                         localStorage.removeItem("tienhub_username");
                         alert("Tài khoản này đã được đăng nhập trên một thiết bị khác.");
-                        window.location.replace(getAuthPath());
+                        window.location.replace("pages/auth.html");
                     }
                 } catch (error) {
                     console.warn("TienHub device heartbeat error:", error);
@@ -153,7 +147,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         profileButton.setAttribute("aria-label", "Đăng nhập TienHub");
         if (profileMenu) profileMenu.hidden = true;
         profileButton.onclick = () => {
-            window.location.href = getAuthPath();
+            window.location.href = "pages/auth.html";
         };
     }
 
@@ -204,7 +198,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         } finally {
             localStorage.removeItem("tienhub_username");
             localStorage.removeItem("tienhub_logged_in");
-            window.location.replace(getAuthPath());
+            window.location.replace("pages/auth.html");
         }
     });
 
