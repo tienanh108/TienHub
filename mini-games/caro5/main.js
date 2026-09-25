@@ -1511,28 +1511,26 @@
 
     async function initFirebase() {
         try {
-            // Ưu tiên Firebase Compat instance đã có trên trang Caro.
-            if (!firebaseApp && window.firebase) {
-                try {
-                    firebaseApp =
-                        firebase.apps.find(app => app.name === "TienHubCaro") ||
-                        firebase.initializeApp(firebaseConfig, "TienHubCaro");
-                } catch (error) {
-                    console.warn("Caro Firebase app init:", error);
-                    try {
-                        firebaseApp = firebase.app("TienHubCaro");
-                    } catch (_) {
-                        firebaseApp = firebase.app();
-                    }
-                }
+            // QUAN TRỌNG: Caro phải dùng DEFAULT Firebase app của TienHub.
+            // Nếu tạo một app tên "TienHubCaro", Firebase Auth sẽ có một
+            // session riêng và không nhìn thấy tài khoản đang đăng nhập
+            // trên TienHub. Đây là nguyên nhân Caro có thể báo chưa kết nối.
+            if (!window.firebase) {
+                throw new Error("Firebase Compat SDK chưa được tải.");
             }
 
-            if (!firebaseAuth && firebaseApp && window.firebase) {
-                firebaseAuth = firebase.auth(firebaseApp);
+            try {
+                firebaseApp = firebase.app();
+            } catch (_) {
+                firebaseApp = firebase.initializeApp(firebaseConfig);
             }
 
-            if (!firebaseDB && firebaseApp && window.firebase) {
-                firebaseDB = firebase.database(firebaseApp);
+            if (!firebaseAuth) {
+                firebaseAuth = firebase.auth();
+            }
+
+            if (!firebaseDB) {
+                firebaseDB = firebase.database();
             }
 
             if (!firebaseAuth || !firebaseDB) {
@@ -1552,15 +1550,11 @@
                 });
             }
 
-            // Khách vẫn được phép chơi Caro: tạo anonymous UID trong
-            // cùng project TienHub để presence cũng xuất hiện trên Hub.
+            // Online Caro dùng chính tài khoản TienHub hiện tại.
+            // Không tự tạo một anonymous session mới vì session đó không
+            // phải tài khoản người dùng và có thể bị Firebase Rules chặn.
             if (!firebaseUser) {
-                const result = await firebaseAuth.signInAnonymously();
-                firebaseUser = result.user;
-            }
-
-            if (!firebaseUser) {
-                throw new Error("Không lấy được Firebase User.");
+                throw new Error("Chưa đăng nhập TienHub.");
             }
 
             // Global presence: cả tài khoản thật và khách đều được tính.
