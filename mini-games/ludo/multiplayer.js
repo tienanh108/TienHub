@@ -1666,9 +1666,7 @@ async function setupPresence(
                 false,
 
             disconnectedAt:
-                window.LudoServerTimestamp
-                    ? window.LudoServerTimestamp()
-                    : Date.now()
+                window.LudoServerTimestamp ? window.LudoServerTimestamp() : Date.now()
 
         });
 
