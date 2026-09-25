@@ -11,10 +11,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const logoutButton = document.querySelector(".profile-logout");
     const profileMenu = profileWrap?.querySelector(".profile-menu");
 
-    // profile.js được dùng ở cả trang gốc và các trang nằm trong /pages/.
-    // Dùng đường dẫn tuyệt đối theo root để tránh /pages/pages/auth.html (404).
-    const authPage = "/pages/auth.html";
-
     if (!profileWrap || !profileButton) return;
 
     let auth = null;
@@ -22,19 +18,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     let deviceHeartbeat = null;
     let deviceId = null;
     let lockBusy = false;
-
-    try {
-        const core = await import("../src/core/firebase.js");
-        auth = core.auth;
-
-        if (typeof auth.authStateReady === "function") {
-            await auth.authStateReady();
-        }
-
-        currentUser = auth.currentUser;
-    } catch (error) {
-        console.warn("TienHub profile auth unavailable:", error);
-    }
 
     function getDeviceId() {
         if (deviceId) return deviceId;
@@ -54,12 +37,20 @@ document.addEventListener("DOMContentLoaded", async () => {
                 clearInterval(deviceHeartbeat);
                 deviceHeartbeat = null;
             }
-            if (!user || user.isAnonymous || !deviceId) return;
+            if (!user || user.isAnonymous) return;
+
             const core = await import("../src/core/firebase.js");
-            const { ref, remove } = await import(
+            const { ref, runTransaction } = await import(
                 "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
             );
-            await remove(ref(core.db, `activeDevices/${user.uid}/${deviceId}`));
+
+            const id = getDeviceId();
+            const lockRef = ref(core.db, `activeDevices/${user.uid}/lock`);
+
+            await runTransaction(lockRef, current => {
+                if (!current || current.deviceId !== id) return;
+                return null;
+            });
         } catch (error) {
             console.warn("TienHub release device lock error:", error);
         }
@@ -68,54 +59,70 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function setupDeviceLock(user) {
         if (!user || user.isAnonymous || lockBusy) return true;
         lockBusy = true;
+
         try {
+            // auth.js owns the lease during the authenticated session.
+            // profile.js only verifies that this browser still owns it;
+            // it must NOT create a second independent lock.
             const core = await import("../src/core/firebase.js");
-            const { ref, runTransaction, onDisconnect, set, remove } = await import(
+            const { ref, get } = await import(
                 "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
             );
 
             const id = getDeviceId();
-            const rootRef = ref(core.db, `activeDevices/${user.uid}`);
-            const deviceRef = ref(core.db, `activeDevices/${user.uid}/${id}`);
-            const now = Date.now();
-            const STALE_MS = 90 * 1000;
+            const lockRef = ref(core.db, `activeDevices/${user.uid}/lock`);
+            const snap = await get(lockRef);
+            const lock = snap.val();
 
-            const tx = await runTransaction(rootRef, current => {
-                const data = current && typeof current === "object" ? current : {};
-                for (const [otherId, info] of Object.entries(data)) {
-                    if (!info || otherId === id) continue;
-                    const lastSeen = Number(info.lastSeen || 0);
-                    if (lastSeen && now - lastSeen < STALE_MS) return;
-                }
-                return {
-                    [id]: { uid: user.uid, lastSeen: now, online: true }
-                };
-            });
-
-            if (!tx.committed) {
-                await auth.signOut();
+            if (!lock || lock.deviceId !== id) {
+                await core.auth.signOut();
                 localStorage.removeItem("tienhub_logged_in");
                 localStorage.removeItem("tienhub_username");
                 alert("Tài khoản này đang được đăng nhập trên một thiết bị khác.");
-                window.location.replace(authPage);
+                window.location.replace("pages/auth.html");
                 return false;
             }
 
-            await onDisconnect(deviceRef).remove();
             if (deviceHeartbeat) clearInterval(deviceHeartbeat);
-            deviceHeartbeat = setInterval(() => {
-                set(deviceRef, { uid: user.uid, lastSeen: Date.now(), online: true })
-                    .catch(error => console.warn("TienHub device heartbeat error:", error));
+            deviceHeartbeat = setInterval(async () => {
+                try {
+                    const result = await runTransaction(lockRef, current => {
+                        if (!current || current.deviceId !== id) return;
+                        return {
+                            ...current,
+                            uid: user.uid,
+                            deviceId: id,
+                            lastSeen: Date.now(),
+                            online: true
+                        };
+                    });
+
+                    if (!result.committed) {
+                        clearInterval(deviceHeartbeat);
+                        deviceHeartbeat = null;
+                        await core.auth.signOut();
+                        localStorage.removeItem("tienhub_logged_in");
+                        localStorage.removeItem("tienhub_username");
+                        alert("Tài khoản này đã được đăng nhập trên một thiết bị khác.");
+                        window.location.replace("pages/auth.html");
+                    }
+                } catch (error) {
+                    console.warn("TienHub device heartbeat error:", error);
+                }
             }, 20000);
 
             window.addEventListener("beforeunload", () => {
-                remove(deviceRef).catch(() => {});
+                clearInterval(deviceHeartbeat);
+                deviceHeartbeat = null;
             }, { once: true });
+
             return true;
         } catch (error) {
-            // Không nuốt permission_denied: tài khoản vẫn hiển thị bình thường,
-            // nhưng lock sẽ không được coi là đã thiết lập nếu Firebase từ chối.
+            // A lock failure must never silently allow the account through.
             console.error("TienHub device lock error:", error);
+            await auth?.signOut().catch(() => {});
+            localStorage.removeItem("tienhub_logged_in");
+            localStorage.removeItem("tienhub_username");
             return false;
         } finally {
             lockBusy = false;
@@ -139,7 +146,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         profileButton.setAttribute("aria-label", "Đăng nhập TienHub");
         if (profileMenu) profileMenu.hidden = true;
         profileButton.onclick = () => {
-            window.location.href = authPage;
+            window.location.href = "pages/auth.html";
         };
     }
 
@@ -190,7 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         } finally {
             localStorage.removeItem("tienhub_username");
             localStorage.removeItem("tienhub_logged_in");
-            window.location.replace(authPage);
+            window.location.replace("pages/auth.html");
         }
     });
 
