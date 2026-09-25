@@ -13,6 +13,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!profileWrap || !profileButton) return;
 
+    // Keep the account UI hidden until Firebase restores the session.
+    profileWrap.style.visibility = "hidden";
+
     let auth = null;
     let currentUser = null;
     let firebaseReady = false;
@@ -80,7 +83,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 localStorage.removeItem("tienhub_logged_in");
                 localStorage.removeItem("tienhub_username");
                 alert("Tài khoản này đang được đăng nhập trên một thiết bị khác.");
-                window.location.replace("pages/auth.html");
+                window.location.replace("/pages/auth.html");
                 return false;
             }
 
@@ -105,7 +108,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         localStorage.removeItem("tienhub_logged_in");
                         localStorage.removeItem("tienhub_username");
                         alert("Tài khoản này đã được đăng nhập trên một thiết bị khác.");
-                        window.location.replace("pages/auth.html");
+                        window.location.replace("/pages/auth.html");
                     }
                 } catch (error) {
                     console.warn("TienHub device heartbeat error:", error);
@@ -146,8 +149,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         profileAvatar.textContent = "→";
         profileButton.setAttribute("aria-label", "Đăng nhập TienHub");
         if (profileMenu) profileMenu.hidden = true;
+        profileWrap.style.visibility = "visible";
         profileButton.onclick = () => {
-            window.location.href = "pages/auth.html";
+            window.location.href = "/pages/auth.html";
         };
     }
 
@@ -168,6 +172,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const lockOk = await setupDeviceLock(user);
         if (!lockOk) return;
 
+        profileWrap.style.visibility = "visible";
         profileButton.onclick = event => {
             event.stopPropagation();
             profileWrap.classList.contains("open") ? closeProfile() : openProfile();
@@ -198,7 +203,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         } finally {
             localStorage.removeItem("tienhub_username");
             localStorage.removeItem("tienhub_logged_in");
-            window.location.replace("pages/auth.html");
+            window.location.replace("/pages/auth.html");
         }
     });
 
