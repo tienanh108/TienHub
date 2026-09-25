@@ -1,3 +1,4 @@
+<!-- Ludo V9: explicit spawn mapping + AI extra turn on 6 -->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -36,7 +37,6 @@
                     <span class="mode-icon">🤖</span>
                     <span class="mode-text">
                         <strong>CHƠI ĐƠN</strong>
-                        <small>Chơi với 3 AI</small>
                     </span>
                     <b class="mode-arrow">→</b>
                 </button>
@@ -75,7 +75,7 @@
                 <div class="panel-icon">🚪</div>
                 <div class="eyebrow">JOIN ROOM</div>
                 <h2>Vào phòng bạn bè</h2>
-                <p>Nhập mã 6 ký tự của phòng. Tên sẽ tự lấy từ tài khoản TienHub hoặc hiện là Khách.</p>
+                <p>Nhập mã 6 ký tự của phòng</p>
 
                 <label class="field">
                     <span>MÃ PHÒNG</span>
@@ -160,7 +160,7 @@
             <aside class="side-panel">
                 <div class="turn-badge" id="turnBadge">LƯỢT CỦA BẠN</div>
 
-                <div class="dice" id="dice">⚄</div>
+                <div class="dice" id="dice">🎲</div>
 
                 <button class="primary-button" id="rollButton" type="button">
                     TUNG XÚC XẮC
@@ -183,12 +183,26 @@
         </div>
     </section>
 
+    <!-- ================= WINNER MODAL ================= -->
+    <div id="winnerModal" class="winner-modal" aria-hidden="true">
+        <div class="winner-card" role="dialog" aria-modal="true" aria-labelledby="winnerTitle">
+            <div class="winner-trophy">🏆</div>
+            <div class="winner-eyebrow">KẾT THÚC TRẬN ĐẤU</div>
+            <h2 id="winnerTitle">CHIẾN THẮNG!</h2>
+            <p><span id="winnerName">Người chơi</span> đã về đích đầu tiên!</p>
+            <button id="winnerMenuButton" class="primary-button winner-menu-button" type="button">
+                ← QUAY VỀ MENU GAME
+            </button>
+        </div>
+    </div>
+
 </main>
 
-<script src="./main.js"></script>
-<script src="./board.js"></script>
-<script src="./ai.js"></script>
-<script src="./game.js"></script>
-<script src="./controls.js"></script>
+<script src="./board.js?v=20260925-2012"></script>
+<script src="./game.js?v=20260925-2012"></script>
+<script src="./controls.js?v=20260925-2012"></script>
+<script src="./ai.js?v=20260925-2012"></script>
+<script src="./multiplayer.js?v=20260925-2012"></script>
+<script src="./main.js?v=20260925-2012"></script>
 </body>
 </html>
