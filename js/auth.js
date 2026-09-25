@@ -425,81 +425,125 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // =========================================================
     // ONE ACCOUNT / ONE DEVICE
+    // Server-backed lease at activeDevices/{uid}/lock.
     // =========================================================
 
     const DEVICE_ID_KEY = "tienhub_device_id";
+    const DEVICE_LOCK_PATH = "lock";
+    const DEVICE_LOCK_STALE_MS = 90 * 1000;
     let deviceHeartbeat = null;
+    let deviceLockLost = false;
 
     function getDeviceId() {
         let id = localStorage.getItem(DEVICE_ID_KEY);
-
         if (!id) {
             id =
                 (crypto?.randomUUID && crypto.randomUUID()) ||
                 `device_${Date.now()}_${Math.random().toString(36).slice(2)}`;
             localStorage.setItem(DEVICE_ID_KEY, id);
         }
-
         return id;
     }
 
-    async function acquireAccountDeviceLock(user) {
-        const { ref, runTransaction, onDisconnect, set, remove } =
-            await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js");
+    async function getDeviceApi() {
         const core = await import("../src/core/firebase.js");
-        const db = core.db;
+        const api = await import(
+            "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
+        );
+        return { core, api };
+    }
+
+    async function acquireAccountDeviceLock(user) {
+        const { core, api } = await getDeviceApi();
+        const { ref, runTransaction, set, remove } = api;
         const uid = user.uid;
         const deviceId = getDeviceId();
-        const deviceRef = ref(db, `activeDevices/${uid}/${deviceId}`);
-        const rootRef = ref(db, `activeDevices/${uid}`);
+        const lockRef = ref(core.db, `activeDevices/${uid}/${DEVICE_LOCK_PATH}`);
         const now = Date.now();
-        const STALE_MS = 90 * 1000;
 
-        const tx = await runTransaction(rootRef, (current) => {
-            const data = current && typeof current === "object" ? current : {};
+        deviceLockLost = false;
 
-            for (const [otherDeviceId, info] of Object.entries(data)) {
-                if (!info || otherDeviceId === deviceId) continue;
-
-                const lastSeen = Number(info.lastSeen || 0);
-                if (lastSeen && now - lastSeen < STALE_MS) {
-                    return; // abort: another device is active
-                }
-            }
-
-            return {
-                [deviceId]: {
+        const tx = await runTransaction(lockRef, current => {
+            if (!current || typeof current !== "object") {
+                return {
                     uid,
+                    deviceId,
                     lastSeen: now,
                     online: true
-                }
+                };
+            }
+
+            const owner = String(current.deviceId || "");
+            const lastSeen = Number(current.lastSeen || 0);
+
+            // Same browser/device: refresh the existing lease.
+            if (owner === deviceId) {
+                return {
+                    uid,
+                    deviceId,
+                    lastSeen: now,
+                    online: true
+                };
+            }
+
+            // Another device is still active: abort the transaction.
+            if (lastSeen > 0 && now - lastSeen < DEVICE_LOCK_STALE_MS) {
+                return;
+            }
+
+            // Existing lease is stale, so this device may take it over.
+            return {
+                uid,
+                deviceId,
+                lastSeen: now,
+                online: true
             };
         });
 
         if (!tx.committed) {
-            const error = new Error("Tài khoản này đang được đăng nhập trên một thiết bị khác.");
+            const error = new Error(
+                "Tài khoản này đang được đăng nhập trên một thiết bị khác."
+            );
             error.code = "tienhub/device-limit";
             throw error;
         }
 
-        try {
-            await onDisconnect(deviceRef).remove();
-        } catch (error) {
-            console.warn("TienHub device onDisconnect error:", error);
-        }
-
         if (deviceHeartbeat) clearInterval(deviceHeartbeat);
+
         deviceHeartbeat = setInterval(async () => {
             try {
-                await set(deviceRef, {
-                    uid,
-                    lastSeen: Date.now(),
-                    online: true
+                const result = await runTransaction(lockRef, current => {
+                    if (!current || current.deviceId !== deviceId) {
+                        return;
+                    }
+
+                    return {
+                        ...current,
+                        uid,
+                        deviceId,
+                        lastSeen: Date.now(),
+                        online: true
+                    };
                 });
+
+                // Another device has taken the lease (for example after
+                // this session went stale). Immediately sign this session out.
+                if (!result.committed) {
+                    if (!deviceLockLost) {
+                        deviceLockLost = true;
+                        clearInterval(deviceHeartbeat);
+                        deviceHeartbeat = null;
+                        try {
+                            await core.auth.signOut();
+                        } catch (_) {}
+                    }
+                }
             } catch (error) {
                 console.warn("TienHub device heartbeat error:", error);
             }
         }, 20000);
+
+        return true;
     }
 
     async function releaseAccountDeviceLock(user = null) {
@@ -509,15 +553,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 deviceHeartbeat = null;
             }
 
-            const core = await import("../src/core/firebase.js");
-            const { ref, remove } =
-                await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js");
-
+            const { core, api } = await getDeviceApi();
             const current = user || core.auth.currentUser;
             if (!current || current.isAnonymous) return;
 
             const deviceId = getDeviceId();
-            await remove(ref(core.db, `activeDevices/${current.uid}/${deviceId}`));
+            const { ref, runTransaction } = api;
+            const lockRef = ref(
+                core.db,
+                `activeDevices/${current.uid}/${DEVICE_LOCK_PATH}`
+            );
+
+            // Never delete another device's lease.
+            await runTransaction(lockRef, existing => {
+                if (!existing || existing.deviceId !== deviceId) {
+                    return;
+                }
+                return null;
+            });
         } catch (error) {
             console.warn("TienHub release device lock error:", error);
         }
