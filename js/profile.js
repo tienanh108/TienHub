@@ -4,238 +4,102 @@
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-    const profileWrap =
-        document.querySelector(".profile-wrap");
+    const profileWrap = document.querySelector(".profile-wrap");
+    const profileButton = document.querySelector(".profile");
+    const profileName = document.querySelector(".profile-name");
+    const profileAvatar = document.querySelector(".profile-avatar");
+    const menuUsername = document.querySelector(".profile-menu-username");
+    const logoutButton = document.querySelector(".profile-logout");
+    const profileMenu = profileWrap?.querySelector(".profile-menu");
 
-    const profileButton =
-        document.querySelector(".profile");
+    if (!profileWrap || !profileButton) return;
 
-    const profileName =
-        document.querySelector(".profile-name");
+    let auth = null;
+    let currentUser = null;
 
-    const profileAvatar =
-        document.querySelector(".profile-avatar");
+    try {
+        const core = await import("../src/core/firebase.js");
+        auth = core.auth;
 
-    const menuUsername =
-        document.querySelector(".profile-menu-username");
+        if (typeof auth.authStateReady === "function") {
+            await auth.authStateReady();
+        }
 
-    const logoutButton =
-        document.querySelector(".profile-logout");
+        currentUser = auth.currentUser;
+    } catch (error) {
+        console.warn("TienHub profile auth unavailable:", error);
+    }
 
+    const isGuest = !currentUser || currentUser.isAnonymous;
 
-    /* Không có Profile thì dừng */
-    if (!profileWrap || !profileButton) {
+    // Guest: show a simple Đăng nhập button instead of a fake profile.
+    if (isGuest) {
+        profileName.textContent = "Đăng nhập";
+        profileAvatar.textContent = "→";
+        profileButton.setAttribute("aria-label", "Đăng nhập TienHub");
+        profileButton.setAttribute("aria-expanded", "false");
+
+        if (profileMenu) {
+            profileMenu.hidden = true;
+        }
+
+        profileButton.addEventListener("click", () => {
+            window.location.href = "pages/auth.html";
+        });
+
         return;
     }
 
-
-    /* =====================================================
-       USERNAME
-    ====================================================== */
-
-    const savedUsername =
-        localStorage.getItem("tienhub_username");
-
+    // Logged-in user: preserve the existing profile behaviour.
+    const savedUsername = localStorage.getItem("tienhub_username");
     const username =
         savedUsername && savedUsername.trim()
             ? savedUsername.trim()
-            : "Khách";
+            : currentUser.displayName ||
+              currentUser.email?.split("@")[0] ||
+              "Người chơi";
 
+    const firstLetter = username.charAt(0).toUpperCase() || "T";
 
-    /* Lấy chữ cái đầu */
-
-    const firstLetter =
-        username.charAt(0).toUpperCase() || "T";
-
-
-    /* Hiển thị username */
-
-    if (profileName) {
-        profileName.textContent = username;
-    }
-
-
-    /* Hiển thị avatar */
-
-    if (profileAvatar) {
-        profileAvatar.textContent = firstLetter;
-    }
-
-
-    /* Username trong menu */
-
-    if (menuUsername) {
-        menuUsername.textContent = username;
-    }
-
-
-    /* =====================================================
-       OPEN / CLOSE
-    ====================================================== */
+    profileName.textContent = username;
+    profileAvatar.textContent = firstLetter;
+    if (menuUsername) menuUsername.textContent = username;
 
     function openProfile() {
-
         profileWrap.classList.add("open");
-
-        profileButton.setAttribute(
-            "aria-expanded",
-            "true"
-        );
+        profileButton.setAttribute("aria-expanded", "true");
     }
-
 
     function closeProfile() {
-
         profileWrap.classList.remove("open");
-
-        profileButton.setAttribute(
-            "aria-expanded",
-            "false"
-        );
+        profileButton.setAttribute("aria-expanded", "false");
     }
 
+    profileButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        profileWrap.classList.contains("open") ? closeProfile() : openProfile();
+    });
 
-    function toggleProfile() {
+    profileMenu?.addEventListener("click", (event) => event.stopPropagation());
 
-        const isOpen =
-            profileWrap.classList.contains("open");
+    document.addEventListener("click", (event) => {
+        if (!profileWrap.contains(event.target)) closeProfile();
+    });
 
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeProfile();
+    });
 
-        if (isOpen) {
-            closeProfile();
-        } else {
-            openProfile();
+    logoutButton?.addEventListener("click", async () => {
+        logoutButton.disabled = true;
+        try {
+            await auth.signOut();
+        } catch (error) {
+            console.error("TienHub logout error:", error);
+        } finally {
+            localStorage.removeItem("tienhub_username");
+            localStorage.removeItem("tienhub_logged_in");
+            window.location.replace("pages/auth.html");
         }
-    }
-
-
-    /* =====================================================
-       CLICK PROFILE
-    ====================================================== */
-
-    profileButton.addEventListener(
-        "click",
-        (event) => {
-
-            event.stopPropagation();
-
-            toggleProfile();
-        }
-    );
-
-
-    /* =====================================================
-       CLICK TRONG MENU
-    ====================================================== */
-
-    const profileMenu =
-        profileWrap.querySelector(".profile-menu");
-
-
-    if (profileMenu) {
-
-        profileMenu.addEventListener(
-            "click",
-            (event) => {
-
-                event.stopPropagation();
-            }
-        );
-    }
-
-
-    /* =====================================================
-       CLICK RA NGOÀI
-    ====================================================== */
-
-    document.addEventListener(
-        "click",
-        (event) => {
-
-            if (!profileWrap.contains(event.target)) {
-                closeProfile();
-            }
-        }
-    );
-
-
-    /* =====================================================
-       ESC
-    ====================================================== */
-
-    document.addEventListener(
-        "keydown",
-        (event) => {
-
-            if (event.key === "Escape") {
-                closeProfile();
-            }
-        }
-    );
-
-
-    /* =====================================================
-       LOGOUT
-    ====================================================== */
-
-    if (logoutButton) {
-
-        logoutButton.addEventListener(
-            "click",
-            async () => {
-
-                /*
-                 * Khóa nút để tránh click nhiều lần
-                 */
-                logoutButton.disabled = true;
-
-                try {
-
-                    /*
-                     * Dùng Firebase Auth mới của TienHub
-                     */
-                    const { auth } =
-                        await import("../src/core/firebase.js");
-
-                    /*
-                     * Đăng xuất Firebase
-                     */
-                    await auth.signOut();
-
-                } catch (error) {
-
-                    console.error(
-                        "TienHub logout error:",
-                        error
-                    );
-
-                } finally {
-
-                    /*
-                     * Xóa trạng thái local
-                     */
-                    localStorage.removeItem(
-                        "tienhub_username"
-                    );
-
-                    localStorage.removeItem(
-                        "tienhub_logged_in"
-                    );
-
-                    /*
-                     * Đóng menu
-                     */
-                    closeProfile();
-
-                    /*
-                     * Về màn hình đăng nhập
-                     */
-                    window.location.replace(
-                        "pages/auth.html"
-                    );
-                }
-            }
-        );
-    }
-
+    });
 });
