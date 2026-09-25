@@ -1754,8 +1754,23 @@
                     firebaseDatabase
                 );
 
-            currentUser =
-                auth.currentUser;
+            // Trên mobile, Firebase Auth có thể cần một chút thời gian
+            // để khôi phục persistence sau khi trang vừa mở.
+            if (typeof auth.authStateReady === "function") {
+                await auth.authStateReady();
+            } else {
+                await new Promise(resolve => {
+                    let done = false;
+                    const unsubscribe = auth.onAuthStateChanged(user => {
+                        if (done) return;
+                        done = true;
+                        try { unsubscribe(); } catch (_) {}
+                        resolve(user);
+                    });
+                });
+            }
+
+            currentUser = auth.currentUser;
 
             if (!currentUser) {
                 throw new Error(
