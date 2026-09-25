@@ -275,74 +275,10 @@ document.addEventListener("DOMContentLoaded", () => {
     /* =====================================================
        3. LIVE PLAYER COUNTS
 
-       Đọc presence từ Firebase và đếm số UID đang online
-       trong từng game. Không đổi giao diện khi Firebase lỗi.
+       Đã bỏ hiển thị số người chơi khỏi trang chủ.
+       Firebase presence vẫn được giữ cho các game online
+       và sẽ được dùng sau này cho trang thống kê quản trị.
     ===================================================== */
-
-    async function setupLivePlayerCounts() {
-
-        const countElements = new Map();
-
-        document
-            .querySelectorAll("[data-game-online]")
-            .forEach((element) => {
-                countElements.set(
-                    element.dataset.gameOnline,
-                    element
-                );
-            });
-
-        if (!countElements.size) return;
-
-        try {
-            const { db } = await import("../src/core/firebase.js");
-            const { ref, onValue } = await import(
-                "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
-            );
-
-            onValue(ref(db, "presence"), (snapshot) => {
-                const data = snapshot.val() || {};
-                const gameUsers = {};
-
-                Object.keys(data).forEach((uid) => {
-                    const sessions = data[uid];
-                    if (!sessions || typeof sessions !== "object") return;
-
-                    // Legacy format: presence/uid = { game, online }
-                    if (sessions.game || sessions.online !== undefined) {
-                        if (sessions.online === true || sessions.game) {
-                            const game = sessions.game;
-                            if (game) {
-                                if (!gameUsers[game]) gameUsers[game] = new Set();
-                                gameUsers[game].add(uid);
-                            }
-                        }
-                        return;
-                    }
-
-                    // Current format: presence/uid/sessionId = { game, online }
-                    Object.values(sessions).forEach((session) => {
-                        if (!session || typeof session !== "object") return;
-                        if (session.online !== true || !session.game) return;
-
-                        if (!gameUsers[session.game]) {
-                            gameUsers[session.game] = new Set();
-                        }
-                        gameUsers[session.game].add(uid);
-                    });
-                });
-
-                countElements.forEach((element, gameId) => {
-                    const count = gameUsers[gameId]?.size || 0;
-                    element.textContent = String(count);
-                });
-            });
-        } catch (error) {
-            console.warn("TienHub live player count unavailable:", error);
-        }
-    }
-
-    setupLivePlayerCounts();
 
 
     /* =====================================================
