@@ -518,15 +518,21 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Do not remove the new device's lock.
-            try { await core.auth.signOut(); } catch (_) {}
-
             localStorage.removeItem("tienhub_logged_in");
             localStorage.removeItem("tienhub_username");
 
             if (!location.pathname.includes("/pages/auth.html")) {
-                alert("Tài khoản này vừa được đăng nhập trên một thiết bị khác.");
-                const authPath = location.pathname.includes("/pages/") ? "auth.html" : "pages/auth.html";
-                window.location.replace(authPath.startsWith("/") ? authPath : `/${authPath}`);
+                const finish = async () => {
+                    try { await core.auth.signOut(); } catch (_) {}
+                };
+                if (typeof window.TienHubShowDeviceKickModal === "function") {
+                    window.TienHubShowDeviceKickModal(finish);
+                } else {
+                    try { await core.auth.signOut(); } catch (_) {}
+                    window.location.replace("/pages/auth.html");
+                }
+            } else {
+                try { await core.auth.signOut(); } catch (_) {}
             }
         });
 
