@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <meta
+        name="theme-color"
+        content="#07101f"
+    >
+
+    <meta
+        name="description"
+        content="Cờ vua online - TienHuB"
+    >
+
+    <title>Cờ vua — TienHuB</title>
+
+    <link
+        rel="stylesheet"
+        href="./style.css?v=22"
+    >
+
+</head>
+
+
+<body data-game="chess">
+
+
+<!-- =====================================================
+     BACKGROUND
+====================================================== -->
+
+<div class="chess-background"></div>
+
+<div class="background-overlay"></div>
+
+
+<!-- =====================================================
+     AUTHOR
+====================================================== -->
+
+<div class="author-tag">
+    @tienanh
+</div>
+
+
+<main class="page">
+
+
+    <!-- =================================================
+         TOP BAR
+    ================================================== -->
+
+    <header class="topbar">
+
+        <button
+            id="menuBtn"
+            class="ghost-btn"
+            type="button"
+        >
+            ← TienHuB
+        </button>
+
+
+        <div class="brand">
+
+            <span class="brand-icon">
+                ♟
+            </span>
+
+            <span>
+                Cờ vua
+            </span>
+
+        </div>
+
+
+        <button
+            id="newGameTop"
+            class="ghost-btn"
+            type="button"
+        >
+            ↻ Ván mới
+        </button>
+
+    </header>
+
+
+
+    <!-- =================================================
+         SETUP
+    ================================================== -->
+
+    <section
+        id="setup"
+        class="setup"
+    >
+
+        <div class="setup-card">
+
+
+            <!-- LOGO -->
+
+            <div class="chess-logo">
+
+                <span>
+                    ♛
+                </span>
+
+            </div>
+
+
+            <div class="eyebrow">
+                TienHuB • CHESS
+            </div>
+
+
+            <h1>
+                Cờ vua
+            </h1>
+
+
+            <p class="muted">
+                Chơi với máy, đấu 2 người hoặc tìm đối thủ online.
+            </p>
+
+
+
+            <!-- =================================================
+                 MODE
+            ================================================== -->
+
+            <div class="mode-row">
+
+                <button
+                    class="mode-btn active"
+                    data-mode="ai"
+                    type="button"
+                >
+
+                    <span class="mode-icon">
+                        🤖
+                    </span>
+
+                    <span>
+                        Đấu với máy
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="mode-btn"
+                    data-mode="local"
+                    type="button"
+                >
+
+                    <span class="mode-icon">
+                        👥
+                    </span>
+
+                    <span>
+                        2 người
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="mode-btn"
+                    data-mode="online"
+                    type="button"
+                >
+
+                    <span class="mode-icon">
+                        🌐
+                    </span>
+
+                    <span>
+                        Online
+                    </span>
+
+                </button>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 DIFFICULTY
+            ================================================== -->
+
+            <div
+                id="difficultyWrap"
+                class="field"
+            >
+
+                <label for="difficulty">
+                    <span>Độ khó</span>
+                </label>
+
+
+                <select id="difficulty">
+
+                    <option value="easy">
+                        Dễ
+                    </option>
+
+
+                    <option
+                        value="medium"
+                        selected
+                    >
+                        Trung bình
+                    </option>
+
+
+                    <option value="hard">
+                        Khó
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 TIME
+            ================================================== -->
+
+            <div class="field">
+
+                <label for="timeControl">
+                    <span>Thời gian mỗi bên</span>
+                </label>
+
+
+                <select id="timeControl">
+
+                    <option value="0">
+                        Không giới hạn
+                    </option>
+
+
+                    <option value="180">
+                        3 phút
+                    </option>
+
+
+                    <option value="300">
+    5 phút
+</option>
+
+<option
+    value="600"
+    selected
+>
+    10 phút
+</option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 ONLINE
+            ================================================== -->
+
+            <div
+                id="onlinePanel"
+                class="online-panel hidden"
+            >
+
+                <div class="online-header">
+
+                    <div class="online-header-icon">
+                        🌐
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Chơi online
+                        </strong>
+
+                        <small>
+                            Tìm đối thủ hoặc tạo phòng riêng
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     RANDOM MATCH
+                ================================================== -->
+
+                <button
+                    id="randomMatchBtn"
+                    class="random-match-btn"
+                    type="button"
+                >
+
+                    <span class="random-match-icon">
+                        🎲
+                    </span>
+
+
+                    <span class="random-match-content">
+
+                        <strong>
+                            Ghép ngẫu nhiên
+                        </strong>
+
+                        <small>
+                            Tìm một người chơi đang online
+                        </small>
+
+                    </span>
+
+
+                    <span class="random-match-arrow">
+                        ›
+                    </span>
+
+                </button>
+
+
+
+                <!-- MATCHMAKING -->
+
+                <div
+                    id="matchmakingStatus"
+                    class="matchmaking-status hidden"
+                    aria-live="polite"
+                >
+
+                    <span class="matchmaking-spinner"></span>
+
+                    <span>
+                        Đang tìm đối thủ...
+                    </span>
+
+                </div>
+
+
+
+                <!-- CANCEL -->
+
+                <button
+                    id="cancelMatchBtn"
+                    class="cancel-match-btn hidden"
+                    type="button"
+                >
+                    ✕ Hủy tìm trận
+                </button>
+
+
+
+                <!-- DIVIDER -->
+
+                <div class="online-divider">
+                    <span>hoặc</span>
+                </div>
+
+
+
+                <!-- CREATE ROOM -->
+
+                <button
+                    id="createRoomBtn"
+                    class="primary-btn create-room-btn"
+                    type="button"
+                >
+
+                    <span>
+                        ＋
+                    </span>
+
+                    Tạo phòng
+
+                </button>
+
+
+
+                <!-- DIVIDER -->
+
+                <div class="online-divider">
+                    <span>hoặc</span>
+                </div>
+
+
+
+                <!-- JOIN -->
+
+                <div class="join-row">
+
+                    <input
+                        id="roomInput"
+                        class="room-input"
+                        type="text"
+                        maxlength="6"
+                        placeholder="Mã phòng"
+                        autocomplete="off"
+                        autocapitalize="characters"
+                        spellcheck="false"
+                    >
+
+
+                    <button
+                        id="joinRoomBtn"
+                        class="action-btn join-btn"
+                        type="button"
+                    >
+                        Vào phòng
+                    </button>
+
+                </div>
+
+
+
+                <!-- MESSAGE -->
+
+                <div
+                    id="roomMessage"
+                    class="room-message"
+                    aria-live="polite"
+                >
+                    Tạo phòng, nhập mã hoặc ghép ngẫu nhiên.
+                </div>
+
+
+
+                <!-- CREATED ROOM -->
+
+                <div
+                    id="createdRoom"
+                    class="created-room hidden"
+                >
+
+                    <div class="waiting-icon">
+                        ⏳
+                    </div>
+
+
+                    <div
+                        id="waitingText"
+                        class="waiting-text"
+                    >
+                        Đang chờ đối thủ...
+                    </div>
+
+
+                    <div
+                        id="roomCode"
+                        class="room-code"
+                    >
+                        ------
+                    </div>
+
+
+                    <button
+                        id="copyRoomBtn"
+                        class="action-btn"
+                        type="button"
+                    >
+                        📋 Copy mã phòng
+                    </button>
+
+
+                    <button
+                        id="leaveWaitingBtn"
+                        class="action-btn danger"
+                        type="button"
+                    >
+                        Rời phòng
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 START
+            ================================================== -->
+
+            <button
+                id="startBtn"
+                class="primary-btn start-btn"
+                type="button"
+            >
+                Bắt đầu
+            </button>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         GAME
+    ================================================== -->
+
+    <section
+        id="game"
+        class="game hidden"
+    >
+
+
+        <!-- =================================================
+             ONLINE BAR
+        ================================================== -->
+
+        <div
+            id="onlineGameBar"
+            class="online-game-bar hidden"
+        >
+
+            <span>
+
+                🌐 Phòng:
+
+                <strong id="gameRoomCode">
+                    ------
+                </strong>
+
+            </span>
+
+
+            <button
+                id="copyGameRoomBtn"
+                class="action-btn"
+                type="button"
+            >
+                📋 Copy
+            </button>
+
+
+            <button
+                id="leaveOnlineBtn"
+                class="action-btn danger"
+                type="button"
+            >
+                Rời phòng
+            </button>
+
+        </div>
+
+
+
+        <!-- =================================================
+             GAME LAYOUT
+        ================================================== -->
+
+        <div class="game-layout">
+
+
+            <!-- =================================================
+                 BOARD AREA
+            ================================================== -->
+
+            <div class="board-area">
+
+
+                <!-- PLAYERS -->
+
+                <div class="game-head">
+
+
+                    <!-- BLACK -->
+
+                    <div
+                        class="player-card"
+                        id="blackPlayer"
+                    >
+
+                        <span class="dot black-dot"></span>
+
+
+                        <div>
+
+                            <strong id="blackName">
+                                Đen
+                            </strong>
+
+
+                            <small id="blackStatus">
+                                Chờ lượt
+                            </small>
+
+                        </div>
+
+
+                        <b id="blackClock">
+                            5:00
+                        </b>
+
+                    </div>
+
+
+
+                    <!-- TURN -->
+
+                    <div
+                        class="turn-pill"
+                        id="turnPill"
+                    >
+                        Lượt Trắng
+                    </div>
+
+
+
+                    <!-- WHITE -->
+
+                    <div
+                        class="player-card"
+                        id="whitePlayer"
+                    >
+
+                        <span class="dot white-dot"></span>
+
+
+                        <div>
+
+                            <strong id="whiteName">
+                                Trắng
+                            </strong>
+
+
+                            <small id="whiteStatus">
+                                Đang đi
+                            </small>
+
+                        </div>
+
+
+                        <b id="whiteClock">
+                            5:00
+                        </b>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- BOARD -->
+
+                <div class="board-wrap">
+
+                    <div
+                        id="board"
+                        class="board"
+                        aria-label="Bàn cờ vua"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 SIDE PANEL
+            ================================================== -->
+
+            <aside class="side-panel">
+
+
+                <div class="side-title">
+
+                    <div class="side-piece">
+                        ♛
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            Cờ vua
+                        </strong>
+
+
+                        <small id="sideModeText">
+                            Đấu với máy
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- MOVES -->
+
+                <div class="moves-panel">
+
+                    <div class="moves-title">
+
+                        <h3>
+                            Nước đi
+                        </h3>
+
+
+                        <span id="moveCount">
+                            0
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="moves"
+                        class="moves"
+                    ></div>
+
+                </div>
+
+
+
+                <!-- MESSAGE -->
+
+                <div
+                    id="message"
+                    class="message"
+                    aria-live="polite"
+                >
+                    Chọn một quân cờ để đi.
+                </div>
+
+
+
+                <!-- ACTIONS -->
+
+                <div class="actions">
+
+                    <button
+                        id="drawBtn"
+                        class="action-btn"
+                        type="button"
+                    >
+                        🤝 Xin hòa
+                    </button>
+
+
+                    <button
+                        id="flipBtn"
+                        class="action-btn"
+                        type="button"
+                    >
+                        ⇅ Đảo bàn
+                    </button>
+
+
+                    <button
+                        id="resignBtn"
+                        class="action-btn danger"
+                        type="button"
+                    >
+                        🏳 Xin thua
+                    </button>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+
+<!-- =====================================================
+     DRAW OFFER
+====================================================== -->
+
+<div
+    id="drawOverlay"
+    class="overlay hidden"
+>
+
+    <div class="draw-card">
+
+        <div class="draw-icon">
+            🤝
+        </div>
+
+
+        <h2>
+            Đối thủ xin hòa
+        </h2>
+
+
+        <p>
+            Bạn có đồng ý kết thúc ván cờ với kết quả hòa không?
+        </p>
+
+
+        <div class="draw-actions">
+
+            <button
+                id="acceptDrawBtn"
+                class="primary-btn"
+                type="button"
+            >
+                ✓ Đồng ý
+            </button>
+
+
+            <button
+                id="rejectDrawBtn"
+                class="action-btn"
+                type="button"
+            >
+                ✕ Từ chối
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     RESULT
+====================================================== -->
+
+<div
+    id="resultOverlay"
+    class="overlay hidden"
+>
+
+    <div class="result-card">
+
+        <div
+            id="resultIcon"
+            class="result-icon"
+        >
+            ♔
+        </div>
+
+
+        <h2 id="resultTitle">
+            Kết thúc
+        </h2>
+
+
+        <p id="resultText"></p>
+
+
+        <div class="result-actions">
+
+            <button
+                id="replayBtn"
+                class="primary-btn"
+                type="button"
+            >
+                🔄 Chơi lại
+            </button>
+
+
+            <button
+                id="backMenuBtn"
+                class="action-btn"
+                type="button"
+            >
+                ← Menu
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     FIREBASE
+====================================================== -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+
+
+<!-- =====================================================
+     TienHuB
+====================================================== -->
+
+<script
+    src="../../js/gamehub.js?v=clean"
+></script>
+
+
+
+<!-- =====================================================
+     CHESS CORE
+====================================================== -->
+
+<script
+    src="./chess.js?v=20"
+    onload="console.log('✅ chess.js loaded')"
+    onerror="console.error('❌ chess.js không tải được')"
+></script>
+
+
+
+<!-- =====================================================
+     SOUND
+====================================================== -->
+
+<script
+    src="../../js/sound.js?v=20"
+></script>
+
+
+
+<!-- =====================================================
+     MAIN
+====================================================== -->
+
+<script
+    src="./main.js?v=26"
+    onload="console.log('✅ chess main.js loaded')"
+    onerror="console.error('❌ chess main.js không tải được')"
+></script>
+
+
+</body>
+
+</html>
