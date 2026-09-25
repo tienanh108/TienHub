@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let auth = null;
     let currentUser = null;
+    let firebaseReady = false;
     let deviceHeartbeat = null;
     let deviceId = null;
     let lockBusy = false;
@@ -201,6 +202,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
+    async function initFirebaseAuth() {
+        if (firebaseReady && auth) return auth;
+
+        const core = await import("../src/core/firebase.js");
+        auth = core.auth;
+
+        if (!auth) {
+            throw new Error("Không lấy được Firebase Auth của TienHub.");
+        }
+
+        if (typeof auth.authStateReady === "function") {
+            await auth.authStateReady();
+        }
+
+        firebaseReady = true;
+        return auth;
+    }
+
     async function syncAuth(user) {
         if (currentUser && !currentUser.isAnonymous && !user) {
             await releaseDeviceLock(currentUser);
@@ -213,11 +232,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    await syncAuth(currentUser);
+    try {
+        await initFirebaseAuth();
 
-    if (auth) {
+        // IMPORTANT: after a full page reload Firebase needs to restore
+        // the LOCAL session before we decide whether the user is logged in.
+        // Never treat the temporary null state as a logout.
+        currentUser = auth.currentUser || null;
+        await syncAuth(currentUser);
+
         auth.onAuthStateChanged(async user => {
             await syncAuth(user);
         });
+    } catch (error) {
+        console.error("TienHub profile Firebase init error:", error);
+        renderGuest();
     }
 });
