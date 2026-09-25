@@ -526,7 +526,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!location.pathname.includes("/pages/auth.html")) {
                 alert("Tài khoản này vừa được đăng nhập trên một thiết bị khác.");
                 const authPath = location.pathname.includes("/pages/") ? "auth.html" : "pages/auth.html";
-                window.location.replace(authPath);
+                window.location.replace(authPath.startsWith("/") ? authPath : `/${authPath}`);
             }
         });
 
