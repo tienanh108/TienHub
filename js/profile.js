@@ -2,6 +2,128 @@
    TIENHUB — PROFILE + ONE ACCOUNT / ONE DEVICE
 ========================================================= */
 
+
+/* =========================================================
+   DEVICE KICK MODAL
+========================================================= */
+if (!window.TienHubShowDeviceKickModal) {
+    window.TienHubShowDeviceKickModal = function (onClose) {
+        if (window.TienHubDeviceKickShowing) return;
+        window.TienHubDeviceKickShowing = true;
+
+        const old = document.getElementById("tienhubDeviceKickModal");
+        old?.remove();
+
+        const overlay = document.createElement("div");
+        overlay.id = "tienhubDeviceKickModal";
+        overlay.innerHTML = `
+            <div class="tienhub-device-kick-backdrop"></div>
+            <div class="tienhub-device-kick-card" role="dialog" aria-modal="true" aria-labelledby="tienhubDeviceKickTitle">
+                <button type="button" class="tienhub-device-kick-x" aria-label="Đóng">×</button>
+                <div class="tienhub-device-kick-icon">⚠</div>
+                <h2 id="tienhubDeviceKickTitle">Tài khoản đã đăng nhập ở thiết bị khác</h2>
+                <p>Tài khoản này vừa được đăng nhập trên một thiết bị khác. Phiên đăng nhập trên thiết bị này đã kết thúc.</p>
+                <button type="button" class="tienhub-device-kick-close">Đóng</button>
+            </div>
+        `;
+
+        const style = document.createElement("style");
+        style.id = "tienhubDeviceKickStyle";
+        style.textContent = `
+            #tienhubDeviceKickModal {
+                position: fixed;
+                inset: 0;
+                z-index: 2147483647;
+                display: grid;
+                place-items: center;
+                font-family: inherit;
+            }
+            .tienhub-device-kick-backdrop {
+                position: absolute;
+                inset: 0;
+                background: rgba(2, 10, 22, .78);
+                backdrop-filter: blur(5px);
+            }
+            .tienhub-device-kick-card {
+                position: relative;
+                width: min(92vw, 460px);
+                box-sizing: border-box;
+                padding: 30px 30px 26px;
+                border: 1px solid rgba(44, 190, 255, .35);
+                border-radius: 22px;
+                background: linear-gradient(145deg, #09213d, #061322);
+                box-shadow: 0 25px 80px rgba(0,0,0,.55);
+                color: #fff;
+                text-align: center;
+            }
+            .tienhub-device-kick-x {
+                position: absolute;
+                top: 10px;
+                right: 12px;
+                width: 38px;
+                height: 38px;
+                border: 0;
+                border-radius: 50%;
+                background: transparent;
+                color: rgba(255,255,255,.65);
+                font-size: 28px;
+                line-height: 1;
+                cursor: pointer;
+            }
+            .tienhub-device-kick-x:hover { background: rgba(255,255,255,.08); color: #fff; }
+            .tienhub-device-kick-icon {
+                width: 56px;
+                height: 56px;
+                margin: 0 auto 16px;
+                display: grid;
+                place-items: center;
+                border-radius: 50%;
+                background: rgba(255, 180, 0, .12);
+                color: #ffc44d;
+                font-size: 28px;
+            }
+            .tienhub-device-kick-card h2 {
+                margin: 0 0 12px;
+                font-size: 21px;
+            }
+            .tienhub-device-kick-card p {
+                margin: 0 auto 24px;
+                max-width: 360px;
+                color: rgba(255,255,255,.68);
+                line-height: 1.55;
+                font-size: 14px;
+            }
+            .tienhub-device-kick-close {
+                min-width: 130px;
+                padding: 11px 22px;
+                border: 0;
+                border-radius: 12px;
+                background: #16a34a;
+                color: #fff;
+                font-weight: 700;
+                cursor: pointer;
+            }
+            .tienhub-device-kick-close:hover { filter: brightness(1.08); }
+        `;
+        document.head.appendChild(style);
+        document.body.appendChild(overlay);
+
+        const finish = async () => {
+            const buttons = overlay.querySelectorAll("button");
+            buttons.forEach(btn => btn.disabled = true);
+            try { await onClose?.(); } catch (_) {}
+            overlay.remove();
+            document.getElementById("tienhubDeviceKickStyle")?.remove();
+            window.TienHubDeviceKickShowing = false;
+            window.location.replace("/pages/auth.html");
+        };
+
+        overlay.querySelector(".tienhub-device-kick-x")?.addEventListener("click", finish);
+        overlay.querySelector(".tienhub-device-kick-close")?.addEventListener("click", finish);
+    };
+}
+
+
 document.addEventListener("DOMContentLoaded", async () => {
     const profileWrap = document.querySelector(".profile-wrap");
     const profileButton = document.querySelector(".profile");
@@ -22,6 +144,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     let deviceHeartbeat = null;
     let deviceId = null;
     let lockBusy = false;
+    let lockUnsubscribe = null;
+    let lockLostHandled = false;
 
     function getDeviceId() {
         if (deviceId) return deviceId;
@@ -40,6 +164,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (deviceHeartbeat) {
                 clearInterval(deviceHeartbeat);
                 deviceHeartbeat = null;
+            }
+            if (typeof lockUnsubscribe === "function") {
+                lockUnsubscribe();
+                lockUnsubscribe = null;
             }
             if (!user || user.isAnonymous) return;
 
@@ -69,7 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             // profile.js only verifies that this browser still owns it;
             // it must NOT create a second independent lock.
             const core = await import("../src/core/firebase.js");
-            const { ref, get } = await import(
+            const { ref, get, onValue } = await import(
                 "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
             );
 
@@ -79,13 +207,37 @@ document.addEventListener("DOMContentLoaded", async () => {
             const lock = snap.val();
 
             if (!lock || lock.deviceId !== id) {
-                await core.auth.signOut();
                 localStorage.removeItem("tienhub_logged_in");
                 localStorage.removeItem("tienhub_username");
-                alert("Tài khoản này đang được đăng nhập trên một thiết bị khác.");
-                window.location.replace("/pages/auth.html");
+                window.TienHubShowDeviceKickModal(async () => {
+                    try { await core.auth.signOut(); } catch (_) {}
+                });
                 return false;
             }
+
+            // Keep a realtime listener on EVERY authenticated page.
+            // auth.js only runs the login-time listener, so without this
+            // the old device would stay logged in after a later login.
+            if (typeof lockUnsubscribe === "function") {
+                lockUnsubscribe();
+                lockUnsubscribe = null;
+            }
+            lockLostHandled = false;
+            lockUnsubscribe = onValue(lockRef, async snapshot => {
+                const latest = snapshot.val();
+                if (lockLostHandled || !latest || latest.deviceId === id) return;
+
+                lockLostHandled = true;
+                if (deviceHeartbeat) {
+                    clearInterval(deviceHeartbeat);
+                    deviceHeartbeat = null;
+                }
+                localStorage.removeItem("tienhub_logged_in");
+                localStorage.removeItem("tienhub_username");
+                window.TienHubShowDeviceKickModal(async () => {
+                    try { await core.auth.signOut(); } catch (_) {}
+                });
+            });
 
             if (deviceHeartbeat) clearInterval(deviceHeartbeat);
             deviceHeartbeat = setInterval(async () => {
@@ -104,11 +256,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                     if (!result.committed) {
                         clearInterval(deviceHeartbeat);
                         deviceHeartbeat = null;
-                        await core.auth.signOut();
                         localStorage.removeItem("tienhub_logged_in");
                         localStorage.removeItem("tienhub_username");
-                        alert("Tài khoản này đã được đăng nhập trên một thiết bị khác.");
-                        window.location.replace("/pages/auth.html");
+                        window.TienHubShowDeviceKickModal(async () => {
+                            try { await core.auth.signOut(); } catch (_) {}
+                        });
                     }
                 } catch (error) {
                     console.warn("TienHub device heartbeat error:", error);
