@@ -126,6 +126,8 @@
 
     let databaseApi = null;
 
+    let firebaseDatabaseRaw = null;
+
     let currentUser = null;
 
     let roomRef = null;
@@ -1655,79 +1657,68 @@
             onDisconnect
         } = databaseApi;
 
-        function wrapRef(databaseRef) {
-            return {
-
-                child(path) {
-                    return wrapRef(
-                        ref(databaseRef, String(path))
-                    );
-                },
-
-                once(event) {
-                    if (event !== "value") {
-                        throw new Error("Chess chỉ hỗ trợ once('value').");
-                    }
-                    return get(databaseRef);
-                },
-
-                set(value) {
-                    return set(databaseRef, value);
-                },
-
-                update(value) {
-                    return update(databaseRef, value);
-                },
-
-                remove() {
-                    return remove(databaseRef);
-                },
-
-                on(event, callback) {
-                    if (event !== "value") {
-                        throw new Error("Chess chỉ hỗ trợ on('value').");
-                    }
-                    return onValue(databaseRef, callback);
-                },
-
-                off(event, callback) {
-                    if (event && event !== "value") {
-                        return;
-                    }
-                    return off(
-                        databaseRef,
-                        event || "value",
-                        callback
-                    );
-                },
-
-                transaction(updateFn) {
-                    return runTransaction(
-                        databaseRef,
-                        updateFn
-                    );
-                },
-
-                onDisconnect() {
-                    const disconnectRef = onDisconnect(databaseRef);
-                    return {
-                        remove() {
-                            return disconnectRef.remove();
-                        },
-                        cancel() {
-                            return disconnectRef.cancel();
-                        }
-                    };
-                }
-            };
-        }
-
         return {
 
             ref(path) {
-                return wrapRef(
-                    ref(database, path)
-                );
+                const databaseRef = ref(database, path);
+
+                return {
+                    once(event) {
+                        if (event !== "value") {
+                            throw new Error("Chess chỉ hỗ trợ once('value').");
+                        }
+                        return get(databaseRef);
+                    },
+
+                    set(value) {
+                        return set(databaseRef, value);
+                    },
+
+                    update(value) {
+                        return update(databaseRef, value);
+                    },
+
+                    remove() {
+                        return remove(databaseRef);
+                    },
+
+                    on(event, callback) {
+                        if (event !== "value") {
+                            throw new Error("Chess chỉ hỗ trợ on('value').");
+                        }
+                        return onValue(databaseRef, callback);
+                    },
+
+                    off(event, callback) {
+                        if (event && event !== "value") {
+                            return;
+                        }
+                        return off(
+                            databaseRef,
+                            event || "value",
+                            callback
+                        );
+                    },
+
+                    transaction(updateFn) {
+                        return runTransaction(
+                            databaseRef,
+                            updateFn
+                        );
+                    },
+
+                    onDisconnect() {
+                        const disconnectRef = onDisconnect(databaseRef);
+                        return {
+                            remove() {
+                                return disconnectRef.remove();
+                            },
+                            cancel() {
+                                return disconnectRef.cancel();
+                            }
+                        };
+                    }
+                };
             }
         };
     }
@@ -1745,6 +1736,7 @@
 
             auth = core.auth;
             const firebaseDatabase = core.db;
+            firebaseDatabaseRaw = firebaseDatabase;
 
             if (!auth || !firebaseDatabase) {
                 throw new Error(
@@ -4532,10 +4524,19 @@
            GỬI NƯỚC ĐI FIREBASE
         ================================================== */
 
-        await roomRef
-            .child("game")
-            .update({
+        if (!firebaseDatabaseRaw || !databaseApi?.ref || !databaseApi?.update) {
+            throw new Error("Firebase Database chưa sẵn sàng để gửi nước đi.");
+        }
 
+        const gameRef =
+            databaseApi.ref(
+                firebaseDatabaseRaw,
+                `rooms/chess/${roomId}/game`
+            );
+
+        await databaseApi.update(
+            gameRef,
+            {
                 status:
                     end
                         ? "finished"
@@ -4588,7 +4589,8 @@
 
                 updatedAt:
                     serverTimestamp()
-            });
+            }
+        );
 
 
         /* =================================================
@@ -4606,9 +4608,18 @@
             error
         );
 
+        const code =
+            error?.code
+                ? ` [${error.code}]`
+                : "";
+
+        const detail =
+            error?.message
+                ? ` ${error.message}`
+                : "";
 
         setMessage(
-            "❌ Không thể gửi nước đi."
+            `❌ Không thể gửi nước đi.${code}${detail}`
         );
 
     } finally {
