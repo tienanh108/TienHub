@@ -1575,3 +1575,227 @@ main {
         height: 135px;
     }
 }
+/* =====================================================
+   TIENHUB MINI GAME CSS COVERS
+   ===================================================== */
+
+.generic-mini-cover {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+    background:
+        radial-gradient(circle at 50% 40%, #123b55 0%, #061722 70%);
+}
+
+/* ---------- BRICK BREAKER ---------- */
+
+.mini-card[data-game-id="brick-breaker"] .mini-cover {
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(180deg, #071d35 0%, #06111d 100%);
+}
+
+.mini-card[data-game-id="brick-breaker"] .mini-cover::before {
+    content: "";
+    position: absolute;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 18px rgba(255,255,255,.7);
+    left: 50%;
+    top: 55%;
+    transform: translate(-50%, -50%);
+}
+
+.mini-card[data-game-id="brick-breaker"] .mini-cover::after {
+    content: "";
+    position: absolute;
+    width: 100px;
+    height: 10px;
+    border-radius: 10px;
+    background: #16bce9;
+    box-shadow: 0 0 15px rgba(22,188,233,.7);
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+}
+
+/* Gạch */
+.mini-card[data-game-id="brick-breaker"] .mini-cover {
+    --brick-red: #ff4d5a;
+    --brick-yellow: #ffd43b;
+    --brick-blue: #38a8ff;
+}
+
+.mini-card[data-game-id="brick-breaker"] .mini-cover span {
+    display: block;
+}
+
+
+/* ---------- MINESWEEPER ---------- */
+
+.mini-card[data-game-id="minesweeper"] .mini-cover {
+    position: relative;
+    overflow: hidden;
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #c7d0d8 0,
+            #c7d0d8 34px,
+            #aeb9c3 35px,
+            #aeb9c3 36px
+        );
+}
+
+.mini-card[data-game-id="minesweeper"] .mini-cover::before {
+    content: "1  2  1\A  1  💣  2\A  2  3  1";
+    white-space: pre;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: #245da8;
+    font-size: 25px;
+    line-height: 48px;
+    font-weight: 800;
+    text-align: center;
+    text-shadow: 0 1px rgba(255,255,255,.8);
+}
+
+
+/* ---------- BLACKJACK ---------- */
+
+.mini-card[data-game-id="blackjack"] .mini-cover {
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(
+            circle at center,
+            #176b42 0%,
+            #0b452c 65%,
+            #05291b 100%
+        );
+}
+
+.mini-card[data-game-id="blackjack"] .mini-cover::before,
+.mini-card[data-game-id="blackjack"] .mini-cover::after {
+    position: absolute;
+    width: 65px;
+    height: 90px;
+    border-radius: 8px;
+    background: #fff;
+    color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: 800;
+    box-shadow: 0 8px 20px rgba(0,0,0,.35);
+}
+
+.mini-card[data-game-id="blackjack"] .mini-cover::before {
+    content: "A♠";
+    left: 35%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(-8deg);
+}
+
+.mini-card[data-game-id="blackjack"] .mini-cover::after {
+    content: "K♥";
+    left: 65%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(8deg);
+    color: #d92d45;
+}
+
+
+/* ---------- PONG ---------- */
+
+.mini-card[data-game-id="pong"] .mini-cover {
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(
+            90deg,
+            #061522,
+            #09283a,
+            #061522
+        );
+}
+
+.mini-card[data-game-id="pong"] .mini-cover::before {
+    content: "";
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    width: 9px;
+    height: 65px;
+    transform: translateY(-50%);
+    border-radius: 8px;
+    background: #19cfff;
+    box-shadow: 0 0 15px rgba(25,207,255,.8);
+}
+
+.mini-card[data-game-id="pong"] .mini-cover::after {
+    content: "";
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    width: 9px;
+    height: 65px;
+    transform: translateY(-50%);
+    border-radius: 8px;
+    background: #ff4d7d;
+    box-shadow: 0 0 15px rgba(255,77,125,.8);
+}
+
+
+/* ---------- DẤU CHẤM PONG ---------- */
+
+.mini-card[data-game-id="pong"] .mini-cover {
+    --pong-ball-x: 50%;
+}
+
+.mini-card[data-game-id="pong"] .mini-cover .mini-coming-soon-icon {
+    display: none;
+}
+
+
+/* ---------- GAME COVER GENERIC ---------- */
+
+.mini-card[data-game-id="brick-breaker"] .mini-cover::marker,
+.mini-card[data-game-id="minesweeper"] .mini-cover::marker {
+    display: none;
+}
+
+
+/* ---------- BUTTON ---------- */
+
+.mini-card .play-button {
+    cursor: pointer;
+}
+
+.mini-card .play-button.disabled {
+    cursor: default;
+}
+
+
+/* SOCCER CARD — pure CSS illustration */
+.soccer-cover { position: relative; overflow: hidden; background: linear-gradient(135deg,#0c6b46 0%,#138a58 48%,#075335 100%); isolation:isolate; }
+.soccer-cover::before { content:""; position:absolute; inset:10% 7%; border:2px solid rgba(255,255,255,.55); border-radius:3px; }
+.soccer-cover::after { content:""; position:absolute; width:25%; aspect-ratio:1; left:37.5%; top:37.5%; border:2px solid rgba(255,255,255,.48); border-radius:50%; }
+.soccer-field-line { position:absolute; z-index:2; pointer-events:none; }
+.soccer-field-line.midfield { width:2px; height:80%; left:50%; top:10%; background:rgba(255,255,255,.45); }
+.soccer-field-line.box-left,.soccer-field-line.box-right { width:15%; height:38%; top:31%; border:2px solid rgba(255,255,255,.42); }
+.soccer-field-line.box-left { left:7%; border-left:0; }.soccer-field-line.box-right { right:7%; border-right:0; }
+.soccer-player { position:absolute; z-index:5; width:22px; height:22px; border-radius:50%; border:3px solid rgba(255,255,255,.85); box-shadow:0 4px 10px rgba(0,0,0,.35); }
+.soccer-player::after { content:""; position:absolute; width:7px; height:7px; border-radius:50%; left:5px; top:-7px; background:#ffd6b3; border:1px solid rgba(0,0,0,.22); }
+.soccer-player.blue { background:#20a9e8; }.soccer-player.red { background:#ef4d62; }
+.soccer-player.p1 { left:24%; top:28%; }.soccer-player.p2 { left:31%; top:65%; }.soccer-player.p3 { left:42%; top:47%; }
+.soccer-player.p4 { right:24%; top:30%; }.soccer-player.p5 { right:31%; top:64%; }.soccer-player.p6 { right:42%; top:48%; }
+.soccer-ball { position:absolute; z-index:6; width:16px; height:16px; left:54%; top:42%; border-radius:50%; background:#fff; border:2px solid #17212b; box-shadow:0 4px 9px rgba(0,0,0,.35); }
