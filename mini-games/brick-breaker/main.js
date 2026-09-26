@@ -58,7 +58,35 @@ canvas.height = H;
 
 
 
-const menuBtn = document.getElementById("menuBtn");
+const menuBtn = document.createElement("button");
+
+
+
+menuBtn.id = "menuBtn";
+
+menuBtn.className = "pause-btn";
+
+menuBtn.textContent = "⌂";
+
+menuBtn.title = "Quay về menu";
+
+
+
+menuBtn.style.marginRight = "6px";
+
+
+
+pauseBtn.parentNode.insertBefore(
+
+    menuBtn,
+
+    pauseBtn
+
+);
+
+
+
+
 
 // =====================================================
 
@@ -202,7 +230,7 @@ function createBall(
 
 
 
-        radius: MOBILE ? 6 : 8,
+        radius: 8,
 
 
 
@@ -246,23 +274,33 @@ function resetBalls() {
 
 
 
-const brick = MOBILE
-    ? {
-        rows: 7,
-        cols: 7,
-        width: 44,
-        height: 20,
-        gap: 6,
-        top: 48
-    }
-    : {
-        rows: 6,
-        cols: 11,
-        width: 80,
-        height: 25,
-        gap: 8,
-        top: 60
-    };
+const brick = {
+
+
+
+    rows: 6,
+
+
+
+    cols: 11,
+
+
+
+    width: 80,
+
+
+
+    height: 25,
+
+
+
+    gap: 8,
+
+
+
+    top: 60
+
+};
 
 
 
@@ -3100,7 +3138,7 @@ function updateBalls() {
 
 
 
-    const targetSpeed = MOBILE ? 8.5 : 10.5;
+    const targetSpeed = 10.5;
 
 
 
