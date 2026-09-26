@@ -1,525 +1,186 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ — TienHub</title>
+    <link rel="stylesheet" href="../css/profile-page.css?v=20260926-1418">
+    <style>
+        @media (max-width: 850px) {
+            .profile-page { width: calc(100% - 24px) !important; }
+            .profile-grid { display: block !important; }
+            .preview-panel { display: none !important; }
+            .right-column { display: block !important; }
+            .security-panel { margin-top: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="nav-shell">
+            <a class="brand" href="../index.html" aria-label="TienHub">
+                <span class="brand-mark"><img src="../assets/icon/tienhub-mark.png" alt="TienHub"></span>
+                <span class="brand-name">TienHub</span>
+            </a>
+            <nav class="main-nav" aria-label="Điều hướng chính">
+                <a href="../index.html">Trang chủ</a>
+                <a href="mini-game.html">Mini Games</a>
+                <a href="download.html">Tải về</a>
+                <a class="active" href="profile.html">Hồ sơ</a>
+            </nav>
+            <div class="nav-actions">
+                <label class="search">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.8"></circle><path d="m16.2 16.2 4.2 4.2"></path></svg>
+                    <input type="search" placeholder="Tìm kiếm game..." aria-label="Tìm kiếm game">
+                </label>
+                <span class="nav-divider"></span>
+                <button class="account-trigger" id="accountTrigger" type="button" aria-label="Hồ sơ">
+                    <span class="account-avatar" id="headerAvatar">T</span>
+                    <span class="account-name" id="headerName">tienanh</span>
+                </button>
+            </div>
+        </div>
+    </header>
 
-:root{
-    --bg:#06101c;
-    --bg-2:#091725;
-    --panel:#0c1b2b;
-    --panel-2:#102236;
-    --line:rgba(143,190,230,.13);
-    --text:#f3f7fb;
-    --muted:#8ea2b8;
-    --cyan:#39c8ff;
-    --cyan-2:#19aee8;
-    --danger:#ff5d68;
-}
+    <main class="profile-page">
+        <div class="page-heading">
+            <div>
+                <p class="eyebrow">ACCOUNT</p>
+                <h1>Hồ sơ của tôi</h1>
+                <p>Quản lý tên hiển thị và avatar được sử dụng trong các game của TienHub.</p>
+            </div>
+        </div>
 
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Inter,system-ui,sans-serif;color:var(--text);background:
-radial-gradient(circle at 70% -10%,rgba(31,122,175,.16),transparent 30%),
-linear-gradient(145deg,#050d17 0%,#071321 55%,#06101c 100%)}
-body{min-height:100vh}
+        <section class="profile-grid">
+            <div class="panel edit-panel">
+                <div class="panel-title">
+                    <div>
+                        <h2>Chỉnh sửa hồ sơ</h2>
+                        <p>Thông tin hiển thị trong game</p>
+                    </div>
+                </div>
 
-button,input{font:inherit}
-button{cursor:pointer}
+                <div class="avatar-editor">
+                    <div class="large-avatar" id="largeAvatar">T</div>
+                    <button class="avatar-change" id="focusAvatar" type="button">Thay đổi avatar</button>
+                                </div>
 
-.site-header{
-    height:72px;
-    display:flex;
-    align-items:center;
-    padding:0 42px;
-    border-bottom:1px solid var(--line);
-    background:rgba(5,14,24,.88);
-    backdrop-filter:blur(18px);
-    position:sticky;
-    top:0;
-    z-index:10;
-}
+                <label class="field-label" for="displayName">Tên hiển thị trong game</label>
+                <div class="input-wrap">
+                    <input id="displayName" type="text" value="tienanh1" maxlength="20" autocomplete="off">
+                    <span class="edit-icon">✎</span>
+                </div>
+                <p class="field-hint">Tên này sẽ được người chơi khác nhìn thấy trong game và BXH.</p>
 
-.brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;font-size:21px}
-.brand-mark{
-    width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
-    color:#03111b;background:linear-gradient(135deg,#4bd7ff,#1698d7);
-    box-shadow:0 0 22px rgba(42,193,255,.24);font-weight:900
-}
-.main-nav{display:flex;gap:34px;margin-left:52px}
-.main-nav a{color:#8fa4b9;text-decoration:none;font-size:14px;font-weight:600;transition:.2s}
-.main-nav a:hover,.main-nav a[href*="profile"]:hover{color:#fff}
+                <label class="field-label" for="username">Tên đăng nhập</label>
+                <div class="input-wrap locked">
+                    <input id="username" type="text" value="tienanh" readonly>
+                    <span class="lock-icon">🔒</span>
+                </div>
+                <p class="field-hint">Tên đăng nhập không thể thay đổi.</p>
 
-.account-trigger{
-    margin-left:auto;display:flex;align-items:center;gap:10px;border:0;background:transparent;color:#fff;
-    padding:7px 10px;border-radius:12px
-}
-.account-trigger:hover{background:rgba(255,255,255,.05)}
-.account-avatar,.large-avatar,.preview-avatar{
-    display:grid;place-items:center;border-radius:50%;font-weight:800;color:#03131e;
-    background:linear-gradient(135deg,#66dcff,#238dcb)
-}
-.account-avatar{width:34px;height:34px;font-size:14px}
-.account-name{font-size:14px;font-weight:650}
-.chevron{font-size:17px;color:#7f95aa}
+                <div class="field-label avatar-label">Chọn avatar</div>
+                <div class="avatar-grid" id="avatarGrid">
+                    <button class="avatar-option selected" data-letter="T" type="button">T</button>
+                    <button class="avatar-option" data-letter="A" type="button">A</button>
+                    <button class="avatar-option" data-letter="N" type="button">N</button>
+                    <button class="avatar-option" data-letter="K" type="button">K</button>
+                    <button class="avatar-option" data-letter="M" type="button">M</button>
+                </div>
 
-.profile-page{width:min(1180px,calc(100% - 48px));margin:0 auto;padding:58px 0 70px}
-.page-heading{margin-bottom:30px}
-.eyebrow{margin:0 0 9px;color:var(--cyan);font-size:11px;font-weight:800;letter-spacing:.18em}
-.page-heading h1{margin:0;font-size:34px;letter-spacing:-.04em}
-.page-heading p:not(.eyebrow){margin:10px 0 0;color:var(--muted);font-size:14px}
+                <div class="actions">
+                    <button class="btn secondary" id="cancelBtn" type="button">Hủy</button>
+                    <button class="btn primary" id="saveBtn" type="button">Lưu thay đổi</button>
+                </div>
+            </div>
 
-.profile-grid{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(350px,.82fr);gap:22px;align-items:start}
-.right-column{display:grid;gap:22px}
+            <div class="right-column">
+                <div class="panel preview-panel">
+                    <div class="panel-title">
+                        <div>
+                            <h2>Xem trước hiển thị</h2>
+                            <p>Thông tin người khác sẽ nhìn thấy</p>
+                        </div>
+                    </div>
 
-.panel{
-    background:linear-gradient(180deg,rgba(15,32,49,.95),rgba(9,24,38,.96));
-    border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 55px rgba(0,0,0,.22)
-}
-.edit-panel{padding:28px}
-.preview-panel,.security-panel{padding:25px}
+                    <div class="preview-card">
+                        <div class="preview-avatar" id="previewAvatar">T</div>
+                        <div class="preview-info">
+                            <strong id="previewName">tienanh1</strong>
+                            <span>TienHub Player</span>
+                        </div>
+                    </div>
+                </div>
 
-.panel-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px}
-.panel-title h2{margin:0;font-size:18px}
-.panel-title p{margin:6px 0 0;color:var(--muted);font-size:12px}
+                <div class="panel security-panel">
+                    <div class="panel-title">
+                        <div>
+                            <h2>Bảo mật</h2>
+                            <p>Quản lý quyền truy cập tài khoản</p>
+                        </div>
+                    </div>
 
-.avatar-editor{display:flex;align-items:center;gap:18px;margin-bottom:25px}
-.large-avatar{width:84px;height:84px;font-size:30px;box-shadow:0 0 32px rgba(50,190,255,.16)}
-.avatar-change{
-    border:1px solid rgba(73,199,255,.28);background:rgba(37,174,229,.08);color:#a9dff4;
-    padding:10px 14px;border-radius:10px;font-size:12px;font-weight:650
-}
-.avatar-change:hover{background:rgba(37,174,229,.14);color:#fff}
+                    <button class="security-row" type="button" id="passwordBtn">
+                        <span class="security-icon">🔑</span>
+                        <span class="security-copy">
+                            <strong>Đổi mật khẩu</strong>
+                            <small>Cập nhật mật khẩu đăng nhập</small>
+                        </span>
+                        <span class="row-arrow">›</span>
+                    </button>
 
-.field-label{display:block;margin:20px 0 9px;font-size:12px;font-weight:700;color:#c8d5e2}
-.input-wrap{position:relative}
-.input-wrap input{
-    width:100%;height:48px;padding:0 42px 0 15px;border-radius:11px;border:1px solid rgba(138,179,210,.15);
-    outline:none;background:#071521;color:#f2f7fb;font-size:14px;transition:.2s
-}
-.input-wrap input:focus{border-color:rgba(57,200,255,.65);box-shadow:0 0 0 3px rgba(57,200,255,.08)}
-.input-wrap.locked input{color:#758ba0;background:#091521}
-.edit-icon,.lock-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:13px;color:#7190a6}
-.field-hint{margin:7px 0;color:#70869b;font-size:11px}
-.avatar-label{margin-top:23px}
-.avatar-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:10px}
-.avatar-option{
-    aspect-ratio:1;border-radius:13px;border:1px solid rgba(136,180,211,.14);background:#091724;color:#dceaf4;
-    font-size:17px;font-weight:800;transition:.18s
-}
-.avatar-option:hover{border-color:rgba(57,200,255,.45);transform:translateY(-1px)}
-.avatar-option.selected{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(57,200,255,.12),0 0 20px rgba(57,200,255,.12);background:#0d2535}
+                    <button class="security-row disabled" type="button" id="emailBtn">
+                        <span class="security-icon">✉</span>
+                        <span class="security-copy">
+                            <strong>Liên kết email</strong>
+                            <small>Tính năng sẽ được bổ sung sau</small>
+                        </span>
+                        <span class="coming-soon">Sắp có</span>
+                    </button>
+                </div>
 
-.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:28px}
-.btn{height:44px;padding:0 19px;border-radius:10px;border:1px solid transparent;font-size:12px;font-weight:750}
-.btn.secondary{background:#0a1724;color:#9aafc1;border-color:var(--line)}
-.btn.secondary:hover{color:#fff;background:#102132}
-.btn.primary{color:#021019;background:linear-gradient(135deg,#4ad5ff,#1ca9e2);box-shadow:0 8px 25px rgba(35,177,231,.16)}
-.btn.primary:hover{filter:brightness(1.07)}
+                <button class="logout-button" id="logoutBtn" type="button">
+                    <span>↪</span>
+                    <span>Đăng xuất</span>
+                </button>
+            </div>
+        </section>
+    </main>
 
-.preview-card{
-    min-height:220px;border-radius:16px;border:1px solid rgba(110,171,207,.12);
-    background:
-      radial-gradient(circle at 50% 0%,rgba(40,184,242,.13),transparent 48%),
-      linear-gradient(145deg,#0b1d2d,#07131f);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px
-}
-.preview-avatar{width:86px;height:86px;font-size:30px;box-shadow:0 0 38px rgba(46,195,255,.16)}
-.preview-info{text-align:center;display:flex;flex-direction:column;gap:6px}
-.preview-info strong{font-size:18px}
-.preview-info span{font-size:11px;color:#6e8498}
+    <div class="password-modal" id="passwordModal" aria-hidden="true">
+        <div class="password-backdrop" data-close-password></div>
+        <div class="password-dialog" role="dialog" aria-modal="true" aria-labelledby="passwordModalTitle">
+            <div class="password-dialog-head">
+                <div>
+                    <p class="eyebrow">SECURITY</p>
+                    <h2 id="passwordModalTitle">Đổi mật khẩu</h2>
+                    <p>Nhập mật khẩu hiện tại và mật khẩu mới của bạn.</p>
+                </div>
+                <button class="password-close" id="passwordCloseBtn" type="button" aria-label="Đóng">×</button>
+            </div>
 
-.security-panel{padding-bottom:12px}
-.security-row{
-    width:100%;display:flex;align-items:center;gap:13px;text-align:left;border:0;border-top:1px solid var(--line);
-    background:transparent;color:#fff;padding:17px 2px
-}
-.security-row:first-of-type{border-top:0}
-.security-row:hover:not(.disabled){background:rgba(255,255,255,.02)}
-.security-icon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:#0b2434;font-size:15px}
-.security-copy{display:flex;flex-direction:column;gap:4px;flex:1}
-.security-copy strong{font-size:12px}
-.security-copy small{font-size:10px;color:#71879a}
-.row-arrow{color:#6f8498;font-size:22px}
-.security-row.disabled{cursor:not-allowed;opacity:.62}
-.coming-soon{font-size:9px;color:#748a9d;border:1px solid var(--line);padding:5px 7px;border-radius:6px}
+            <form id="passwordForm" class="password-form">
+                <label for="currentPassword">Mật khẩu hiện tại</label>
+                <input id="currentPassword" type="password" autocomplete="current-password" minlength="6" required>
 
-.logout-button{
-    height:50px;border-radius:13px;border:1px solid rgba(255,93,104,.17);background:rgba(255,70,80,.045);
-    color:#ff8790;font-size:12px;font-weight:750;display:flex;align-items:center;justify-content:center;gap:8px
-}
-.logout-button:hover{background:rgba(255,70,80,.09);border-color:rgba(255,93,104,.3)}
+                <label for="newPassword">Mật khẩu mới</label>
+                <input id="newPassword" type="password" autocomplete="new-password" minlength="6" required>
 
-.toast{
-    position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;pointer-events:none;
-    padding:11px 16px;border-radius:10px;background:#12283a;border:1px solid rgba(79,199,246,.22);
-    color:#dff6ff;font-size:12px;transition:.25s;z-index:30
-}
-.toast.show{opacity:1;transform:translate(-50%,0)}
+                <label for="confirmNewPassword">Xác nhận mật khẩu mới</label>
+                <input id="confirmNewPassword" type="password" autocomplete="new-password" minlength="6" required>
 
-@media(max-width:850px){
-    .site-header{padding:0 18px}
-    .main-nav{gap:16px;margin-left:25px}
-    .profile-page{width:min(100% - 28px,620px);padding-top:35px}
-    .profile-grid{grid-template-columns:1fr}
-}
-@media(max-width:560px){
-    .main-nav{display:none}
-    .account-name{display:none}
-    .page-heading h1{font-size:28px}
-    .edit-panel,.preview-panel,.security-panel{padding:20px}
-    .avatar-grid{grid-template-columns:repeat(4,1fr)}
-    .actions{justify-content:stretch}
-    .actions .btn{flex:1}
-}
+                <p class="password-message" id="passwordMessage" role="status"></p>
 
-/* ===== PROFILE COMPACT DESKTOP ===== */
-.site-header{
-    height:60px;
-    padding:0 30px;
-}
-.brand{font-size:19px}
-.brand-mark{width:32px;height:32px}
-.main-nav{gap:28px;margin-left:44px}
-.main-nav a.active{color:#fff;position:relative}
-.main-nav a.active::after{
-    content:"";
-    position:absolute;
-    left:0;right:0;bottom:-21px;
-    height:2px;border-radius:2px;
-    background:var(--cyan);
-}
+                <div class="password-actions">
+                    <button class="btn secondary" id="passwordCancelBtn" type="button">Hủy</button>
+                    <button class="btn primary" id="passwordSubmitBtn" type="submit">Đổi mật khẩu</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-.profile-page{
-    width:min(1160px,calc(100% - 44px));
-    height:calc(100vh - 60px);
-    min-height:0;
-    margin:0 auto;
-    padding:24px 0 20px;
-    overflow:hidden;
-}
-.page-heading{
-    margin-bottom:18px;
-}
-.eyebrow{margin-bottom:5px;font-size:10px}
-.page-heading h1{font-size:28px}
-.page-heading p:not(.eyebrow){margin-top:6px;font-size:12px}
-
-.profile-grid{
-    grid-template-columns:minmax(0,1.12fr) minmax(320px,.88fr);
-    gap:16px;
-    height:calc(100% - 82px);
-    min-height:0;
-}
-.right-column{
-    gap:12px;
-    min-height:0;
-}
-
-.panel{border-radius:16px}
-.edit-panel{padding:20px;min-height:0}
-.preview-panel,.security-panel{padding:18px}
-
-.panel-title{margin-bottom:14px}
-.panel-title h2{font-size:16px}
-.panel-title p{margin-top:4px;font-size:10px}
-
-.avatar-editor{
-    gap:14px;
-    margin-bottom:14px;
-}
-.large-avatar{width:64px;height:64px;font-size:24px}
-.avatar-change{padding:8px 12px;font-size:11px}
-
-.field-label{
-    margin:12px 0 6px;
-    font-size:11px;
-}
-.input-wrap input{
-    height:38px;
-    padding-left:12px;
-    font-size:12px;
-    border-radius:9px;
-}
-.edit-icon,.lock-icon{right:11px;font-size:11px}
-.field-hint{margin:4px 0;font-size:9px}
-.avatar-label{margin-top:13px}
-.avatar-grid{grid-template-columns:repeat(8,1fr);gap:7px}
-.avatar-option{
-    border-radius:9px;
-    font-size:14px;
-}
-
-.actions{
-    gap:8px;
-    margin-top:14px;
-}
-.btn{
-    height:36px;
-    padding:0 15px;
-    font-size:11px;
-}
-
-.preview-card{
-    min-height:145px;
-    border-radius:13px;
-    gap:9px;
-}
-.preview-avatar{width:62px;height:62px;font-size:24px}
-.preview-info{gap:4px}
-.preview-info strong{font-size:16px}
-.preview-info span{font-size:9px}
-
-.security-panel{padding-bottom:7px}
-.security-row{
-    gap:10px;
-    padding:10px 2px;
-}
-.security-icon{width:30px;height:30px;border-radius:8px;font-size:13px}
-.security-copy{gap:2px}
-.security-copy strong{font-size:11px}
-.security-copy small{font-size:9px}
-.row-arrow{font-size:18px}
-.coming-soon{font-size:8px;padding:4px 6px}
-
-.logout-button{
-    height:40px;
-    border-radius:10px;
-    font-size:11px;
-}
-
-@media (max-height:760px) and (min-width:851px){
-    .profile-page{padding-top:16px;padding-bottom:12px}
-    .page-heading{margin-bottom:12px}
-    .page-heading h1{font-size:25px}
-    .page-heading p:not(.eyebrow){font-size:11px}
-    .edit-panel{padding:17px}
-    .preview-panel,.security-panel{padding:15px}
-    .avatar-editor{margin-bottom:10px}
-    .large-avatar{width:56px;height:56px;font-size:21px}
-    .field-label{margin-top:9px}
-    .input-wrap input{height:35px}
-    .avatar-grid{gap:5px}
-    .btn{height:33px}
-    .preview-card{min-height:125px}
-    .preview-avatar{width:54px;height:54px}
-}
-
-@media(max-width:850px){
-    .profile-page{
-        width:min(100% - 28px,620px);
-        height:auto;
-        min-height:0;
-        overflow:visible;
-        padding-top:24px;
-        padding-bottom:40px;
-    }
-
-    .profile-grid{
-        grid-template-columns:1fr;
-        height:auto;
-        min-height:0;
-    }
-
-    /* Preview is useful on desktop, but wastes a full panel on phones. */
-    .preview-panel{
-        display:none !important;
-    }
-
-    .right-column{
-        display:grid;
-        grid-template-columns:1fr;
-        gap:14px;
-    }
-}
-
-@media(max-width:560px){
-    .site-header{
-        height:60px;
-        padding:0 12px;
-    }
-
-    .brand{
-        gap:7px;
-        font-size:17px;
-    }
-
-    .brand-mark,.brand-mark img{
-        width:32px;
-        height:32px;
-    }
-
-    .nav-actions{
-        gap:5px;
-    }
-
-    .search,.nav-divider{
-        display:none;
-    }
-
-    .profile-page{
-        width:calc(100% - 24px);
-        padding-top:20px;
-    }
-
-    .page-heading{
-        margin-bottom:16px;
-    }
-
-    .page-heading h1{
-        font-size:28px;
-    }
-
-    .page-heading p:not(.eyebrow){
-        font-size:12px;
-        line-height:1.55;
-    }
-
-    .edit-panel,.security-panel{
-        padding:18px;
-    }
-
-    .avatar-grid{
-        grid-template-columns:repeat(5,1fr);
-        gap:8px;
-    }
-
-    .actions{
-        justify-content:stretch;
-    }
-
-    .actions .btn{
-        flex:1;
-    }
-}
-
-
-/* ===== PROFILE HEADER MATCHES TIENHUB WEB ===== */
-.site-header{height:66px;padding:0 18px;}
-.nav-shell{width:100%;display:flex;align-items:center;min-width:0;}
-.brand{gap:10px;font-size:19px;flex:0 0 auto;}
-.brand-mark{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:transparent;box-shadow:none;}
-.brand-mark img{width:36px;height:36px;display:block;object-fit:contain;}
-.main-nav{display:flex;gap:30px;margin-left:44px;align-items:center;}
-.main-nav a{font-size:14px;}
-.main-nav a.active{color:#fff;position:relative;}
-.main-nav a.active::after{content:"";position:absolute;left:0;right:0;bottom:-24px;height:2px;border-radius:2px;background:var(--cyan);}
-.nav-actions{margin-left:auto;display:flex;align-items:center;gap:12px;min-width:0;}
-.search{width:228px;height:38px;display:flex;align-items:center;gap:9px;padding:0 12px;border:1px solid rgba(34,193,255,.18);border-radius:11px;background:#061925;color:#71899b;}
-.search svg{width:16px;height:16px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.7;}
-.search input{width:100%;border:0;outline:0;background:transparent;color:#dcebf4;font-size:12px;}
-.search input::placeholder{color:#607889;}
-.nav-divider{width:1px;height:28px;background:var(--line);}
-.account-trigger{margin-left:0;padding:5px 9px;border-radius:999px;}
-.profile-page{width:min(1280px,calc(100% - 36px));padding-top:28px;}
-.page-heading h1{font-size:26px;}
-
-/* ===== PASSWORD MODAL ===== */
-.password-modal{
-    position:fixed;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:24px;
-    opacity:0;
-    visibility:hidden;
-    pointer-events:none;
-    z-index:1000;
-    transition:opacity .2s ease, visibility .2s ease;
-}
-.password-modal.show{
-    opacity:1;
-    visibility:visible;
-    pointer-events:auto;
-}
-.password-backdrop{
-    position:absolute;
-    inset:0;
-    background:rgba(2,9,16,.72);
-    backdrop-filter:blur(7px);
-}
-.password-dialog{
-    position:relative;
-    z-index:1;
-    width:min(520px,100%);
-    max-height:min(90vh,700px);
-    overflow:auto;
-    padding:26px;
-    border:1px solid rgba(78,196,245,.18);
-    border-radius:18px;
-    background:linear-gradient(180deg,#0d2031,#081622);
-    box-shadow:0 30px 90px rgba(0,0,0,.48),0 0 35px rgba(26,172,225,.08);
-}
-.password-dialog-head{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:18px;
-    margin-bottom:22px;
-}
-.password-dialog-head .eyebrow{margin:0 0 6px}
-.password-dialog-head h2{
-    margin:0;
-    font-size:23px;
-    letter-spacing:-.025em;
-}
-.password-dialog-head > div > p:last-child{
-    margin:7px 0 0;
-    color:var(--muted);
-    font-size:12px;
-}
-.password-close{
-    width:34px;
-    height:34px;
-    flex:0 0 34px;
-    border:1px solid var(--line);
-    border-radius:9px;
-    background:#091824;
-    color:#9bb0c1;
-    font-size:20px;
-    line-height:1;
-}
-.password-close:hover{color:#fff;background:#102638}
-.password-form{display:grid;gap:8px}
-.password-form label{
-    margin-top:7px;
-    color:#cbd9e5;
-    font-size:12px;
-    font-weight:700;
-}
-.password-form input{
-    width:100%;
-    height:44px;
-    padding:0 13px;
-    border:1px solid rgba(138,179,210,.15);
-    border-radius:10px;
-    outline:none;
-    background:#061520;
-    color:#f2f7fb;
-    font-size:13px;
-}
-.password-form input:focus{
-    border-color:rgba(57,200,255,.65);
-    box-shadow:0 0 0 3px rgba(57,200,255,.08);
-}
-.password-message{
-    min-height:18px;
-    margin:5px 0 0;
-    font-size:12px;
-    color:#8ea2b8;
-}
-.password-message.error{color:#ff8790}
-.password-message.success{color:#63dcaa}
-.password-actions{
-    display:flex;
-    justify-content:flex-end;
-    gap:10px;
-    margin-top:7px;
-}
-.password-submit,
-#passwordSubmitBtn{min-width:125px}
-#passwordSubmitBtn:disabled{opacity:.65;cursor:wait}
-
-@media(max-width:560px){
-    .password-modal{padding:14px}
-    .password-dialog{padding:20px;border-radius:15px}
-    .password-dialog-head h2{font-size:20px}
-    .password-actions{flex-direction:column-reverse}
-    .password-actions .btn{width:100%}
-}
+    <div class="toast" id="toast" role="status"></div>
+    <script src="../js/profile.js?v=20260926-1418" defer></script>
+    <script type="module" src="../js/profile-page.js?v=20260926-1418"></script>
+</body>
+</html>
