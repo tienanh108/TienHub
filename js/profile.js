@@ -275,6 +275,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Keep the account UI hidden until Firebase restores the session.
 
     profileWrap.style.visibility = "hidden";
+    profileAvatar?.style.setProperty("background-image", "");
+    profileAvatar?.classList.remove("has-image");
 
 
 
@@ -570,6 +572,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         profileName.textContent = "Đăng nhập";
 
+        profileAvatar.style.backgroundImage = "";
+        profileAvatar.classList.remove("has-image");
         profileAvatar.textContent = "→";
 
         profileButton.setAttribute("aria-label", "Đăng nhập TienHub");
@@ -604,19 +608,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 
-        profileName.textContent = username;
-
-        const photoURL = user.photoURL || localStorage.getItem("tienhub_avatar_url") || "";
-        if (photoURL) {
-            profileAvatar.textContent = "";
-            profileAvatar.style.backgroundImage = `url("${photoURL}")`;
-            profileAvatar.style.backgroundSize = "cover";
-            profileAvatar.style.backgroundPosition = "center";
-            profileAvatar.style.backgroundRepeat = "no-repeat";
-        } else {
-            profileAvatar.style.backgroundImage = "";
-            profileAvatar.textContent = username.charAt(0).toUpperCase() || "T";
+        // Avatar is shared through Realtime Database. Never reuse old uploaded photos.
+        let avatar = username.charAt(0).toUpperCase() || "T";
+        try {
+            const core = await import("../src/core/firebase.js");
+            const { ref, get } = await import(
+                "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
+            );
+            const snapshot = await get(ref(core.db, `users/${user.uid}`));
+            const profileData = snapshot.exists() ? snapshot.val() : null;
+            if (profileData?.avatar && typeof profileData.avatar === "string") {
+                avatar = profileData.avatar;
+            }
+        } catch (error) {
+            console.warn("TienHub avatar read skipped:", error);
         }
+
+        profileName.textContent = username;
+        profileAvatar.style.backgroundImage = "";
+        profileAvatar.classList.remove("has-image");
+        profileAvatar.textContent = avatar;
 
         if (menuUsername) menuUsername.textContent = username;
 
