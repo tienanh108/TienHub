@@ -295,6 +295,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let lockUnsubscribe = null;
 
     let lockLostHandled = false;
+    let lockCheckTimer = null;
 
 
 
@@ -339,6 +340,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                 lockUnsubscribe();
 
                 lockUnsubscribe = null;
+
+            }
+
+            if (lockCheckTimer) {
+
+                clearInterval(lockCheckTimer);
+
+                lockCheckTimer = null;
 
             }
 
@@ -416,54 +425,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 
-            // If the lock disappeared, let auth.js reacquire it for this same browser.
-            // A lock belonging to another device still means this browser must be kicked.
-            if (!lock) {
-                if (window.TienHubDeviceLock?.acquire) {
-                    try {
-                        await window.TienHubDeviceLock.acquire(user);
-                        const reacquired = await get(lockRef);
-                        const reacquiredLock = reacquired.val();
-
-                        if (reacquiredLock?.deviceId !== id) {
-                            localStorage.removeItem("tienhub_logged_in");
-                            localStorage.removeItem("tienhub_username");
-                            window.TienHubShowDeviceKickModal(async () => {
-                                try { await core.auth.signOut(); } catch (_) {}
-                            });
-                            return false;
-                        }
-                    } catch (error) {
-                        console.error("TienHub device lock reacquire error:", error);
-                        localStorage.removeItem("tienhub_logged_in");
-                        localStorage.removeItem("tienhub_username");
-                        window.TienHubShowDeviceKickModal(async () => {
-                            try { await core.auth.signOut(); } catch (_) {}
-                        });
-                        return false;
-                    }
-                } else {
-                    localStorage.removeItem("tienhub_logged_in");
-                    localStorage.removeItem("tienhub_username");
-                    window.TienHubShowDeviceKickModal(async () => {
-                        try { await core.auth.signOut(); } catch (_) {}
-                    });
-                    return false;
-                }
-            } else if (lock.deviceId !== id) {
-
+            // A logged-in browser must already own the server-side lock.
+            // Only the login flow is allowed to claim the lock.
+            if (!lock || lock.deviceId !== id) {
                 localStorage.removeItem("tienhub_logged_in");
-
                 localStorage.removeItem("tienhub_username");
-
                 window.TienHubShowDeviceKickModal(async () => {
-
                     try { await core.auth.signOut(); } catch (_) {}
-
                 });
-
                 return false;
-
             }
 
 
@@ -475,43 +445,58 @@ document.addEventListener("DOMContentLoaded", async () => {
             // the old device would stay logged in after a later login.
 
             if (typeof lockUnsubscribe === "function") {
-
                 lockUnsubscribe();
-
                 lockUnsubscribe = null;
-
+            }
+            if (lockCheckTimer) {
+                clearInterval(lockCheckTimer);
+                lockCheckTimer = null;
             }
 
             lockLostHandled = false;
 
-            lockUnsubscribe = onValue(lockRef, async snapshot => {
-
-                const latest = snapshot.val();
-
-                if (lockLostHandled || !latest || latest.deviceId === id) return;
-
-
-
+            const handleLostLock = async () => {
+                if (lockLostHandled) return;
                 lockLostHandled = true;
 
-                if (deviceHeartbeat) {
-
-                    clearInterval(deviceHeartbeat);
-
-                    deviceHeartbeat = null;
-
+                if (lockCheckTimer) {
+                    clearInterval(lockCheckTimer);
+                    lockCheckTimer = null;
                 }
 
                 localStorage.removeItem("tienhub_logged_in");
-
                 localStorage.removeItem("tienhub_username");
-
                 window.TienHubShowDeviceKickModal(async () => {
-
                     try { await core.auth.signOut(); } catch (_) {}
-
                 });
+            };
 
+            lockUnsubscribe = onValue(lockRef, async snapshot => {
+                const latest = snapshot.val();
+                if (lockLostHandled) return;
+                if (!latest || latest.deviceId !== id) await handleLostLock();
+            });
+
+            // Safety net if a realtime event is missed.
+            lockCheckTimer = setInterval(async () => {
+                if (lockLostHandled) return;
+                try {
+                    const latest = (await get(lockRef)).val();
+                    if (!latest || latest.deviceId !== id) await handleLostLock();
+                } catch (error) {
+                    console.warn("TienHub device lock check error:", error);
+                }
+            }, 10000);
+
+            // Check immediately when returning to the tab.
+            window.addEventListener("visibilitychange", async () => {
+                if (document.visibilityState !== "visible" || lockLostHandled) return;
+                try {
+                    const latest = (await get(lockRef)).val();
+                    if (!latest || latest.deviceId !== id) await handleLostLock();
+                } catch (error) {
+                    console.warn("TienHub device lock visibility check error:", error);
+                }
             });
 
 
