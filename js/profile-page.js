@@ -182,6 +182,9 @@ async function initProfile() {
                 displayNameInput.value = profileData.displayName.trim();
                 headerName.textContent = profileData.displayName.trim();
             }
+            if (typeof profileData.avatar === "string" && profileData.avatar.trim()) {
+    selectedAvatar = profileData.avatar.trim();
+}
 
             if (typeof profileData.avatarUrl === "string" && profileData.avatarUrl) {
                 selectedPhotoURL = profileData.avatarUrl;
@@ -385,8 +388,9 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
         await updateProfile(currentUser, { displayName: name });
 
         await update(ref(core.db, `users/${currentUser.uid}`), {
-            displayName: name
-        });
+    displayName: name,
+    avatar: selectedAvatar || name.charAt(0).toUpperCase() || "T"
+});
 
         await update(ref(core.db, `publicProfiles/${currentUser.uid}`), {
             displayName: name,
