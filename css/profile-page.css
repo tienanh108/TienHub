@@ -302,8 +302,89 @@ button{cursor:pointer}
 
 @media(max-width:850px){
     .profile-page{
+        width:min(100% - 28px,620px);
         height:auto;
+        min-height:0;
         overflow:visible;
+        padding-top:24px;
+        padding-bottom:40px;
+    }
+
+    .profile-grid{
+        grid-template-columns:1fr;
+        height:auto;
+        min-height:0;
+    }
+
+    /* Preview is useful on desktop, but wastes a full panel on phones. */
+    .preview-panel{
+        display:none;
+    }
+
+    .right-column{
+        display:grid;
+        grid-template-columns:1fr;
+        gap:14px;
+    }
+}
+
+@media(max-width:560px){
+    .site-header{
+        height:60px;
+        padding:0 12px;
+    }
+
+    .brand{
+        gap:7px;
+        font-size:17px;
+    }
+
+    .brand-mark,.brand-mark img{
+        width:32px;
+        height:32px;
+    }
+
+    .nav-actions{
+        gap:5px;
+    }
+
+    .search,.nav-divider{
+        display:none;
+    }
+
+    .profile-page{
+        width:calc(100% - 24px);
+        padding-top:20px;
+    }
+
+    .page-heading{
+        margin-bottom:16px;
+    }
+
+    .page-heading h1{
+        font-size:28px;
+    }
+
+    .page-heading p:not(.eyebrow){
+        font-size:12px;
+        line-height:1.55;
+    }
+
+    .edit-panel,.security-panel{
+        padding:18px;
+    }
+
+    .avatar-grid{
+        grid-template-columns:repeat(5,1fr);
+        gap:8px;
+    }
+
+    .actions{
+        justify-content:stretch;
+    }
+
+    .actions .btn{
+        flex:1;
     }
 }
 
