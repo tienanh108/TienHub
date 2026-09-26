@@ -9,6 +9,11 @@
 
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/download.css">
+
+<style id="profile-menu-profile-style">
+.profile-menu-profile{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;border-radius:10px;color:inherit;text-decoration:none;box-sizing:border-box;}
+.profile-menu-profile:hover{background:rgba(255,255,255,.07);}
+</style>
 </head>
 
 <body>
@@ -27,6 +32,7 @@
             <a href="../index.html">Trang chủ</a>
             <a href="mini-game.html">Mini Game</a>
             <a href="download.html" class="active">Tải về</a>
+            <a href="/pages/profile.html">Hồ sơ</a>
         </nav>
 
         <div class="nav-actions">
@@ -63,7 +69,11 @@
                         <span>Thông tin tài khoản TienHub</span>
                     </div>
 
-                    <button class="profile-logout" type="button">
+                    <a class="profile-menu-profile" href="/pages/profile.html">
+                            👤 Hồ sơ
+                        </a>
+
+                        <button class="profile-logout" type="button">
                         ↪ Đăng xuất
                     </button>
                 </div>
