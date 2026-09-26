@@ -594,22 +594,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function renderLoggedIn(user) {
 
-        const saved = localStorage.getItem("tienhub_username");
+        // The login username is immutable; the visible name belongs to the profile.
+        // Never let the old localStorage cache override the Firebase profile.
+        let displayName =
 
-        const username =
-
-            saved?.trim() ||
-
-            user.displayName ||
+            user.displayName?.trim() ||
 
             user.email?.split("@")[0] ||
 
             "Người chơi";
 
+        let avatar = displayName.charAt(0).toUpperCase() || "T";
 
-
-        // Avatar is shared through Realtime Database. Never reuse old uploaded photos.
-        let avatar = username.charAt(0).toUpperCase() || "T";
         try {
             const core = await import("../src/core/firebase.js");
             const { ref, get } = await import(
@@ -617,23 +613,27 @@ document.addEventListener("DOMContentLoaded", async () => {
             );
             const snapshot = await get(ref(core.db, `users/${user.uid}`));
             const profileData = snapshot.exists() ? snapshot.val() : null;
+
+            if (profileData?.displayName && typeof profileData.displayName === "string") {
+                displayName = profileData.displayName.trim() || displayName;
+            }
             if (profileData?.avatar && typeof profileData.avatar === "string") {
                 avatar = profileData.avatar;
             }
         } catch (error) {
-            console.warn("TienHub avatar read skipped:", error);
+            console.warn("TienHub profile read skipped:", error);
         }
 
-        profileName.textContent = username;
+        profileName.textContent = displayName;
         profileAvatar.style.backgroundImage = "";
         profileAvatar.classList.remove("has-image");
         profileAvatar.textContent = avatar;
 
-        if (menuUsername) menuUsername.textContent = username;
+        if (menuUsername) menuUsername.textContent = displayName;
 
         if (profileMenu) profileMenu.hidden = false;
 
-        profileButton.setAttribute("aria-label", `Tài khoản ${username}`);
+        profileButton.setAttribute("aria-label", `Tài khoản ${displayName}`);
 
 
 
