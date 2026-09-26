@@ -1,473 +1,907 @@
 <!DOCTYPE html>
+
 <html lang="vi">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <meta name="theme-color" content="#061522">
+
     <title>Mini Games - TienHub</title>
 
+
+
     <link rel="stylesheet" href="../css/global.css">
+
     <link rel="stylesheet" href="../css/home.css">
+
     <link rel="stylesheet" href="../css/mini-game.css">
+
 </head>
 
+
+
 <body>
+
 <header class="site-header">
+
     <div class="nav-shell">
 
+
+
         <a class="brand" href="../" aria-label="TienHub">
+
             <span class="brand-mark">
+
                 <img src="../assets/icon/tienhub-mark.png" alt="TienHub">
+
             </span>
+
             <span class="brand-name">TienHub</span>
+
         </a>
 
+
+
         <nav class="main-nav" aria-label="Điều hướng chính">
+
             <a href="../">Trang chủ</a>
+
             <a href="mini-game.html" class="active">Mini Games</a>
+
             <a href="download.html">Tải về</a>
+
             <a href="/pages/profile.html">Hồ sơ</a>
+
         </nav>
 
+
+
         <div class="nav-actions">
+
             <label class="search">
+
                 <svg viewBox="0 0 24 24" aria-hidden="true">
+
                     <circle cx="11" cy="11" r="6.8"></circle>
+
                     <path d="m16.2 16.2 4.2 4.2"></path>
+
                 </svg>
+
                 <input id="gameSearch" type="search"
+
                        placeholder="Tìm kiếm game..."
+
                        aria-label="Tìm kiếm game">
+
             </label>
+
+
 
             <span class="nav-divider"></span>
 
+
+
             <div class="profile-wrap">
+
                 <button class="profile" type="button" aria-label="Mở hồ sơ" aria-expanded="false">
+
                     <span class="profile-avatar">T</span>
+
                     <span class="profile-name">Khách</span>
+
                 </button>
 
+
+
                 <div class="profile-menu">
+
                     <div class="profile-menu-head">
+
                         <strong class="profile-menu-username">Khách</strong>
+
                         <span>Thông tin tài khoản TienHub</span>
+
                     </div>
 
+
+
                     <a class="profile-menu-profile" href="/pages/profile.html">
+
                         👤 Hồ sơ
+
                     </a>
 
+
+
                     <button class="profile-logout" type="button">
+
                         ↪ Đăng xuất
+
                     </button>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
+
 </header>
+
+
 
 <main class="mini-page">
 
+
+
     <section class="mini-page-hero">
-        <div class="mini-hero-copy">
-            <div class="mini-breadcrumb">
-                <a href="../">Trang chủ</a>
-                <span>›</span>
-                <span>Mini Games</span>
-            </div>
 
-            <div class="mini-title-row">
-                <span class="mini-title-icon">👾</span>
-                <h1>Mini Games</h1>
-            </div>
+        
 
-            <p>Những trò chơi nhỏ, giải trí nhanh, chơi mọi lúc mọi nơi.</p>
-
-            <div class="mini-features">
-                <span>✓ Chơi nhanh</span>
-                <span>✓ Dễ chơi</span>
-                <span>✓ Nhiều thể loại</span>
-            </div>
-        </div>
     </section>
+
+
 
     <section class="mini-library">
 
+
+
         <div class="mini-library-heading">
+
             <div>
+
                 <span class="mini-eyebrow">TIENHUB LIBRARY</span>
+
                 <h2>Tất cả Mini Games</h2>
+
             </div>
+
             <span id="gameCount" class="game-count">10 game</span>
+
         </div>
+
+
 
         <!-- NÚT CHỌN THỂ LOẠI -->
+
         <div class="category-bar" role="tablist" aria-label="Lọc thể loại game">
+
             <button class="category-btn active" type="button"
+
                     data-category="all">
+
                 🎮 Tất cả
+
             </button>
+
             <button class="category-btn" type="button"
+
                     data-category="arcade">
+
                 🕹️ Arcade
+
             </button>
+
             <button class="category-btn" type="button"
+
                     data-category="board">
+
                 🎲 Board Game
+
             </button>
+
             <button class="category-btn" type="button"
+
                     data-category="card">
+
                 🃏 Card Game
+
             </button>
+
             <button class="category-btn" type="button"
+
                     data-category="puzzle">
+
                 🧩 Puzzle
+
             </button>
+
         </div>
 
+
+
         <div class="mini-library-tools">
+
             <span id="filterText">Đang hiển thị tất cả game</span>
+
         </div>
+
+
 
         <div class="mini-library-grid" id="miniGameGrid">
 
+
+
             <!-- CARO 5 -->
+
             <article class="library-mini-card"
+
                      data-category="board"
+
                      data-name="caro 5">
+
                 <div class="library-cover caro-cover">
+
                     <span class="xo x1">×</span><span class="xo o1">○</span>
+
                     <span class="xo x2">×</span><span class="xo o2">○</span>
+
                     <span class="xo x3">×</span><span class="xo o3">○</span>
+
                     <span class="xo x4">×</span><span class="xo o4">○</span>
+
                     <span class="xo x5">×</span>
+
                 </div>
+
                 <div class="library-info">
+
                     <div>
+
                         <h3>Caro 5</h3>
+
                         <span>Board Game</span>
+
                         <p>Đặt 5 quân liên tiếp để chiến thắng.</p>
+
                     </div>
+
                     <a href="../mini-games/caro5/index.html">Chơi</a>
+
                 </div>
+
             </article>
+
+
 
             <!-- CHESS -->
+
             <article class="library-mini-card"
+
                      data-category="board"
+
                      data-name="chess">
+
                 <div class="library-cover chess-cover">
+
                     <div class="chess-board">
+
                         <span>♜</span><span>♞</span><span>♝</span><span>♛</span>
+
                         <span>♟</span><span>♟</span><span>♟</span><span>♟</span>
+
                         <span>♙</span><span>♙</span><span>♙</span><span>♙</span>
+
                         <span>♖</span><span>♘</span><span>♗</span><span>♕</span>
+
                     </div>
+
                 </div>
+
                 <div class="library-info">
+
                     <div>
+
                         <h3>Chess</h3>
+
                         <span>Board Game</span>
+
                         <p>Đấu trí và chiếu hết đối thủ.</p>
+
                     </div>
+
                     <a href="../mini-games/chess/index.html">Chơi</a>
+
                 </div>
+
             </article>
+
+
 
             <!-- FLAPPY -->
+
             <article class="library-mini-card"
+
                      data-category="arcade"
+
                      data-name="flappy bird">
+
                 <div class="library-cover flappy-cover">
+
                     <span class="cloud cloud-1"></span>
+
                     <span class="cloud cloud-2"></span>
+
                     <span class="flappy-pipe pipe-top"></span>
+
                     <span class="flappy-pipe pipe-bottom"></span>
+
                     <span class="flappy-bird">
+
                         <i class="bird-eye"></i>
+
                         <i class="bird-beak"></i>
+
                         <i class="bird-wing"></i>
+
                     </span>
+
                 </div>
+
                 <div class="library-info">
+
                     <div>
+
                         <h3>Flappy Bird</h3>
+
                         <span>Arcade</span>
+
                         <p>Bay càng xa càng tốt.</p>
+
                     </div>
+
                     <a href="../mini-games/flappy/index.html">Chơi</a>
+
                 </div>
+
             </article>
+
+
 
             <!-- LUDO -->
+
             <article class="library-mini-card"
+
                      data-category="board"
+
                      data-name="ludo">
+
                 <div class="library-cover ludo-cover">
+
                     <div class="ludo-board">
+
                         <span class="ludo-home red"></span>
+
                         <span class="ludo-home blue"></span>
+
                         <span class="ludo-home yellow"></span>
+
                         <span class="ludo-home green"></span>
+
                         <span class="ludo-center"></span>
+
                     </div>
+
                 </div>
+
                 <div class="library-info">
+
                     <div>
+
                         <h3>Ludo</h3>
+
                         <span>Board Game</span>
+
                         <p>Đưa quân về đích trước đối thủ.</p>
+
                     </div>
+
                     <a href="../mini-games/ludo/index.html">Chơi</a>
+
                 </div>
+
             </article>
+
+
 
             <!-- SNAKE -->
+
             <article class="library-mini-card"
+
                      data-category="arcade"
+
                      data-name="snake">
+
                 <div class="library-cover snake-cover">
+
                     <span class="snake-body snake-1"></span>
+
                     <span class="snake-body snake-2"></span>
+
                     <span class="snake-body snake-3"></span>
+
                     <span class="snake-body snake-4"></span>
+
                     <span class="snake-head"></span>
+
                     <span class="snake-food"></span>
+
                 </div>
+
                 <div class="library-info">
+
                     <div>
+
                         <h3>Snake</h3>
+
                         <span>Arcade</span>
+
                         <p>Ăn thức ăn và lớn dần.</p>
+
                     </div>
+
                     <a href="../mini-games/snake/index.html">Chơi</a>
+
                 </div>
+
             </article>
+
+
 
             <!-- STICKMAN -->
+
             <article class="library-mini-card"
+
                      data-category="arcade"
+
                      data-name="stickman">
+
                 <div class="library-cover stickman-cover">
+
                     <span class="stickman-head"></span>
+
                     <span class="stickman-body"></span>
+
                     <span class="stickman-arm arm-left"></span>
+
                     <span class="stickman-arm arm-right"></span>
+
                     <span class="stickman-leg leg-left"></span>
+
                     <span class="stickman-leg leg-right"></span>
+
                     <span class="stickman-sword"></span>
+
                 </div>
+
                 <div class="library-info">
+
                     <div>
+
                         <h3>Stickman</h3>
+
                         <span>Arcade</span>
+
                         <p>Vượt chướng ngại vật và tiến về phía trước.</p>
+
                     </div>
+
                     <a href="../mini-games/stickman/index.html">Chơi</a>
+
                 </div>
+
             </article>
+
+
 
             <!-- BRICK BREAKER -->
+
             <article class="library-mini-card"
+
                      data-category="arcade"
+
                      data-name="brick breaker">
+
                 <div class="library-cover brick-breaker-cover">
+
                     <div class="brick-wall">
+
                         <span></span><span></span><span></span><span></span>
+
                         <span></span><span></span><span></span><span></span>
+
                         <span></span><span></span><span></span><span></span>
+
                     </div>
+
                     <div class="brick-ball"></div>
+
                     <div class="brick-paddle"></div>
+
                 </div>
+
                 <div class="library-info">
+
                     <div>
+
                         <h3>Brick Breaker</h3>
+
                         <span>Arcade</span>
+
                         <p>Phá toàn bộ gạch bằng quả bóng.</p>
+
                     </div>
+
                     <a href="../mini-games/brick-breaker/index.html">Chơi</a>
+
                 </div>
+
             </article>
+
+
 
             <!-- MINESWEEPER -->
+
             <article class="library-mini-card"
+
                      data-category="puzzle"
+
                      data-name="minesweeper">
+
                 <div class="library-cover minesweeper-cover">
+
                     <div class="mine-grid">
+
                         <span>1</span><span>2</span><span>1</span><span>·</span>
+
                         <span>1</span><span>💣</span><span>2</span><span>1</span>
+
                         <span>·</span><span>2</span><span>3</span><span>1</span>
+
                         <span>1</span><span>1</span><span>·</span><span>2</span>
+
                     </div>
+
                 </div>
+
                 <div class="library-info">
+
                     <div>
+
                         <h3>Minesweeper</h3>
+
                         <span>Puzzle</span>
+
                         <p>Tìm ô an toàn và tránh những quả mìn.</p>
+
                     </div>
+
                     <a href="../mini-games/minesweeper/index.html">Chơi</a>
+
                 </div>
+
             </article>
+
+
 
             <!-- BLACKJACK -->
+
             <article class="library-mini-card"
+
                      data-category="card"
+
                      data-name="blackjack">
+
                 <div class="library-cover blackjack-cover">
+
                     <div class="playing-card card-a">A♠</div>
+
                     <div class="playing-card card-k">K♥</div>
+
                 </div>
+
                 <div class="library-info">
+
                     <div>
+
                         <h3>Blackjack</h3>
+
                         <span>Card Game</span>
+
                         <p>Cố đạt gần 21 điểm hơn dealer.</p>
+
                     </div>
+
                     <a href="../mini-games/blackjack/index.html">Chơi</a>
+
                 </div>
+
             </article>
+
+
 
             <!-- PONG -->
+
             <article class="library-mini-card"
+
                      data-category="arcade"
+
                      data-name="pong">
+
                 <div class="library-cover pong-cover">
+
                     <span class="pong-paddle left"></span>
+
                     <span class="pong-paddle right"></span>
+
                     <span class="pong-ball"></span>
+
                     <span class="pong-line"></span>
+
                 </div>
+
                 <div class="library-info">
+
                     <div>
+
                         <h3>Pong</h3>
+
                         <span>Arcade</span>
+
                         <p>Đánh bóng và vượt qua đối thủ.</p>
+
                     </div>
+
                     <a href="../mini-games/pong/index.html">Chơi</a>
+
                 </div>
+
             </article>
 
+
+
             <div class="no-games" id="noGames" hidden>
+
                 Không tìm thấy game phù hợp.
+
             </div>
+
         </div>
+
     </section>
+
 </main>
 
+
+
 <footer class="site-footer">
+
     <div class="footer-inner">
+
         <div class="footer-brand">
+
             <div class="footer-logo">
+
                 <img src="../assets/icon/tienhub-mark.png" alt="TienHub">
+
                 <strong>TienHub</strong>
+
             </div>
+
             <p>Nền tảng game nơi bạn có thể khám phá, chơi và kết nối cùng cộng đồng.</p>
+
         </div>
 
+
+
         <div class="footer-column">
+
             <strong>TIENHUB</strong>
+
             <a href="../">Trang chủ</a>
+
             <a href="mini-game.html">Mini Games</a>
+
             <a href="download.html">Tải về</a>
+
         </div>
 
+
+
         <div class="footer-column">
+
             <strong>HỖ TRỢ</strong>
+
             <a href="#">Trung tâm trợ giúp</a>
+
             <a href="#">Báo lỗi</a>
+
             <a href="#">Liên hệ</a>
+
         </div>
 
+
+
         <div class="footer-column">
+
             <strong>PHÁP LÝ</strong>
+
             <a href="#">Điều khoản sử dụng</a>
+
             <a href="#">Chính sách bảo mật</a>
+
         </div>
+
+
 
         <div class="system-status">
+
             <span class="status-dot"></span>
+
             Tất cả hệ thống đang hoạt động
+
         </div>
+
     </div>
+
+
 
     <div class="footer-bottom">
+
         © 2026 TienHub. All rights reserved.
+
     </div>
+
 </footer>
 
+
+
 <script src="../js/game.js?v=20260926-2" defer></script>
+
 <script src="../js/profile.js?v=20260925-2235" defer></script>
+
 <script type="module" src="../js/auth.js?v=20260925-2235"></script>
 
+
+
 <script>
+
 (function () {
+
     const buttons = [...document.querySelectorAll(".category-btn")];
+
     const cards = [...document.querySelectorAll(".library-mini-card")];
+
     const search = document.getElementById("gameSearch");
+
     const count = document.getElementById("gameCount");
+
     const filterText = document.getElementById("filterText");
+
     const noGames = document.getElementById("noGames");
+
+
 
     let activeCategory = "all";
 
+
+
     function applyFilter() {
+
         const keyword = (search?.value || "").trim().toLowerCase();
+
         let visible = 0;
 
+
+
         cards.forEach(card => {
+
             const category = card.dataset.category || "";
+
             const name = card.dataset.name || "";
+
             const categoryMatch =
+
                 activeCategory === "all" || category === activeCategory;
+
             const searchMatch = !keyword || name.includes(keyword);
 
+
+
             const show = categoryMatch && searchMatch;
+
             card.hidden = !show;
 
+
+
             if (show) visible++;
+
         });
+
+
 
         if (count) {
-            count.textContent = `${visible} game`;
+
+            count.textContent = \`${visible} game\`;
+
         }
+
+
 
         if (filterText) {
+
             const activeButton =
+
                 buttons.find(btn => btn.dataset.category === activeCategory);
+
             const label = activeButton
+
                 ? activeButton.textContent.trim()
+
                 : "Tất cả";
 
+
+
             filterText.textContent = keyword
-                ? `Tìm kiếm: "${keyword}" • ${visible} game`
-                : `Đang hiển thị: ${label} • ${visible} game`;
+
+                ? \`Tìm kiếm: "${keyword}" • ${visible} game\`
+
+                : \`Đang hiển thị: ${label} • ${visible} game\`;
+
         }
+
+
 
         if (noGames) {
+
             noGames.hidden = visible !== 0;
+
         }
+
     }
 
+
+
     buttons.forEach(button => {
+
         button.addEventListener("click", () => {
+
             activeCategory = button.dataset.category || "all";
 
+
+
             buttons.forEach(btn => {
+
                 btn.classList.toggle("active", btn === button);
+
             });
 
+
+
             applyFilter();
+
         });
+
     });
+
+
 
     search?.addEventListener("input", applyFilter);
 
+
+
     applyFilter();
+
 })();
+
 </script>
+
 </body>
+
 </html>
