@@ -796,21 +796,29 @@ async function saveFlappyLeaderboardScore(newScore) {
 
         // Rules yêu cầu chỉ tăng Best.
         // Nếu chưa có bản ghi, tạo bản ghi kể cả score = 0.
-        const displayName = await getFlappyDisplayName(user);
+        // BXH Flappy dùng USERNAME ĐĂNG NHẬP.
+        // Firebase Rules của TienHub cũng xác thực username này
+        // với users/{uid}/username, nên không ghi displayName vào BXH.
+        const username = await getFlappyUsername(user);
+
+        if (!username) {
+            throw new Error("Không xác định được username TienHub.");
+        }
 
         if (existingScore !== null && newScore <= existingScore) {
-            // Đồng bộ tên hiển thị mới vào bản ghi BXH hiện tại.
-            if (existing?.username !== displayName || existing?.displayName !== displayName) {
+            // Không cần ghi lại nếu điểm mới không vượt Best.
+            // Chỉ đồng bộ username nếu bản ghi cũ bị thiếu/sai.
+            if (existing?.username !== username) {
                 await set(scoreRef, {
                     ...existing,
-                    username: displayName,
-                    displayName,
+                    username,
                     score: existingScore,
                     updatedAt: Date.now()
                 });
             }
 
             highScore = existingScore;
+            currentUsername = username;
             updateScore();
             updateFlappyProfileBest(existingScore);
             await loadFlappyLeaderboard();
@@ -818,8 +826,7 @@ async function saveFlappyLeaderboardScore(newScore) {
         }
 
         const payload = {
-            username: displayName,
-            displayName,
+            username,
             score: newScore,
             updatedAt: Date.now()
         };
@@ -833,14 +840,14 @@ async function saveFlappyLeaderboardScore(newScore) {
 
         if (
             !verified ||
-            (verified.displayName || verified.username) !== displayName ||
+            verified.username !== username ||
             typeof verified.score !== "number" ||
             verified.score !== newScore
         ) {
             throw new Error("Firebase ghi điểm nhưng không xác minh được dữ liệu.");
         }
 
-        currentUsername = displayName;
+        currentUsername = username;
         highScore = newScore;
 
         updateScore();
@@ -887,9 +894,9 @@ async function loadFlappyLeaderboard() {
 
             players.push({
                 uid: child.key,
-                username: typeof data.displayName === "string" && data.displayName.trim()
-                    ? data.displayName.trim()
-                    : (typeof data.username === "string" ? data.username : "Người chơi"),
+                username: typeof data.username === "string" && data.username.trim()
+                    ? data.username.trim()
+                    : "Người chơi",
                 score: typeof data.score === "number"
                     ? data.score
                     : Number(data.score) || 0
