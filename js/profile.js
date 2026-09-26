@@ -606,7 +606,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         profileName.textContent = username;
 
-        profileAvatar.textContent = username.charAt(0).toUpperCase() || "T";
+        const photoURL = user.photoURL || localStorage.getItem("tienhub_avatar_url") || "";
+        if (photoURL) {
+            profileAvatar.textContent = "";
+            profileAvatar.style.backgroundImage = `url("${photoURL}")`;
+            profileAvatar.style.backgroundSize = "cover";
+            profileAvatar.style.backgroundPosition = "center";
+            profileAvatar.style.backgroundRepeat = "no-repeat";
+        } else {
+            profileAvatar.style.backgroundImage = "";
+            profileAvatar.textContent = username.charAt(0).toUpperCase() || "T";
+        }
 
         if (menuUsername) menuUsername.textContent = username;
 
