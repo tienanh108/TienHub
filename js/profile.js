@@ -621,10 +621,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 
+        // Avatar dùng chung lấy từ Realtime Database users/{uid}.avatar.
+        let avatar = username.charAt(0).toUpperCase() || "T";
+        try {
+            const core = await import("../src/core/firebase.js");
+            const { ref, get } = await import(
+                "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
+            );
+            const snapshot = await get(ref(core.db, `users/${user.uid}`));
+            const profileData = snapshot.exists() ? snapshot.val() : null;
+            if (profileData?.avatar && typeof profileData.avatar === "string") {
+                avatar = profileData.avatar;
+            }
+        } catch (error) {
+            console.warn("TienHub avatar read skipped:", error);
+        }
+
         profileName.textContent = username;
-
-        profileAvatar.textContent = username.charAt(0).toUpperCase() || "T";
-
+        profileAvatar.style.backgroundImage = "";
+        profileAvatar.classList.remove("has-image");
+        profileAvatar.textContent = avatar;
         if (menuUsername) menuUsername.textContent = username;
 
         if (profileMenu) profileMenu.hidden = false;
