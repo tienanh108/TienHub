@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <title>TienHub - Minesweeper</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="game-wrapper">
+    <header class="topbar">
+      <div class="brand">
+        <strong>TIENHUB</strong>
+        <span>MINESWEEPER</span>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <small>MINES</small>
+          <strong id="mineCount">010</strong>
+        </div>
+        <div class="stat">
+          <small>TIME</small>
+          <strong id="timer">000</strong>
+        </div>
+        <div class="stat">
+          <small>BEST</small>
+          <strong id="best">---</strong>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="menuBtn" class="icon-btn" title="Về menu">⌂</button>
+        <button id="newBtn" class="new-btn">NEW</button>
+      </div>
+    </header>
+
+    <section class="controlbar">
+      <div class="difficulty" id="difficulty">
+        <button data-level="easy" class="active">EASY</button>
+        <button data-level="medium">MEDIUM</button>
+        <button data-level="hard">HARD</button>
+      </div>
+      <div class="status" id="status">CHỌN MỘT Ô ĐỂ BẮT ĐẦU</div>
+    </section>
+
+    <section class="board-shell">
+      <div id="board" class="board" aria-label="Bàn dò mìn"></div>
+      <div id="overlay" class="overlay hidden">
+        <div class="result-card">
+          <div id="resultIcon" class="result-icon">💥</div>
+          <h1 id="resultTitle">GAME OVER</h1>
+          <p id="resultText">Bạn đã chạm phải một quả mìn.</p>
+          <button id="againBtn" class="play-btn">PLAY AGAIN</button>
+        </div>
+      </div>
+    </section>
+
+    <p class="mobile-help">Chạm để mở · Nhấn giữ để cắm cờ</p>
+    <footer>MINESWEEPER · TIENHUB</footer>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>
