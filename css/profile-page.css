@@ -318,7 +318,7 @@ button{cursor:pointer}
 
     /* Preview is useful on desktop, but wastes a full panel on phones. */
     .preview-panel{
-        display:none;
+        display:none !important;
     }
 
     .right-column{
