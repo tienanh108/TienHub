@@ -26,6 +26,7 @@
             <a href="../">Trang chủ</a>
             <a href="mini-game.html" class="active">Mini Games</a>
             <a href="download.html">Tải về</a>
+            <a href="/pages/profile.html">Hồ sơ</a>
         </nav>
 
         <div class="nav-actions">
@@ -42,10 +43,25 @@
             <span class="nav-divider"></span>
 
             <div class="profile-wrap">
-                <button class="profile" type="button">
+                <button class="profile" type="button" aria-label="Mở hồ sơ" aria-expanded="false">
                     <span class="profile-avatar">T</span>
                     <span class="profile-name">Khách</span>
                 </button>
+
+                <div class="profile-menu">
+                    <div class="profile-menu-head">
+                        <strong class="profile-menu-username">Khách</strong>
+                        <span>Thông tin tài khoản TienHub</span>
+                    </div>
+
+                    <a class="profile-menu-profile" href="/pages/profile.html">
+                        👤 Hồ sơ
+                    </a>
+
+                    <button class="profile-logout" type="button">
+                        ↪ Đăng xuất
+                    </button>
+                </div>
             </div>
         </div>
     </div>
