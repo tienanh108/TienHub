@@ -9,6 +9,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const games = [
         {
+            id: "soccer",
+            name: "Soccer",
+            category: "sports",
+            players: null,
+            href: "#",
+            visual: `
+                <div class="mini-cover soccer-cover">
+                    <span class="soccer-field-line midfield"></span>
+                    <span class="soccer-field-line box-left"></span>
+                    <span class="soccer-field-line box-right"></span>
+                    <span class="soccer-player blue p1"></span>
+                    <span class="soccer-player blue p2"></span>
+                    <span class="soccer-player blue p3"></span>
+                    <span class="soccer-player red p4"></span>
+                    <span class="soccer-player red p5"></span>
+                    <span class="soccer-player red p6"></span>
+                    <span class="soccer-ball"></span>
+                </div>
+            `
+        },
+        {
             id: "caro5",
             name: "Caro 5",
             players: null,
