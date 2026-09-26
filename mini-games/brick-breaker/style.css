@@ -1,3 +1,8 @@
+/* =====================================================
+   TIENHUB - BRICK BREAKER
+   Responsive stylesheet
+===================================================== */
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -19,12 +24,16 @@ body {
     overflow: hidden;
 
     background:
-        radial-gradient(circle at 12% 20%,
-            rgba(20, 90, 220, .17),
-            transparent 32%),
-        radial-gradient(circle at 88% 78%,
-            rgba(130, 40, 220, .15),
-            transparent 34%),
+        radial-gradient(
+            circle at 12% 20%,
+            rgba(20, 90, 220, 0.17),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 88% 78%,
+            rgba(130, 40, 220, 0.15),
+            transparent 34%
+        ),
         #02050b;
 
     color: #f5f8ff;
@@ -38,25 +47,24 @@ body {
         sans-serif;
 }
 
-
-/* =========================
-   GAME WRAPPER
-========================= */
+/* =====================================================
+   WRAPPER
+===================================================== */
 
 .game-wrapper {
     width: min(
         calc(100vw - 24px),
-        calc((100vh - 110px) * 1.6923),
+        calc((100vh - 110px) * 1.6923077),
         1100px
     );
 
     max-width: 1100px;
+    min-width: 0;
 }
 
-
-/* =========================
+/* =====================================================
    TOP BAR
-========================= */
+===================================================== */
 
 .topbar {
     width: 100%;
@@ -71,34 +79,31 @@ body {
 }
 
 .brand {
-    flex-shrink: 0;
+    flex: 0 0 auto;
 
     font-size: 22px;
     line-height: 1;
-
     font-weight: 900;
     letter-spacing: 2px;
 }
 
 .brand small {
     display: block;
-
     margin-top: 5px;
 
     color: #5d6a82;
-
     font-size: 7px;
     letter-spacing: 3px;
     font-weight: 700;
 }
 
-
-/* =========================
+/* =====================================================
    STATS
-========================= */
+===================================================== */
 
 .stats {
     flex: 1;
+    min-width: 0;
 
     display: flex;
     align-items: center;
@@ -114,11 +119,9 @@ body {
 
 .stat small {
     display: block;
-
     margin-bottom: 4px;
 
     color: #68758d;
-
     font-size: 8px;
     letter-spacing: 1.5px;
     font-weight: 700;
@@ -126,15 +129,13 @@ body {
 
 .stat strong {
     display: block;
-
     font-size: 17px;
     line-height: 1;
 }
 
-
-/* =========================
+/* =====================================================
    HEARTS
-========================= */
+===================================================== */
 
 .hearts-stat {
     min-width: auto;
@@ -142,24 +143,25 @@ body {
 
 .hearts-stat strong {
     color: #ff3f5f;
-
     font-size: 24px;
+    line-height: 1;
     letter-spacing: 3px;
-
     white-space: nowrap;
 
     text-shadow:
-        0 0 8px rgba(255,55,85,.45),
-        0 0 18px rgba(255,55,85,.16);
+        0 0 8px rgba(255, 55, 85, 0.45),
+        0 0 18px rgba(255, 55, 85, 0.16);
 }
 
-
-/* =========================
-   BUTTONS
-========================= */
+/* =====================================================
+   TOP ACTIONS
+===================================================== */
 
 .top-actions {
+    flex: 0 0 auto;
+
     display: flex;
+    align-items: center;
     gap: 7px;
 }
 
@@ -171,50 +173,51 @@ body {
     align-items: center;
     justify-content: center;
 
-    border: 1px solid rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,0.14);
     border-radius: 10px;
 
-    background: rgba(255,255,255,.055);
-
-    color: white;
+    background: rgba(255,255,255,0.055);
+    color: #fff;
 
     font-size: 17px;
-
     cursor: pointer;
 
     transition:
-        .15s ease;
+        background .15s ease,
+        transform .15s ease,
+        border-color .15s ease;
 }
 
 .icon-btn:hover {
-    background: rgba(255,255,255,.12);
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.22);
     transform: translateY(-1px);
 }
 
+.icon-btn:active {
+    transform: translateY(0) scale(.96);
+}
 
-/* =========================
-   GAME
-========================= */
+/* =====================================================
+   GAME AREA
+===================================================== */
 
 .game-shell {
     position: relative;
 
     width: 100%;
-
     aspect-ratio: 1100 / 650;
 
     overflow: hidden;
 
+    border: 1px solid rgba(60,150,255,0.30);
     border-radius: 16px;
-
-    border:
-        1px solid rgba(60,150,255,.30);
 
     background: #030711;
 
     box-shadow:
-        0 20px 70px rgba(0,0,0,.60),
-        0 0 45px rgba(0,100,255,.08);
+        0 20px 70px rgba(0,0,0,0.60),
+        0 0 45px rgba(0,100,255,0.08);
 }
 
 #gameCanvas {
@@ -223,23 +226,28 @@ body {
     width: 100%;
     height: 100%;
 
+    max-width: 100%;
+    max-height: 100%;
+
     background: #030711;
 }
 
-
-/* =========================
+/* =====================================================
    OVERLAY
-========================= */
+===================================================== */
 
 .overlay {
     position: absolute;
     inset: 0;
 
+    width: 100%;
+    height: 100%;
+
     display: flex;
     align-items: center;
     justify-content: center;
 
-    background: rgba(2,5,12,.70);
+    background: rgba(2,5,12,0.70);
 
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
@@ -255,13 +263,11 @@ body {
 .overlay.hidden {
     opacity: 0;
     visibility: hidden;
-
     pointer-events: none;
 }
 
 .menu-card {
     width: min(90%, 500px);
-
     padding: 25px;
 
     text-align: center;
@@ -270,31 +276,28 @@ body {
 .menu-card h1 {
     margin-bottom: 9px;
 
-    font-size: clamp(24px,4vw,48px);
-
+    font-size: clamp(24px, 4vw, 48px);
     line-height: 1;
 
     letter-spacing: 3px;
+    font-weight: 900;
 }
 
 .menu-card p {
     margin-bottom: 21px;
 
     color: #8794ac;
-
     font-size: 13px;
+    line-height: 1.5;
 }
 
-
-/* =========================
+/* =====================================================
    MINI BRICKS
-========================= */
+===================================================== */
 
 .mini-bricks {
     display: flex;
-
     justify-content: center;
-
     gap: 5px;
 
     margin-bottom: 17px;
@@ -306,8 +309,7 @@ body {
 
     border-radius: 3px;
 
-    box-shadow:
-        0 0 12px currentColor;
+    box-shadow: 0 0 12px currentColor;
 }
 
 .mini-bricks span:nth-child(1) {
@@ -330,56 +332,54 @@ body {
     color: #38b9ff;
 }
 
-
-/* =========================
-   PLAY
-========================= */
+/* =====================================================
+   PLAY BUTTON
+===================================================== */
 
 .play-btn {
     border: 0;
-
     border-radius: 8px;
 
     padding: 11px 45px;
 
-    background: white;
-
+    background: #fff;
     color: #050810;
 
     font-size: 13px;
-
     font-weight: 900;
-
     letter-spacing: 1px;
 
     cursor: pointer;
+
+    transition:
+        transform .15s ease,
+        box-shadow .15s ease;
 }
 
 .play-btn:hover {
     transform: translateY(-2px);
 
     box-shadow:
-        0 8px 25px
-        rgba(255,255,255,.20);
+        0 8px 25px rgba(255,255,255,0.20);
 }
 
+.play-btn:active {
+    transform: translateY(0) scale(.98);
+}
 
-/* =========================
+/* =====================================================
    CONTROLS
-========================= */
+===================================================== */
 
 .controls {
     display: flex;
-
     justify-content: center;
     align-items: center;
-
     gap: 8px;
 
     margin-top: 15px;
 
     color: #5d6a82;
-
     font-size: 10px;
 }
 
@@ -389,28 +389,22 @@ body {
     font-weight: 700;
 }
 
-
-/* =========================
+/* =====================================================
    FOOTER
-========================= */
+===================================================== */
 
 footer {
     width: 100%;
-
     height: 20px;
 
     display: flex;
-
     align-items: flex-end;
-
     justify-content: space-between;
 
     margin-top: 5px;
 
     color: #4f5d75;
-
     font-size: 8px;
-
     letter-spacing: 1.2px;
 }
 
@@ -426,10 +420,9 @@ footer span {
     color: #60708b;
 }
 
-
-/* =========================
+/* =====================================================
    TABLET
-========================= */
+===================================================== */
 
 @media (max-width: 800px) {
 
@@ -440,21 +433,25 @@ footer span {
     .game-wrapper {
         width: min(
             calc(100vw - 16px),
-            calc((100vh - 90px) * 1.6923)
+            calc((100vh - 90px) * 1.6923077)
         );
     }
 
     .topbar {
         height: 48px;
         gap: 10px;
+        margin-bottom: 7px;
     }
 
     .brand {
         font-size: 18px;
+        letter-spacing: 1.5px;
     }
 
     .brand small {
         font-size: 6px;
+        letter-spacing: 2px;
+        margin-top: 3px;
     }
 
     .stats {
@@ -481,324 +478,17 @@ footer span {
     .icon-btn {
         width: 35px;
         height: 35px;
-        font-size: 15px;
-    }
-}
 
-
-/* =================================================
-   MOBILE
-================================================= */
-
-@media (max-width: 550px) {
-
-    html,
-    body {
-        width: 100%;
-        min-height: 100%;
-    }
-
-    body {
-
-        /* QUAN TRỌNG:
-           Không dùng flex center trên mobile */
-
-        display: block;
-
-        min-height: 100vh;
-
-        padding:
-            max(7px, env(safe-area-inset-top))
-            6px
-            calc(70px + env(safe-area-inset-bottom));
-
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
-
-
-    .game-wrapper {
-
-        width: 100%;
-
-        max-width: none;
-
-        margin: 0 auto;
-    }
-
-
-    /* =====================
-       MOBILE HUD
-    ===================== */
-
-    .topbar {
-
-        height: 48px;
-
-        display: grid;
-
-        grid-template-columns:
-            auto
-            minmax(0,1fr)
-            auto;
-
-        align-items: center;
-
-        gap: 6px;
-
-        margin-bottom: 7px;
-    }
-
-
-    .brand {
-
-        font-size: 15px;
-
-        letter-spacing: 1px;
-    }
-
-
-    .brand small {
-
-        display: block;
-
-        margin-top: 3px;
-
-        font-size: 5px;
-
-        letter-spacing: 1.5px;
-    }
-
-
-    .stats {
-
-        min-width: 0;
-
-        gap: 6px;
-    }
-
-
-    .stat {
-
-        min-width: 29px;
-    }
-
-
-    .stat small {
-
-        font-size: 5px;
-
-        margin-bottom: 3px;
-    }
-
-
-    .stat strong {
-
-        font-size: 12px;
-    }
-
-
-    .hearts-stat strong {
-
-        font-size: 16px;
-
-        letter-spacing: 1px;
-    }
-
-
-    .top-actions {
-
-        gap: 5px;
-    }
-
-
-    .icon-btn {
-
-        width: 34px;
-
-        height: 34px;
-
-        border-radius: 9px;
-
-        font-size: 13px;
-    }
-
-
-    /* =====================
-       MOBILE GAME
-    ===================== */
-
-    .game-shell {
-
-        width: 100%;
-
-        aspect-ratio: 1100 / 650;
-
-        border-radius: 10px;
-
-        box-shadow:
-            0 12px 42px
-            rgba(0,0,0,.58),
-
-            0 0 25px
-            rgba(0,100,255,.09);
-    }
-
-
-    #gameCanvas {
-
-        width: 100%;
-        height: 100%;
-    }
-
-
-    /* =====================
-       MOBILE OVERLAY
-    ===================== */
-
-    .overlay {
-
-        padding: 10px;
-    }
-
-
-    .menu-card {
-
-        width: 94%;
-
-        max-width: 390px;
-
-        padding: 12px;
-    }
-
-
-    .menu-card h1 {
-
-        margin-bottom: 7px;
-
-        font-size:
-            clamp(21px,7vw,30px);
-
-        letter-spacing: 2px;
-    }
-
-
-    .menu-card p {
-
-        margin-bottom: 13px;
-
-        font-size: 10px;
-
-        line-height: 1.4;
-    }
-
-
-    .mini-bricks {
-
-        gap: 4px;
-
-        margin-bottom: 11px;
-    }
-
-
-    .mini-bricks span {
-
-        width: 24px;
-
-        height: 6px;
-    }
-
-
-    .play-btn {
-
-        padding:
-            9px 32px;
-
-        font-size: 11px;
-    }
-
-
-    .controls {
-
-        margin-top: 9px;
-
-        font-size: 8px;
-    }
-
-
-    footer {
-
-        display: none;
-    }
-}
-
-
-/* =========================
-   SMALL PHONE
-========================= */
-
-@media (max-width: 380px) {
-
-    body {
-        padding-left: 4px;
-        padding-right: 4px;
-    }
-
-    .topbar {
-        height: 43px;
-        gap: 4px;
-    }
-
-    .brand {
-        font-size: 13px;
-    }
-
-    .brand small {
-        font-size: 4px;
-    }
-
-    .stats {
-        gap: 4px;
-    }
-
-    .stat {
-        min-width: 25px;
-    }
-
-    .stat small {
-        font-size: 4px;
-    }
-
-    .stat strong {
-        font-size: 10px;
-    }
-
-    .hearts-stat strong {
-        font-size: 14px;
-        letter-spacing: 0;
-    }
-
-    .icon-btn {
-        width: 30px;
-        height: 30px;
-        font-size: 12px;
-    }
-
-    .game-shell {
         border-radius: 8px;
+        font-size: 15px;
     }
 }
 
+/* =====================================================
+   LANDSCAPE MOBILE
+===================================================== */
 
-/* =========================
-   LANDSCAPE PHONE
-========================= */
-
-@media (
-    max-height: 500px
-) and (
-    orientation: landscape
-) {
+@media (max-height: 500px) and (orientation: landscape) {
 
     body {
         padding: 5px 8px;
@@ -808,7 +498,7 @@ footer span {
     .game-wrapper {
         width: min(
             calc(100vw - 16px),
-            calc((100vh - 58px) * 1.6923)
+            calc((100vh - 58px) * 1.6923077)
         );
     }
 
@@ -823,6 +513,7 @@ footer span {
 
     .brand small {
         font-size: 4px;
+        margin-top: 2px;
     }
 
     .stat small {
@@ -845,5 +536,251 @@ footer span {
 
     footer {
         display: none;
+    }
+}
+
+/* =====================================================
+   TOUCH
+===================================================== */
+
+@media (hover: none) and (pointer: coarse) {
+
+    .icon-btn {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .play-btn {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .icon-btn:active {
+        background: rgba(255,255,255,.16);
+    }
+
+    .play-btn:active {
+        box-shadow:
+            0 5px 20px
+            rgba(255,255,255,.18);
+    }
+}
+
+/* =====================================================
+   MOBILE PORTRAIT - TRUE FULL PLAYFIELD
+===================================================== */
+
+@media (max-width: 550px) {
+
+    html,
+    body {
+        width: 100%;
+        min-height: 100%;
+    }
+
+    body {
+        display: block;
+
+        min-height: 100dvh;
+
+        padding:
+            max(6px, env(safe-area-inset-top))
+            6px
+            max(6px, env(safe-area-inset-bottom));
+
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .game-wrapper {
+        width: min(
+            calc(100vw - 12px),
+            calc((100dvh - 62px) * 0.557142857)
+        );
+
+        max-width: none;
+        margin: 0 auto;
+    }
+
+    .topbar {
+        height: 44px;
+
+        display: grid;
+
+        grid-template-columns:
+            auto
+            minmax(0, 1fr)
+            auto;
+
+        align-items: center;
+
+        gap: 5px;
+
+        margin-bottom: 6px;
+    }
+
+    .brand {
+        font-size: 14px;
+        letter-spacing: 1px;
+    }
+
+    .brand small {
+        display: block;
+        margin-top: 3px;
+
+        font-size: 4px;
+        letter-spacing: 1.5px;
+    }
+
+    .stats {
+        min-width: 0;
+        gap: 6px;
+    }
+
+    .stat {
+        min-width: 27px;
+    }
+
+    .stat small {
+        font-size: 5px;
+        margin-bottom: 2px;
+        letter-spacing: .7px;
+    }
+
+    .stat strong {
+        font-size: 12px;
+    }
+
+    .hearts-stat strong {
+        font-size: 16px;
+        letter-spacing: 1px;
+    }
+
+    .top-actions {
+        gap: 4px;
+    }
+
+    .icon-btn {
+        width: 32px;
+        height: 32px;
+
+        border-radius: 8px;
+        font-size: 13px;
+    }
+
+    /* Full portrait game */
+    .game-shell {
+        width: 100%;
+
+        aspect-ratio: 390 / 700;
+
+        border-radius: 11px;
+
+        border:
+            1px solid
+            rgba(60,150,255,.36);
+
+        box-shadow:
+            0 12px 45px
+            rgba(0,0,0,.60),
+            0 0 30px
+            rgba(0,100,255,.10);
+    }
+
+    #gameCanvas {
+        width: 100%;
+        height: 100%;
+    }
+
+    .overlay {
+        padding: 12px;
+    }
+
+    .menu-card {
+        width: 92%;
+        max-width: 360px;
+        padding: 14px;
+    }
+
+    .menu-card h1 {
+        font-size:
+            clamp(23px, 7vw, 31px);
+
+        letter-spacing: 2px;
+        margin-bottom: 8px;
+    }
+
+    .menu-card p {
+        font-size: 10px;
+        line-height: 1.45;
+        margin-bottom: 13px;
+    }
+
+    .mini-bricks {
+        gap: 4px;
+        margin-bottom: 11px;
+    }
+
+    .mini-bricks span {
+        width: 24px;
+        height: 6px;
+    }
+
+    .play-btn {
+        padding: 9px 32px;
+        font-size: 11px;
+    }
+
+    .controls {
+        margin-top: 9px;
+        font-size: 8px;
+    }
+
+    footer {
+        display: none;
+    }
+}
+
+/* Small phones */
+@media (max-width: 380px) {
+
+    .game-wrapper {
+        width: calc(100vw - 10px);
+    }
+
+    .topbar {
+        height: 42px;
+    }
+
+    .brand {
+        font-size: 13px;
+    }
+
+    .brand small {
+        font-size: 4px;
+    }
+
+    .stats {
+        gap: 4px;
+    }
+
+    .stat {
+        min-width: 24px;
+    }
+
+    .stat small {
+        font-size: 4px;
+    }
+
+    .stat strong {
+        font-size: 10px;
+    }
+
+    .hearts-stat strong {
+        font-size: 14px;
+    }
+
+    .icon-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
     }
 }
