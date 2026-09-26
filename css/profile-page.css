@@ -37,13 +37,9 @@ button{cursor:pointer}
 
 .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;font-size:21px}
 .brand-mark{
-    width:34px;
-    height:34px;
-    display:block;
-    object-fit:contain;
-    background:transparent;
-    border-radius:0;
-    box-shadow:none;
+    width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+    color:#03111b;background:linear-gradient(135deg,#4bd7ff,#1698d7);
+    box-shadow:0 0 22px rgba(42,193,255,.24);font-weight:900
 }
 .main-nav{display:flex;gap:34px;margin-left:52px}
 .main-nav a{color:#8fa4b9;text-decoration:none;font-size:14px;font-weight:600;transition:.2s}
@@ -312,43 +308,137 @@ button{cursor:pointer}
 }
 
 
+/* ===== PROFILE HEADER MATCHES TIENHUB WEB ===== */
+.site-header{height:66px;padding:0 18px;}
+.nav-shell{width:100%;display:flex;align-items:center;min-width:0;}
+.brand{gap:10px;font-size:19px;flex:0 0 auto;}
+.brand-mark{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:transparent;box-shadow:none;}
+.brand-mark img{width:36px;height:36px;display:block;object-fit:contain;}
+.main-nav{display:flex;gap:30px;margin-left:44px;align-items:center;}
+.main-nav a{font-size:14px;}
+.main-nav a.active{color:#fff;position:relative;}
+.main-nav a.active::after{content:"";position:absolute;left:0;right:0;bottom:-24px;height:2px;border-radius:2px;background:var(--cyan);}
+.nav-actions{margin-left:auto;display:flex;align-items:center;gap:12px;min-width:0;}
+.search{width:228px;height:38px;display:flex;align-items:center;gap:9px;padding:0 12px;border:1px solid rgba(34,193,255,.18);border-radius:11px;background:#061925;color:#71899b;}
+.search svg{width:16px;height:16px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.7;}
+.search input{width:100%;border:0;outline:0;background:transparent;color:#dcebf4;font-size:12px;}
+.search input::placeholder{color:#607889;}
+.nav-divider{width:1px;height:28px;background:var(--line);}
+.account-trigger{margin-left:0;padding:5px 9px;border-radius:999px;}
+.profile-page{width:min(1280px,calc(100% - 36px));padding-top:28px;}
+.page-heading h1{font-size:26px;}
+
 /* ===== PASSWORD MODAL ===== */
 .password-modal{
-    position:fixed;inset:0;display:none;align-items:center;justify-content:center;
-    z-index:100;padding:20px;
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    z-index:1000;
+    transition:opacity .2s ease, visibility .2s ease;
 }
-.password-modal.show{display:flex}
-.password-backdrop{position:absolute;inset:0;background:rgba(1,8,15,.72);backdrop-filter:blur(7px)}
+.password-modal.show{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+}
+.password-backdrop{
+    position:absolute;
+    inset:0;
+    background:rgba(2,9,16,.72);
+    backdrop-filter:blur(7px);
+}
 .password-dialog{
-    position:relative;width:min(430px,100%);padding:22px;border-radius:18px;
-    background:linear-gradient(180deg,#102236,#091724);
-    border:1px solid rgba(111,190,226,.18);box-shadow:0 25px 80px rgba(0,0,0,.5)
+    position:relative;
+    z-index:1;
+    width:min(520px,100%);
+    max-height:min(90vh,700px);
+    overflow:auto;
+    padding:26px;
+    border:1px solid rgba(78,196,245,.18);
+    border-radius:18px;
+    background:linear-gradient(180deg,#0d2031,#081622);
+    box-shadow:0 30px 90px rgba(0,0,0,.48),0 0 35px rgba(26,172,225,.08);
 }
-.password-dialog-head{display:flex;justify-content:space-between;gap:18px;margin-bottom:17px}
-.password-dialog-head .eyebrow{margin:0 0 4px;font-size:9px}
-.password-dialog-head h2{margin:0;font-size:19px}
-.password-dialog-head p:not(.eyebrow){margin:5px 0 0;color:var(--muted);font-size:10px;line-height:1.45}
+.password-dialog-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:18px;
+    margin-bottom:22px;
+}
+.password-dialog-head .eyebrow{margin:0 0 6px}
+.password-dialog-head h2{
+    margin:0;
+    font-size:23px;
+    letter-spacing:-.025em;
+}
+.password-dialog-head > div > p:last-child{
+    margin:7px 0 0;
+    color:var(--muted);
+    font-size:12px;
+}
 .password-close{
-    flex:0 0 auto;width:30px;height:30px;border-radius:9px;border:1px solid var(--line);
-    background:#0a1724;color:#91a7ba;font-size:20px;line-height:1
+    width:34px;
+    height:34px;
+    flex:0 0 34px;
+    border:1px solid var(--line);
+    border-radius:9px;
+    background:#091824;
+    color:#9bb0c1;
+    font-size:20px;
+    line-height:1;
 }
-.password-close:hover{color:#fff;background:#112437}
-.password-form{display:grid;gap:7px}
-.password-form label{margin-top:5px;color:#c8d5e2;font-size:10px;font-weight:700}
+.password-close:hover{color:#fff;background:#102638}
+.password-form{display:grid;gap:8px}
+.password-form label{
+    margin-top:7px;
+    color:#cbd9e5;
+    font-size:12px;
+    font-weight:700;
+}
 .password-form input{
-    width:100%;height:39px;padding:0 12px;border-radius:9px;border:1px solid rgba(138,179,210,.15);
-    outline:none;background:#071521;color:#f2f7fb;font-size:12px
+    width:100%;
+    height:44px;
+    padding:0 13px;
+    border:1px solid rgba(138,179,210,.15);
+    border-radius:10px;
+    outline:none;
+    background:#061520;
+    color:#f2f7fb;
+    font-size:13px;
 }
-.password-form input:focus{border-color:rgba(57,200,255,.65);box-shadow:0 0 0 3px rgba(57,200,255,.08)}
-.password-message{min-height:16px;margin:5px 0 0;font-size:10px;color:#8ea2b8}
-.password-message.error{color:#ff8a92}
-.password-message.success{color:#65ddad}
-.password-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
-.password-actions .btn{height:36px}
-@media(max-width:560px){.password-dialog{padding:18px}.password-actions{justify-content:stretch}.password-actions .btn{flex:1}}
+.password-form input:focus{
+    border-color:rgba(57,200,255,.65);
+    box-shadow:0 0 0 3px rgba(57,200,255,.08);
+}
+.password-message{
+    min-height:18px;
+    margin:5px 0 0;
+    font-size:12px;
+    color:#8ea2b8;
+}
+.password-message.error{color:#ff8790}
+.password-message.success{color:#63dcaa}
+.password-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:7px;
+}
+.password-submit,
+#passwordSubmitBtn{min-width:125px}
+#passwordSubmitBtn:disabled{opacity:.65;cursor:wait}
 
-
-.avatar-upload-input { display:none; }
-.avatar-upload-btn { border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:#fff; border-radius:10px; padding:8px 12px; font-size:12px; font-weight:700; cursor:pointer; margin-top:6px; }
-.avatar-upload-btn:hover { background:rgba(255,255,255,.1); }
-.large-avatar.has-image, .preview-avatar.has-image { background-size:cover; background-position:center; background-repeat:no-repeat; color:transparent; overflow:hidden; }
+@media(max-width:560px){
+    .password-modal{padding:14px}
+    .password-dialog{padding:20px;border-radius:15px}
+    .password-dialog-head h2{font-size:20px}
+    .password-actions{flex-direction:column-reverse}
+    .password-actions .btn{width:100%}
+}
