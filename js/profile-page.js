@@ -326,256 +326,109 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
     const name = displayNameInput.value.trim();
 
-
-
     if (!name) {
-
         displayNameInput.focus();
-
         showToast("Vui lòng nhập tên hiển thị.");
-
         return;
-
     }
-
-
 
     if (!currentUser) {
-
         showToast("Phiên đăng nhập đã hết. Vui lòng đăng nhập lại.");
-
         return;
-
     }
 
-
-
     const saveBtn = document.getElementById("saveBtn");
-
     saveBtn.disabled = true;
 
-    let reservedNewName = false;
-
-    let oldDisplayName = "";
-
-
-
     try {
-
         const core = await import("../src/core/firebase.js");
-
         const { updateProfile } = await import(
-
             "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"
-
         );
-
-        const { ref, get, runTransaction, update } = await import(
-
+        const { ref, get, set, remove, update } = await import(
             "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
-
         );
 
+        // Check the exact displayName in the reservation table.
+        // Case-sensitive by design: "acedia" !== "Acedia".
+        const nameKey = getDisplayNameKey(name);
+        const reservationRef = ref(core.db, `displayNames/${nameKey}`);
+        const reservationSnapshot = await get(reservationRef);
+        const reservation = reservationSnapshot.val();
 
-
-        const userRef = ref(core.db, `users/${currentUser.uid}`);
-
-        const userSnapshot = await get(userRef);
-
-        const existingProfile = userSnapshot.val() || {};
-
-        oldDisplayName = typeof existingProfile.displayName === "string"
-
-            ? existingProfile.displayName.trim()
-
-            : (typeof currentUser.displayName === "string" ? currentUser.displayName.trim() : "");
-
-
-
-        // Check public profiles first so old accounts (created before the name-lock)
-        // are also protected. The comparison is case-sensitive.
-        const publicProfilesSnapshot = await get(ref(core.db, "publicProfiles"));
-        const existingPublicProfiles = publicProfilesSnapshot.val() || {};
-        const duplicateUid = Object.entries(existingPublicProfiles).find(
-            ([uid, profile]) =>
-                uid !== currentUser.uid &&
-                profile &&
-                typeof profile.displayName === "string" &&
-                profile.displayName === name
-        )?.[0] || null;
-
-        if (duplicateUid) {
-            const error = new Error("Tên hiển thị đã được sử dụng.");
-            error.code = "tienhub/display-name-taken";
-            throw error;
+        if (reservation && reservation.uid !== currentUser.uid) {
+            showToast("Tên này đã tồn tại.");
+            return;
         }
 
-        // Reserve the exact displayName atomically as the final race-condition
-        // protection. "acedia" and "Acedia" remain different names.
-        const newNameKey = getDisplayNameKey(name);
-        const nameLockRef = ref(core.db, `displayNames/${newNameKey}`);
-        const lockResult = await runTransaction(nameLockRef, current => {
-
-            if (!current || current.uid === currentUser.uid) {
-
-                return {
-
-                    uid: currentUser.uid,
-
-                    displayName: name
-
-                };
-
-            }
-
-            return current;
-
+        // Reserve the new name first. The Rules only allow the owner of an
+        // existing reservation to keep it, so two users cannot claim it.
+        await set(reservationRef, {
+            uid: currentUser.uid,
+            displayName: name
         });
 
+        const oldName = String(original.displayName || "").trim();
+        const oldKey = oldName ? getDisplayNameKey(oldName) : "";
 
-
-        const lockOwner = lockResult.snapshot.val();
-
-        if (!lockResult.committed || !lockOwner || lockOwner.uid !== currentUser.uid) {
-
-            const error = new Error("Tên hiển thị đã được sử dụng.");
-
-            error.code = "tienhub/display-name-taken";
-
-            throw error;
-
+        // Release the old name when the user changes it.
+        if (oldKey && oldKey !== nameKey) {
+            const oldRef = ref(core.db, `displayNames/${oldKey}`);
+            const oldSnapshot = await get(oldRef);
+            if (oldSnapshot.val()?.uid === currentUser.uid) {
+                await remove(oldRef);
+            }
         }
 
-        reservedNewName = true;
-
-
-
-        // Firebase Auth photoURL is intended for a URL, not a large base64/data URL.
-
-        // Keep the existing avatar behavior unchanged.
-
+        // Keep Auth, the user's private profile record, and the public profile
+        // used by games in sync. Username/login is never changed here.
         await updateProfile(currentUser, { displayName: name });
 
-
-
-        await update(userRef, {
-
-            displayName: name,
-
-            avatarUrl: selectedPhotoURL || ""
-
+        await update(ref(core.db, `users/${currentUser.uid}`), {
+            displayName: name
         });
-
-
-
-        // Public profile is intentionally separate from /users so the leaderboard
-
-        // can read displayName without exposing private account fields.
 
         await update(ref(core.db, `publicProfiles/${currentUser.uid}`), {
-
-            displayName: name
-
+            displayName: name,
+            avatarUrl: selectedPhotoURL || ""
         });
 
+        localStorage.setItem("tienhub_username", name);
+        localStorage.setItem(
+            getAvatarStorageKey(currentUser),
+            selectedAvatar || name.charAt(0).toUpperCase() || "T"
+        );
 
-
-        // Release the previous exact name after the new one has been saved.
-
-        if (oldDisplayName && oldDisplayName !== name) {
-
-            const oldNameKey = getDisplayNameKey(oldDisplayName);
-
-            await runTransaction(ref(core.db, `displayNames/${oldNameKey}`), current => {
-
-                return current && current.uid === currentUser.uid ? null : current;
-
-            });
-
+        if (selectedPhotoURL) {
+            localStorage.setItem(getAvatarUrlStorageKey(currentUser), selectedPhotoURL);
+        } else {
+            localStorage.removeItem(getAvatarUrlStorageKey(currentUser));
         }
 
-
-
-        localStorage.setItem("tienhub_username", name);
-
-        localStorage.setItem(getAvatarStorageKey(currentUser), selectedAvatar || name.charAt(0).toUpperCase() || "T");
-
-        if (selectedPhotoURL) localStorage.setItem(getAvatarUrlStorageKey(currentUser), selectedPhotoURL);
-
-        else localStorage.removeItem(getAvatarUrlStorageKey(currentUser));
-
-
-
-        original = { displayName: name, avatar: selectedAvatar, photoURL: selectedPhotoURL };
+        original = {
+            displayName: name,
+            avatar: selectedAvatar,
+            photoURL: selectedPhotoURL
+        };
 
         updatePreview();
-
         showToast("Đã lưu thay đổi.");
 
     } catch (error) {
-
         console.error("TienHub profile save error:", error);
-
         const code = error?.code || "";
-
         console.error("TienHub profile save error code:", code);
 
-
-
-        if (code === "tienhub/display-name-taken") {
-
-            showToast("Tên hiển thị này đã được sử dụng. Hãy chọn tên khác.");
-
+        if (code === "PERMISSION_DENIED" || code === "database/permission-denied") {
+            showToast("Không có quyền lưu. Hãy kiểm tra Firebase Rules.");
         } else if (code === "auth/requires-recent-login") {
-
             showToast("Phiên đăng nhập đã cũ. Vui lòng đăng nhập lại rồi thử lại.");
-
         } else {
-
             showToast("Không thể lưu thay đổi. Vui lòng thử lại.");
-
         }
-
-
-
-        // If the profile update failed after reserving the new name, release that
-
-        // reservation so a failed save does not permanently block the name.
-
-        if (reservedNewName) {
-
-            try {
-
-                const core = await import("../src/core/firebase.js");
-
-                const { ref, runTransaction } = await import(
-
-                    "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
-
-                );
-
-                const newNameKey = getDisplayNameKey(name);
-
-                await runTransaction(ref(core.db, `displayNames/${newNameKey}`), current => {
-
-                    return current && current.uid === currentUser.uid ? null : current;
-
-                });
-
-            } catch (cleanupError) {
-
-                console.warn("TienHub displayName reservation cleanup failed:", cleanupError);
-
-            }
-
-        }
-
     } finally {
-
         saveBtn.disabled = false;
-
     }
-
 });
 
 
