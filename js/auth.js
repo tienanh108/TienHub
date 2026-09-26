@@ -915,7 +915,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const { core, api } = await getDeviceApi();
 
-        const { ref, runTransaction, onDisconnect } = api;
+        const { ref, runTransaction, get, onValue } = api;
 
         const uid = user.uid;
 
@@ -925,13 +925,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-        // Release this browser's lease when Firebase disconnects.
-        try {
-            await onDisconnect(lockRef).remove();
-        } catch (error) {
-            console.warn("TienHub onDisconnect registration error:", error);
-        }
-
+        // Do NOT register onDisconnect on the shared lock node.
+        // A previous browser can be kicked while a new browser owns the same
+        // node; an old onDisconnect callback could otherwise remove the new
+        // browser's lock. The owner is cleared only by an owner-checked
+        // logout transaction, while a later login always takes ownership.
         deviceLockLost = false;
 
 
@@ -958,7 +956,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-        if (!tx.committed) {
+        if (!tx.committed || tx.snapshot.val()?.deviceId !== deviceId) {
 
             const error = new Error("Không thể nhận quyền đăng nhập trên thiết bị này.");
 
@@ -966,6 +964,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             throw error;
 
+        }
+
+        // Confirm the server-side value before allowing the login to continue.
+        const confirmed = await get(lockRef);
+        if (confirmed.val()?.deviceId !== deviceId) {
+            const error = new Error("Phiên đăng nhập đã bị thay thế trên thiết bị khác.");
+            error.code = "tienhub/device-limit";
+            throw error;
         }
 
 
@@ -1023,8 +1029,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // If another device logs in later, its deviceId replaces ours.
 
         // Realtime notification immediately signs this browser out.
-
-        const { onValue } = api;
 
         const unsubscribe = onValue(lockRef, async snapshot => {
 
