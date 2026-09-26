@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
             name: "Soccer",
             category: "sports",
             players: null,
-            href: "#",
+            href: "/mini-games/soccer/index.html?v=20260926-2324",
             visual: `
                 <div class="mini-cover soccer-cover">
                     <span class="soccer-field-line midfield"></span>
