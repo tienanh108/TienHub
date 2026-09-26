@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 
+
+
 <html lang="vi">
+
+
+
+
 
 
 
@@ -8,179 +14,361 @@
 
 
 
+
+
+
+
     <link rel="icon" type="image/png" href="/assets/icon/tienhub-mark.png">
+
+
+
+
 
 
 
 <meta charset="UTF-8">
 
+
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+
 
 
 
 <!-- SEO -->
 
+
+
 <title>TienHub</title>
+
+
+
+
 
 
 
 <meta
 
+
+
     name="description"
+
+
 
     content="TienHub - nền tảng game nơi bạn khám phá, trải nghiệm các tựa game do TienHub phát triển"
 
+
+
 >
+
+
+
+
 
 
 
 <!-- Google site name -->
 
+
+
 <script type="application/ld+json">
+
+
 
 {
 
+
+
   "@context": "https\://schema.org",
+
+
 
   "@type": "WebSite",
 
+
+
   "name": "TienHub",
+
+
 
   "alternateName": ["TienHub Game Hub"],
 
+
+
   "url": "https\://tienhub.vn/"
 
+
+
 }
+
+
 
 </script>
 
 
 
+
+
+
+
 <meta
+
+
 
     name="robots"
 
+
+
     content="index, follow"
 
+
+
 >
+
+
+
+
 
 
 
 <link
 
+
+
     rel="canonical"
+
+
 
     href="https\://tienhub.vn/"
 
+
+
 >
+
+
+
+
 
 
 
 <!-- Open Graph -->
 
+
+
 <meta property="og:type" content="website">
 
 
 
+
+
+
+
 <meta
+
+
 
     property="og:title"
 
+
+
     content="TienHub - Game Hub"
+
+
 
 >
 
 
 
+
+
+
+
 <meta
+
+
 
     property="og:description"
 
+
+
     content="Khám phá, chơi game và kết nối cùng cộng đồng trên TienHub."
+
+
 
 >
 
 
 
+
+
+
+
 <meta
+
+
 
     property="og:url"
 
+
+
     content="https\://tienhub.vn/"
+
+
 
 >
 
 
 
+
+
+
+
 <meta
+
+
 
     property="og:image"
 
+
+
     content="https\://tienhub.vn/assets/icon/tienhub-mark.png"
+
+
 
 >
 
 
 
+
+
+
+
 <meta
 
-    property="og:site\_name"
+
+
+    property="og:site\\_name"
+
+
 
     content="TienHub"
 
+
+
 >
+
+
+
+
 
 
 
 <meta
 
+
+
     property="og:locale"
 
-    content="vi\_VN"
+
+
+    content="vi\\_VN"
+
+
 
 >
+
+
+
+
 
 
 
 <!-- Twitter / X -->
 
+
+
 <meta
+
+
 
     name="twitter:card"
 
+
+
     content="summary"
+
+
 
 >
 
 
 
+
+
+
+
 <meta
+
+
 
     name="twitter:title"
 
+
+
     content="TienHub - Game Hub"
+
+
 
 >
 
 
 
+
+
+
+
 <meta
+
+
 
     name="twitter:description"
 
+
+
     content="Khám phá, chơi game và kết nối cùng cộng đồng trên TienHub."
 
+
+
 >
+
+
+
+
 
 
 
 <meta
 
+
+
     name="twitter:image"
+
+
 
     content="https\://tienhub.vn/assets/icon/tienhub-mark.png"
 
+
+
 >
+
+
+
+
+
+
 
 
 
@@ -188,186 +376,383 @@
 
 <!-- Styles -->
 
+
+
 <link rel="stylesheet" href="css/global.css">
+
+
 
 <link rel="stylesheet" href="css/home.css">
 
 
+
+
+
 <style>
+
 /* =====================================================
+
    TIENHUB - CSS MINI GAME COVERS
+
    ===================================================== */
 
+
+
 .css-game-cover {
+
     position: relative;
+
     overflow: hidden;
+
 }
+
+
 
 .brick-breaker-cover {
+
     background: linear-gradient(180deg, #102b47, #061522);
+
 }
+
+
 
 .brick-wall {
+
     position: absolute;
+
     top: 18px;
+
     left: 14px;
+
     right: 14px;
+
     display: grid;
+
     grid-template-columns: repeat(4, 1fr);
+
     gap: 5px;
+
 }
+
+
 
 .brick-wall i {
+
     height: 15px;
+
     border-radius: 4px;
+
     background: #ff4d5a;
+
     box-shadow: 0 2px 5px rgba(0,0,0,.3);
+
 }
+
+
 
 .brick-wall i:nth-child(2n) { background: #ffd43b; }
+
 .brick-wall i:nth-child(3n) { background: #39a9ff; }
+
 .brick-wall i:nth-child(4n) { background: #a75cff; }
 
+
+
 .brick-ball {
+
     position: absolute;
+
     width: 14px;
+
     height: 14px;
+
     border-radius: 50%;
+
     background: #fff;
+
     box-shadow: 0 0 13px rgba(255,255,255,.9);
+
     left: 52%;
+
     top: 58%;
+
 }
+
+
 
 .brick-paddle {
+
     position: absolute;
+
     width: 85px;
+
     height: 9px;
+
     border-radius: 10px;
+
     background: #19c9ef;
+
     bottom: 16px;
+
     left: 50%;
+
     transform: translateX(-50%);
+
     box-shadow: 0 0 13px rgba(25,201,239,.75);
+
 }
+
+
 
 .minesweeper-cover {
+
     background:
+
         linear-gradient(135deg, #e4e9ee, #aeb9c4);
+
 }
+
+
 
 .mine-grid {
+
     width: 155px;
+
     height: 125px;
+
     display: grid;
+
     grid-template-columns: repeat(4, 1fr);
+
     margin: auto;
+
     border: 3px solid #77838e;
+
     background: #cbd3da;
+
     box-shadow: 0 8px 18px rgba(0,0,0,.25);
+
 }
+
+
 
 .mine-grid i {
+
     display: flex;
+
     align-items: center;
+
     justify-content: center;
+
     border: 1px solid #9aa6b1;
+
     background: linear-gradient(145deg, #eef2f5, #b9c3cc);
+
     font-style: normal;
+
     font-weight: 900;
+
     font-size: 20px;
+
     color: #2467b2;
+
 }
+
+
 
 .mine-grid i:nth-child(6) { color: #111; }
+
 .mine-grid i:nth-child(7),
+
 .mine-grid i:nth-child(11) { color: #d43c3c; }
 
+
+
 .blackjack-cover {
+
     background:
+
         radial-gradient(circle at center, #16714a, #073521 80%);
+
 }
+
+
 
 .playing-card {
+
     position: absolute;
+
     width: 62px;
+
     height: 86px;
+
     border-radius: 7px;
+
     background: #fff;
+
     display: flex;
+
     align-items: center;
+
     justify-content: center;
+
     font-size: 27px;
+
     font-weight: 900;
+
     box-shadow: 0 8px 18px rgba(0,0,0,.35);
+
 }
+
+
 
 .card-a {
+
     left: 35%;
+
     top: 50%;
+
     transform: translate(-50%, -50%) rotate(-9deg);
+
     color: #111;
+
 }
+
+
 
 .card-k {
+
     left: 65%;
+
     top: 50%;
+
     transform: translate(-50%, -50%) rotate(9deg);
+
     color: #d52f45;
+
 }
+
+
 
 .pong-cover {
+
     background:
+
         linear-gradient(90deg, #071522, #0a2b3c, #071522);
+
 }
+
+
 
 .pong-paddle {
+
     position: absolute;
+
     width: 8px;
+
     height: 62px;
+
     top: 50%;
+
     transform: translateY(-50%);
+
     border-radius: 8px;
+
 }
+
+
 
 .pong-left {
+
     left: 20px;
+
     background: #18cfff;
+
     box-shadow: 0 0 14px rgba(24,207,255,.8);
+
 }
+
+
 
 .pong-right {
+
     right: 20px;
+
     background: #ff4e82;
+
     box-shadow: 0 0 14px rgba(255,78,130,.8);
+
 }
+
+
 
 .pong-line {
+
     position: absolute;
+
     left: 50%;
+
     top: 8px;
+
     bottom: 8px;
+
     border-left: 2px dashed rgba(255,255,255,.35);
+
 }
 
+
+
 .pong-ball {
+
     position: absolute;
+
     width: 15px;
+
     height: 15px;
+
     border-radius: 50%;
+
     background: #fff;
+
     left: 52%;
+
     top: 48%;
+
     box-shadow: 0 0 13px rgba(255,255,255,.85);
+
 }
+
 </style>
+
+
+
 
 
 <style id="profile-menu-profile-style">
+
 .profile-menu-profile{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;border-radius:10px;color:inherit;text-decoration:none;box-sizing:border-box;}
+
 .profile-menu-profile:hover{background:rgba(255,255,255,.07);}
+
 </style>
+
+
+
+    <!-- Hide /index.html from the browser URL on the homepage only. -->
+    <script>
+        (() => {
+            const path = window.location.pathname;
+            if (path === '/index.html' || path.endsWith('/index.html')) {
+                const cleanPath = path.slice(0, -'index.html'.length) || '/';
+                window.history.replaceState(null, document.title, cleanPath + window.location.search + window.location.hash);
+            }
+        })();
+    </script>
 </head>
+
+
+
+
 
 
 
@@ -375,11 +760,23 @@
 
 
 
+
+
+
+
     <!-- =====================================================
+
+
 
          HEADER
 
+
+
     \====================================================== -->
+
+
+
+
 
 
 
@@ -387,35 +784,71 @@
 
 
 
+
+
+
+
         <div class="nav-shell">
+
+
+
+
 
 
 
             <!-- LOGO -->
 
+
+
             <a class="brand" href="/" aria-label="TienHub">
+
+
+
+
 
 
 
                 <span class="brand-mark">
 
+
+
                     <img
+
+
 
                         src="assets/icon/tienhub-mark.png"
 
+
+
                         alt="TienHub"
+
+
 
                     >
 
+
+
                 </span>
+
+
+
+
 
 
 
                 <span class="brand-name">
 
+
+
                     TienHub
 
+
+
                 </span>
+
+
+
+
 
 
 
@@ -425,45 +858,91 @@
 
 
 
+
+
+
+
+
+
             <!-- NAVIGATION -->
+
+
 
             <nav class="main-nav">
 
 
 
+
+
+
+
                 <a
+
+
 
                     href="/"
 
+
+
                     class="active"
+
+
 
                 >
 
+
+
                     Trang chủ
 
+
+
                 </a>
+
+
+
+
 
 
 
                 <a href="pages/mini-game.html">
 
+
+
                     Mini Games
 
+
+
                 </a>
+
+
+
+
 
 
 
                 <a href="pages/download.html">
 
+
+
                     Tải về
 
+
+
                 </a>
+
+
 
                 <a href="/pages/profile.html">
 
+
+
                     Hồ sơ
 
+
+
                 </a>
+
+
 
 </nav>
 
@@ -471,57 +950,117 @@
 
 
 
+
+
+
+
+
+
             <!-- RIGHT SIDE -->
+
+
 
             <div class="nav-actions">
 
 
 
+
+
+
+
                 <!-- SEARCH -->
+
+
 
                 <label class="search">
 
 
 
+
+
+
+
                     <svg
+
+
 
                         viewBox="0 0 24 24"
 
+
+
                         aria-hidden="true"
+
+
 
                     >
 
+
+
                         <circle
+
+
 
                             cx="11"
 
+
+
                             cy="11"
 
+
+
                             r="6.8"
+
+
 
                         ></circle>
 
 
 
+
+
+
+
                         <path
+
+
 
                             d="m16.2 16.2 4.2 4.2"
 
+
+
                         ></path>
+
+
 
                     </svg>
 
 
 
+
+
+
+
                     <input
+
+
 
                         type="search"
 
+
+
                         placeholder="Tìm kiếm game..."
+
+
 
                         aria-label="Tìm kiếm game"
 
+
+
                     >
+
+
+
+
 
 
 
@@ -531,9 +1070,23 @@
 
 
 
+
+
+
+
+
+
                 <!-- DIVIDER -->
 
+
+
                 <span class="nav-divider"></span>
+
+
+
+
+
+
 
 
 
@@ -543,37 +1096,75 @@
 
 
 
+
+
+
+
                 <div class="profile-wrap" style="visibility:hidden">
+
+
+
+
 
 
 
                     <button
 
+
+
                         class="profile"
+
+
 
                         type="button"
 
+
+
                         aria-label="Đăng nhập TienHub"
 
+
+
                         aria-expanded="false"
+
+
 
                     >
 
 
 
+
+
+
+
                         <span class="profile-avatar">
+
+
 
                             T
 
+
+
                         </span>
+
+
+
+
 
 
 
                         <span class="profile-name">
 
+
+
                             Khách
 
+
+
                         </span>
+
+
+
+
 
 
 
@@ -583,7 +1174,17 @@
 
 
 
+
+
+
+
+
+
                     <!-- PROFILE MENU -->
+
+
+
+
 
 
 
@@ -591,23 +1192,47 @@
 
 
 
+
+
+
+
                         <div class="profile-menu-head">
+
+
+
+
 
 
 
                             <strong class="profile-menu-username">
 
+
+
                                 Khách
+
+
 
                             </strong>
 
 
 
+
+
+
+
                             <span>
+
+
 
                                 Thông tin tài khoản TienHub
 
+
+
                             </span>
+
+
+
+
 
 
 
@@ -617,23 +1242,49 @@
 
 
 
+
+
+
+
+
+
                         <a class="profile-menu-profile" href="/pages/profile.html">
+
+
 
                             👤 Hồ sơ
 
+
+
                         </a>
+
+
 
                         <button
 
+
+
                             class="profile-logout"
+
+
 
                             type="button"
 
+
+
                         >
+
+
 
                             ↪ Đăng xuất
 
+
+
                         </button>
+
+
+
+
 
 
 
@@ -641,7 +1292,15 @@
 
 
 
+
+
+
+
                 </div>
+
+
+
+
 
 
 
@@ -649,7 +1308,15 @@
 
 
 
+
+
+
+
         </div>
+
+
+
+
 
 
 
@@ -661,11 +1328,27 @@
 
 
 
+
+
+
+
+
+
+
+
     <!-- =====================================================
+
+
 
          MAIN
 
+
+
     \====================================================== -->
+
+
+
+
 
 
 
@@ -675,31 +1358,65 @@
 
 
 
+
+
+
+
+
+
         <!-- =================================================
 
+
+
              RACING HERO
+
+
 
         \================================================== -->
 
 
 
+
+
+
+
         <section
+
+
 
             class="hero-wrap"
 
+
+
             aria-label="Racing"
+
+
 
         >
 
 
 
+
+
+
+
             <div
+
+
 
                 class="hero"
 
+
+
                 id="racingHero"
 
+
+
             >
+
+
+
+
 
 
 
@@ -707,23 +1424,49 @@
 
 
 
+
+
+
+
                 <div class="hero-media">
+
+
+
+
 
 
 
                     <img
 
+
+
                         id="heroImage"
+
+
 
                         src="assets/images/games/racing/sunset-coast.png"
 
+
+
                         alt="TienHub Racing"
+
+
 
                     >
 
 
 
+
+
+
+
                 </div>
+
+
+
+
+
+
 
 
 
@@ -733,7 +1476,17 @@
 
 
 
+
+
+
+
                 <div class="hero-overlay"></div>
+
+
+
+
+
+
 
 
 
@@ -743,55 +1496,113 @@
 
 
 
+
+
+
+
                 <div class="hero-content">
+
+
+
+
 
 
 
                     <span class="hero-kicker">
 
+
+
                         SẮP RA MẮT
+
+
 
                     </span>
 
 
 
+
+
+
+
                     <h1>
 
+
+
                         Racing
+
+
 
                     </h1>
 
 
 
+
+
+
+
                     <p>
+
+
 
                         Những cuộc đua tốc độ cao đang được phát triển
 
+
+
                         cho TienHub.
+
+
 
                     </p>
 
 
 
+
+
+
+
                     <button
+
+
 
                         class="hero-button"
 
+
+
                         type="button"
+
+
 
                         disabled
 
+
+
                     >
+
+
 
                         <span>🏁</span>
 
+
+
                         Sắp ra mắt
+
+
 
                     </button>
 
 
 
+
+
+
+
                 </div>
+
+
+
+
+
+
 
 
 
@@ -801,21 +1612,45 @@
 
 
 
+
+
+
+
                 <button
+
+
 
                     class="hero-arrow hero-prev"
 
+
+
                     id="heroPrev"
+
+
 
                     type="button"
 
+
+
                     aria-label="Ảnh trước"
+
+
 
                 >
 
+
+
                     ‹
 
+
+
                 </button>
+
+
+
+
+
+
 
 
 
@@ -825,21 +1660,45 @@
 
 
 
+
+
+
+
                 <button
+
+
 
                     class="hero-arrow hero-next"
 
+
+
                     id="heroNext"
+
+
 
                     type="button"
 
+
+
                     aria-label="Ảnh tiếp theo"
+
+
 
                 >
 
+
+
                     ›
 
+
+
                 </button>
+
+
+
+
+
+
 
 
 
@@ -849,57 +1708,115 @@
 
 
 
+
+
+
+
                 <div
+
+
 
                     class="hero-dots"
 
+
+
                     role="tablist"
 
+
+
                     aria-label="Ảnh Racing"
+
+
 
                 >
 
 
 
+
+
+
+
                     <button
+
+
 
                         class="hero-dot active"
 
+
+
                         type="button"
+
+
 
                         aria-label="Ảnh Racing 1"
 
+
+
                         aria-selected="true"
+
+
 
                     ></button>
 
 
 
+
+
+
+
                     <button
+
+
 
                         class="hero-dot"
 
+
+
                         type="button"
+
+
 
                         aria-label="Ảnh Racing 2"
 
+
+
                         aria-selected="false"
 
+
+
                     ></button>
+
+
+
+
 
 
 
                     <button
 
+
+
                         class="hero-dot"
+
+
 
                         type="button"
 
+
+
                         aria-label="Ảnh Racing 3"
+
+
 
                         aria-selected="false"
 
+
+
                     ></button>
+
+
+
+
 
 
 
@@ -907,7 +1824,15 @@
 
 
 
+
+
+
+
             </div>
+
+
+
+
 
 
 
@@ -919,11 +1844,27 @@
 
 
 
+
+
+
+
+
+
+
+
         <!-- =================================================
+
+
 
              GAMES
 
+
+
         \================================================== -->
+
+
+
+
 
 
 
@@ -931,7 +1872,15 @@
 
 
 
+
+
+
+
             <div class="section-heading">
+
+
+
+
 
 
 
@@ -939,19 +1888,39 @@
 
 
 
+
+
+
+
                     <span class="section-icon games-icon">
 
+
+
                         🎮
+
+
 
                     </span>
 
 
 
+
+
+
+
                     <h2>
+
+
 
                         Games
 
+
+
                     </h2>
+
+
+
+
 
 
 
@@ -961,23 +1930,51 @@
 
 
 
+
+
+
+
+
+
                 <a
+
+
 
                     class="view-all"
 
+
+
                     href="pages/download.html"
+
+
 
                 >
 
+
+
                     Xem tất cả
 
+
+
                     <span>›</span>
+
+
 
                 </a>
 
 
 
+
+
+
+
             </div>
+
+
+
+
+
+
 
 
 
@@ -989,19 +1986,41 @@
 
 
 
+
+
+
+
+
+
                 <!-- RACING -->
+
+
+
+
 
 
 
                 <a
 
+
+
                     class="game-card"
+
+
 
                     data-game-id="racing"
 
+
+
                     href="games/racing/index.html"
 
+
+
                 >
+
+
+
+
 
 
 
@@ -1009,17 +2028,37 @@
 
 
 
+
+
+
+
                         <img
+
+
 
                             src="assets/images/games/racing/sunset-coast.png"
 
+
+
                             alt="Racing"
+
+
 
                         >
 
 
 
+
+
+
+
                     </div>
+
+
+
+
+
+
 
 
 
@@ -1029,15 +2068,31 @@
 
 
 
+
+
+
+
                         <div class="game-main">
+
+
+
+
 
 
 
                             <h3>
 
+
+
                                 Racing
 
+
+
                             </h3>
+
+
+
+
 
 
 
@@ -1045,15 +2100,31 @@
 
 
 
+
+
+
+
                                 <span>
 
+
+
                                     Sắp ra mắt
+
+
 
                                 </span>
 
 
 
+
+
+
+
                             </div>
+
+
+
+
 
 
 
@@ -1063,11 +2134,25 @@
 
 
 
+
+
+
+
+
+
                         <span class="game-action disabled">
+
+
 
                             Sắp ra mắt
 
+
+
                         </span>
+
+
+
+
 
 
 
@@ -1075,7 +2160,19 @@
 
 
 
+
+
+
+
                 </a>
+
+
+
+
+
+
+
+
 
 
 
@@ -1087,15 +2184,31 @@
 
 
 
+
+
+
+
                 <a
+
+
 
                     class="game-card"
 
+
+
                     data-game-id="rpg"
+
+
 
                     href="games/rpg/index.html"
 
+
+
                 >
+
+
+
+
 
 
 
@@ -1103,17 +2216,37 @@
 
 
 
+
+
+
+
                         <img
+
+
 
                             src="assets/images/games/rpg/cover.png"
 
+
+
                             alt="RPG Online"
+
+
 
                         >
 
 
 
+
+
+
+
                     </div>
+
+
+
+
+
+
 
 
 
@@ -1123,15 +2256,31 @@
 
 
 
+
+
+
+
                         <div class="game-main">
+
+
+
+
 
 
 
                             <h3>
 
+
+
                                 RPG Online
 
+
+
                             </h3>
+
+
+
+
 
 
 
@@ -1139,15 +2288,31 @@
 
 
 
+
+
+
+
                                 <span>
 
+
+
                                     Sắp ra mắt
+
+
 
                                 </span>
 
 
 
+
+
+
+
                             </div>
+
+
+
+
 
 
 
@@ -1157,11 +2322,25 @@
 
 
 
+
+
+
+
+
+
                         <span class="game-action disabled">
+
+
 
                             Sắp ra mắt
 
+
+
                         </span>
+
+
+
+
 
 
 
@@ -1169,7 +2348,19 @@
 
 
 
+
+
+
+
                 </a>
+
+
+
+
+
+
+
+
 
 
 
@@ -1181,13 +2372,27 @@
 
 
 
+
+
+
+
                 <a
+
+
 
                     class="game-card"
 
+
+
                     href="#"
 
+
+
                 >
+
+
+
+
 
 
 
@@ -1195,19 +2400,41 @@
 
 
 
+
+
+
+
                         <img
+
+
 
                             src="assets/images/games/project%20z/cover.png"
 
+
+
                             alt="Project Z"
 
+
+
                             onerror="this.src='assets/images/games/project-z/cover.png'"
+
+
 
                         >
 
 
 
+
+
+
+
                     </div>
+
+
+
+
+
+
 
 
 
@@ -1217,15 +2444,31 @@
 
 
 
+
+
+
+
                         <div class="game-main">
+
+
+
+
 
 
 
                             <h3>
 
+
+
                                 Project Z
 
+
+
                             </h3>
+
+
+
+
 
 
 
@@ -1233,23 +2476,47 @@
 
 
 
+
+
+
+
                                 <span class="game-players">
+
+
 
                                     👥 — người chơi
 
+
+
                                 </span>
+
+
+
+
 
 
 
                                 <span>
 
+
+
                                     Sắp ra mắt
+
+
 
                                 </span>
 
 
 
+
+
+
+
                             </div>
+
+
+
+
 
 
 
@@ -1259,11 +2526,25 @@
 
 
 
+
+
+
+
+
+
                         <span class="game-action disabled">
+
+
 
                             Sắp ra mắt
 
+
+
                         </span>
+
+
+
+
 
 
 
@@ -1271,11 +2552,23 @@
 
 
 
+
+
+
+
                 </a>
 
 
 
+
+
+
+
             </div>
+
+
+
+
 
 
 
@@ -1287,11 +2580,27 @@
 
 
 
+
+
+
+
+
+
+
+
         <!-- =================================================
+
+
 
              MINI GAME
 
+
+
         \================================================== -->
+
+
+
+
 
 
 
@@ -1299,7 +2608,15 @@
 
 
 
+
+
+
+
             <div class="section-heading">
+
+
+
+
 
 
 
@@ -1307,19 +2624,39 @@
 
 
 
+
+
+
+
                     <span class="section-icon mini-icon">
 
+
+
                         👾
+
+
 
                     </span>
 
 
 
+
+
+
+
                     <h2>
+
+
 
                         Mini Games
 
+
+
                     </h2>
+
+
+
+
 
 
 
@@ -1329,19 +2666,41 @@
 
 
 
+
+
+
+
+
+
                 <a
+
+
 
                     class="view-all"
 
+
+
                     href="pages/mini-game.html"
+
+
 
                 >
 
+
+
                     Xem tất cả
+
+
 
                     <span>›</span>
 
+
+
                 </a>
+
+
+
+
 
 
 
@@ -1351,168 +2710,339 @@
 
 
 
+
+
+
+
+
+
             <div class="mini-grid">
 
+
+
                 <!-- CARO 5 -->
+
                 <a class="mini-card" data-game-id="caro5" href="mini-games/caro5/index.html">
+
                     <div class="mini-cover caro-cover">
+
                         <span class="xo x1">×</span><span class="xo o1">○</span>
+
                         <span class="xo x2">×</span><span class="xo o2">○</span>
+
                         <span class="xo x3">×</span><span class="xo o3">○</span>
+
                         <span class="xo x4">×</span><span class="xo o4">○</span>
+
                         <span class="xo x5">×</span>
+
                     </div>
+
                     <div class="mini-info">
+
                         <div><h3>Caro 5</h3><span>Board Game</span></div>
+
                         <span class="play-button">Chơi</span>
+
                     </div>
+
                 </a>
+
+
 
                 <!-- CHESS -->
+
                 <a class="mini-card" data-game-id="chess" href="mini-games/chess/index.html">
+
                     <div class="mini-cover chess-cover">
+
                         <div class="chess-board">
+
                             <span>♜</span><span>♞</span><span>♝</span><span>♛</span>
+
                             <span>♟</span><span>♟</span><span>♟</span><span>♟</span>
+
                             <span>♙</span><span>♙</span><span>♙</span><span>♙</span>
+
                             <span>♖</span><span>♘</span><span>♗</span><span>♕</span>
+
                         </div>
+
                     </div>
+
                     <div class="mini-info">
+
                         <div><h3>Chess</h3><span>Board Game</span></div>
+
                         <span class="play-button">Chơi</span>
+
                     </div>
+
                 </a>
+
+
 
                 <!-- FLAPPY BIRD -->
+
                 <a class="mini-card" data-game-id="flappy" href="mini-games/flappy/index.html">
+
                     <div class="mini-cover flappy-cover">
+
                         <span class="cloud cloud-1"></span>
+
                         <span class="cloud cloud-2"></span>
+
                         <span class="flappy-pipe pipe-top"></span>
+
                         <span class="flappy-pipe pipe-bottom"></span>
+
                         <span class="flappy-bird">
+
                             <i class="bird-eye"></i>
+
                             <i class="bird-beak"></i>
+
                             <i class="bird-wing"></i>
+
                         </span>
+
                     </div>
+
                     <div class="mini-info">
+
                         <div><h3>Flappy Bird</h3><span>Arcade</span></div>
+
                         <span class="play-button">Chơi</span>
+
                     </div>
+
                 </a>
+
+
 
                 <!-- LUDO -->
+
                 <a class="mini-card" data-game-id="ludo" href="mini-games/ludo/index.html">
+
                     <div class="mini-cover ludo-cover">
+
                         <div class="ludo-board">
+
                             <span class="ludo-home red"></span>
+
                             <span class="ludo-home blue"></span>
+
                             <span class="ludo-home yellow"></span>
+
                             <span class="ludo-home green"></span>
+
                             <span class="ludo-center"></span>
+
                         </div>
+
                     </div>
+
                     <div class="mini-info">
+
                         <div><h3>Ludo</h3><span>Board Game</span></div>
+
                         <span class="play-button">Chơi</span>
+
                     </div>
+
                 </a>
+
+
 
                 <!-- SNAKE -->
+
                 <a class="mini-card" data-game-id="snake" href="mini-games/snake/index.html">
+
                     <div class="mini-cover snake-cover">
+
                         <span class="snake-body snake-1"></span>
+
                         <span class="snake-body snake-2"></span>
+
                         <span class="snake-body snake-3"></span>
+
                         <span class="snake-body snake-4"></span>
+
                         <span class="snake-head"></span>
+
                         <span class="snake-food"></span>
+
                     </div>
+
                     <div class="mini-info">
+
                         <div><h3>Snake</h3><span>Arcade</span></div>
+
                         <span class="play-button">Chơi</span>
+
                     </div>
+
                 </a>
+
+
 
                 <!-- STICKMAN -->
+
                 <a class="mini-card" data-game-id="stickman" href="mini-games/stickman/index.html">
+
                     <div class="mini-cover stickman-cover">
+
                         <span class="stickman-head"></span>
+
                         <span class="stickman-body"></span>
+
                         <span class="stickman-arm arm-left"></span>
+
                         <span class="stickman-arm arm-right"></span>
+
                         <span class="stickman-leg leg-left"></span>
+
                         <span class="stickman-leg leg-right"></span>
+
                         <span class="stickman-sword"></span>
+
                     </div>
+
                     <div class="mini-info">
+
                         <div><h3>Stickman</h3><span>Arcade</span></div>
+
                         <span class="play-button">Chơi</span>
+
                     </div>
+
                 </a>
+
+
 
                 <!-- BRICK BREAKER -->
+
                 <a class="mini-card" data-game-id="brick-breaker" href="mini-games/brick-breaker/index.html">
+
                     <div class="mini-cover css-game-cover brick-breaker-cover">
+
                         <div class="brick-wall">
+
                             <i></i><i></i><i></i><i></i>
+
                             <i></i><i></i><i></i><i></i>
+
                             <i></i><i></i><i></i><i></i>
+
                         </div>
+
                         <span class="brick-ball"></span>
+
                         <span class="brick-paddle"></span>
+
                     </div>
+
                     <div class="mini-info">
+
                         <div><h3>Brick Breaker</h3><span>Arcade</span></div>
+
                         <span class="play-button">Chơi</span>
+
                     </div>
+
                 </a>
+
+
 
                 <!-- MINESWEEPER -->
+
                 <a class="mini-card" data-game-id="minesweeper" href="mini-games/minesweeper/index.html">
+
                     <div class="mini-cover css-game-cover minesweeper-cover">
+
                         <div class="mine-grid">
+
                             <i>1</i><i>2</i><i>1</i><i>·</i>
+
                             <i>1</i><i>💣</i><i>2</i><i>1</i>
+
                             <i>·</i><i>2</i><i>3</i><i>·</i>
+
                             <i>1</i><i>·</i><i>1</i><i>2</i>
+
                         </div>
+
                     </div>
+
                     <div class="mini-info">
+
                         <div><h3>Minesweeper</h3><span>Puzzle</span></div>
+
                         <span class="play-button">Chơi</span>
+
                     </div>
+
                 </a>
+
+
 
                 <!-- BLACKJACK -->
+
                 <a class="mini-card" data-game-id="blackjack" href="mini-games/blackjack/index.html">
+
                     <div class="mini-cover css-game-cover blackjack-cover">
+
                         <div class="playing-card card-a">A♠</div>
+
                         <div class="playing-card card-k">K♥</div>
+
                     </div>
+
                     <div class="mini-info">
+
                         <div><h3>Blackjack</h3><span>Card Game</span></div>
+
                         <span class="play-button">Chơi</span>
+
                     </div>
+
                 </a>
+
+
 
                 <!-- PONG -->
+
                 <a class="mini-card" data-game-id="pong" href="mini-games/pong/index.html">
+
                     <div class="mini-cover css-game-cover pong-cover">
+
                         <span class="pong-paddle pong-left"></span>
+
                         <span class="pong-paddle pong-right"></span>
+
                         <span class="pong-line"></span>
+
                         <span class="pong-ball"></span>
+
                     </div>
+
                     <div class="mini-info">
+
                         <div><h3>Pong</h3><span>Arcade</span></div>
+
                         <span class="play-button">Chơi</span>
+
                     </div>
+
                 </a>
 
+
+
             </section>
+
+
+
+
 
 
 
@@ -1524,11 +3054,27 @@
 
 
 
+
+
+
+
+
+
+
+
     <!-- =====================================================
+
+
 
          FOOTER
 
+
+
     \====================================================== -->
+
+
+
+
 
 
 
@@ -1536,7 +3082,15 @@
 
 
 
+
+
+
+
         <div class="footer-inner">
+
+
+
+
 
 
 
@@ -1544,25 +3098,51 @@
 
 
 
+
+
+
+
                 <div class="footer-logo">
+
+
+
+
 
 
 
                     <img
 
+
+
                         src="assets/icon/tienhub-mark.png"
 
+
+
                         alt="TienHub"
+
+
 
                     >
 
 
 
+
+
+
+
                     <strong>
+
+
 
                         TienHub
 
+
+
                     </strong>
+
+
+
+
 
 
 
@@ -1570,17 +3150,37 @@
 
 
 
+
+
+
+
                 <p>
+
+
 
                     Nền tảng game nơi bạn có thể khám phá,
 
+
+
                     chơi và kết nối cùng cộng đồng.
+
+
 
                 </p>
 
 
 
+
+
+
+
             </div>
+
+
+
+
+
+
 
 
 
@@ -1590,35 +3190,71 @@
 
 
 
+
+
+
+
                 <strong>
+
+
 
                     TIENHUB
 
+
+
                 </strong>
+
+
+
+
 
 
 
                 <a href="/">
 
+
+
                     Trang chủ
 
+
+
                 </a>
+
+
+
+
 
 
 
                 <a href="pages/mini-game.html">
 
+
+
                     Mini Games
 
+
+
                 </a>
+
+
+
+
 
 
 
                 <a href="pages/download.html">
 
+
+
                     Tải về
 
+
+
                 </a>
+
+
+
+
 
 
 
@@ -1628,43 +3264,91 @@
 
 
 
+
+
+
+
+
+
             <div class="footer-column">
 
 
 
+
+
+
+
                 <strong>
+
+
 
                     HỖ TRỢ
 
+
+
                 </strong>
 
 
 
+
+
+
+
                 <a href="#">
+
+
 
                     Trung tâm trợ giúp
 
+
+
                 </a>
 
 
 
+
+
+
+
                 <a href="#">
+
+
 
                     Báo lỗi
 
+
+
                 </a>
+
+
+
+
 
 
 
                 <a href="#">
 
+
+
                     Liên hệ
 
+
+
                 </a>
+
+
+
+
 
 
 
             </div>
+
+
+
+
+
+
 
 
 
@@ -1674,31 +3358,65 @@
 
 
 
+
+
+
+
                 <strong>
 
+
+
                     PHÁP LÝ
+
+
 
                 </strong>
 
 
 
+
+
+
+
                 <a href="#">
+
+
 
                     Điều khoản sử dụng
 
+
+
                 </a>
+
+
+
+
 
 
 
                 <a href="#">
 
+
+
                     Chính sách bảo mật
 
+
+
                 </a>
+
+
+
+
 
 
 
             </div>
+
+
+
+
+
+
 
 
 
@@ -1708,7 +3426,15 @@
 
 
 
+
+
+
+
                 <span class="status-dot"></span>
+
+
+
+
 
 
 
@@ -1716,11 +3442,25 @@
 
 
 
+
+
+
+
             </div>
 
 
 
+
+
+
+
         </div>
+
+
+
+
+
+
 
 
 
@@ -1730,11 +3470,23 @@
 
 
 
+
+
+
+
             © 2026 TienHub. All rights reserved.
 
 
 
+
+
+
+
         </div>
+
+
+
+
 
 
 
@@ -1746,47 +3498,106 @@
 
 
 
+
+
+
+
+
+
+
+
     <!-- =====================================================
 
+
+
          JAVASCRIPT
+
+
 
     \====================================================== -->
 
 
 
+
+
+
+
     <script src="js/game.js?v=20260926-1" defer></script>
 
+
+
     <script
+
+
 
         src="js/home.js"
 
+
+
         defer
+
+
 
     ></script>
 
 
 
+
+
+
+
     <script
+
+
 
         src="js/profile.js?v=20260925-2235"
 
+
+
         defer
+
+
 
     ></script>
 
 
 
+
+
+
+
     <script
+
+
 
     type="module"
 
+
+
     src="js/auth.js?v=20260925-2235"
 
+
+
 ></script>
+
+<script>
+    // Chuẩn hóa riêng URL trang chủ: /index.html -> /
+    if (window.location.pathname === '/index.html') {
+        window.history.replaceState({}, document.title, '/');
+    }
+</script>
+
+
+
+
 
 
 
 </body>
+
+
+
+
 
 
 
