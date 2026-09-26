@@ -275,24 +275,26 @@ async function getFlappyAuthUser() {
     return null;
 }
 
-async function getFlappyUsername(user) {
+async function getFlappyDisplayName(user) {
     if (!user || user.isAnonymous) {
         return null;
     }
 
-    const { ref, get } = await initFlappyFirebase();
+    // BXH dùng TÊN HIỂN THỊ trong Profile, không dùng username đăng nhập.
+    const displayName = String(user.displayName || "").trim();
+    if (displayName) return displayName;
 
+    const { ref, get } = await initFlappyFirebase();
     const snapshot = await get(
         ref(leaderboardDatabase, `users/${user.uid}/username`)
     );
-
     const username = snapshot.val();
 
-    if (typeof username !== "string" || !username.trim()) {
-        throw new Error("Không tìm thấy users/$uid/username.");
+    if (typeof username === "string" && username.trim()) {
+        return username.trim();
     }
 
-    return username.trim();
+    return "Người chơi";
 }
 
 /* =====================================================
@@ -794,7 +796,20 @@ async function saveFlappyLeaderboardScore(newScore) {
 
         // Rules yêu cầu chỉ tăng Best.
         // Nếu chưa có bản ghi, tạo bản ghi kể cả score = 0.
+        const displayName = await getFlappyDisplayName(user);
+
         if (existingScore !== null && newScore <= existingScore) {
+            // Đồng bộ tên hiển thị mới vào bản ghi BXH hiện tại.
+            if (existing?.username !== displayName || existing?.displayName !== displayName) {
+                await set(scoreRef, {
+                    ...existing,
+                    username: displayName,
+                    displayName,
+                    score: existingScore,
+                    updatedAt: Date.now()
+                });
+            }
+
             highScore = existingScore;
             updateScore();
             updateFlappyProfileBest(existingScore);
@@ -802,10 +817,9 @@ async function saveFlappyLeaderboardScore(newScore) {
             return;
         }
 
-        const username = await getFlappyUsername(user);
-
         const payload = {
-            username,
+            username: displayName,
+            displayName,
             score: newScore,
             updatedAt: Date.now()
         };
@@ -819,14 +833,14 @@ async function saveFlappyLeaderboardScore(newScore) {
 
         if (
             !verified ||
-            verified.username !== username ||
+            (verified.displayName || verified.username) !== displayName ||
             typeof verified.score !== "number" ||
             verified.score !== newScore
         ) {
             throw new Error("Firebase ghi điểm nhưng không xác minh được dữ liệu.");
         }
 
-        currentUsername = username;
+        currentUsername = displayName;
         highScore = newScore;
 
         updateScore();
@@ -836,7 +850,7 @@ async function saveFlappyLeaderboardScore(newScore) {
 
         console.log(
             "FLAPPY SCORE SAVED:",
-            username,
+            displayName,
             newScore
         );
     } catch (error) {
@@ -873,9 +887,9 @@ async function loadFlappyLeaderboard() {
 
             players.push({
                 uid: child.key,
-                username: typeof data.username === "string"
-                    ? data.username
-                    : "Người chơi",
+                username: typeof data.displayName === "string" && data.displayName.trim()
+                    ? data.displayName.trim()
+                    : (typeof data.username === "string" ? data.username : "Người chơi"),
                 score: typeof data.score === "number"
                     ? data.score
                     : Number(data.score) || 0
