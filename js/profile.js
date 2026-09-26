@@ -275,8 +275,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Keep the account UI hidden until Firebase restores the session.
 
     profileWrap.style.visibility = "hidden";
-    profileAvatar?.style.setProperty("background-image", "");
-    profileAvatar?.classList.remove("has-image");
 
 
 
@@ -295,7 +293,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     let lockUnsubscribe = null;
 
     let lockLostHandled = false;
-    let lockCheckTimer = null;
 
 
 
@@ -340,14 +337,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 lockUnsubscribe();
 
                 lockUnsubscribe = null;
-
-            }
-
-            if (lockCheckTimer) {
-
-                clearInterval(lockCheckTimer);
-
-                lockCheckTimer = null;
 
             }
 
@@ -399,11 +388,28 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
 
+            // On a fresh login, wait until auth.js has claimed the lock.
+
+            // Otherwise this page can see the old/empty lock for a moment
+
+            // and incorrectly kick the newly logged-in user.
+
+            if (window.TienHubDeviceLockReady) {
+
+                try {
+                    await window.TienHubDeviceLockReady;
+                } catch (_) {
+                    return false;
+                }
+
+                window.TienHubDeviceLockReady = null;
+            }
+
+
+
             // auth.js owns the lease during the authenticated session.
 
-            // profile.js only verifies that this browser still owns it;
-
-            // it must NOT create a second independent lock.
+            // profile.js only verifies that this browser still owns it.
 
             const core = await import("../src/core/firebase.js");
 
@@ -425,15 +431,54 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 
-            // A logged-in browser must already own the server-side lock.
-            // Only the login flow is allowed to claim the lock.
-            if (!lock || lock.deviceId !== id) {
+            // If the lock disappeared, let auth.js reacquire it for this same browser.
+            // A lock belonging to another device still means this browser must be kicked.
+            if (!lock) {
+                if (window.TienHubDeviceLock?.acquire) {
+                    try {
+                        await window.TienHubDeviceLock.acquire(user);
+                        const reacquired = await get(lockRef);
+                        const reacquiredLock = reacquired.val();
+
+                        if (reacquiredLock?.deviceId !== id) {
+                            localStorage.removeItem("tienhub_logged_in");
+                            localStorage.removeItem("tienhub_username");
+                            window.TienHubShowDeviceKickModal(async () => {
+                                try { await core.auth.signOut(); } catch (_) {}
+                            });
+                            return false;
+                        }
+                    } catch (error) {
+                        console.error("TienHub device lock reacquire error:", error);
+                        localStorage.removeItem("tienhub_logged_in");
+                        localStorage.removeItem("tienhub_username");
+                        window.TienHubShowDeviceKickModal(async () => {
+                            try { await core.auth.signOut(); } catch (_) {}
+                        });
+                        return false;
+                    }
+                } else {
+                    localStorage.removeItem("tienhub_logged_in");
+                    localStorage.removeItem("tienhub_username");
+                    window.TienHubShowDeviceKickModal(async () => {
+                        try { await core.auth.signOut(); } catch (_) {}
+                    });
+                    return false;
+                }
+            } else if (lock.deviceId !== id) {
+
                 localStorage.removeItem("tienhub_logged_in");
+
                 localStorage.removeItem("tienhub_username");
+
                 window.TienHubShowDeviceKickModal(async () => {
+
                     try { await core.auth.signOut(); } catch (_) {}
+
                 });
+
                 return false;
+
             }
 
 
@@ -445,58 +490,43 @@ document.addEventListener("DOMContentLoaded", async () => {
             // the old device would stay logged in after a later login.
 
             if (typeof lockUnsubscribe === "function") {
+
                 lockUnsubscribe();
+
                 lockUnsubscribe = null;
-            }
-            if (lockCheckTimer) {
-                clearInterval(lockCheckTimer);
-                lockCheckTimer = null;
+
             }
 
             lockLostHandled = false;
 
-            const handleLostLock = async () => {
-                if (lockLostHandled) return;
+            lockUnsubscribe = onValue(lockRef, async snapshot => {
+
+                const latest = snapshot.val();
+
+                if (lockLostHandled || !latest || latest.deviceId === id) return;
+
+
+
                 lockLostHandled = true;
 
-                if (lockCheckTimer) {
-                    clearInterval(lockCheckTimer);
-                    lockCheckTimer = null;
+                if (deviceHeartbeat) {
+
+                    clearInterval(deviceHeartbeat);
+
+                    deviceHeartbeat = null;
+
                 }
 
                 localStorage.removeItem("tienhub_logged_in");
+
                 localStorage.removeItem("tienhub_username");
+
                 window.TienHubShowDeviceKickModal(async () => {
+
                     try { await core.auth.signOut(); } catch (_) {}
+
                 });
-            };
 
-            lockUnsubscribe = onValue(lockRef, async snapshot => {
-                const latest = snapshot.val();
-                if (lockLostHandled) return;
-                if (!latest || latest.deviceId !== id) await handleLostLock();
-            });
-
-            // Safety net if a realtime event is missed.
-            lockCheckTimer = setInterval(async () => {
-                if (lockLostHandled) return;
-                try {
-                    const latest = (await get(lockRef)).val();
-                    if (!latest || latest.deviceId !== id) await handleLostLock();
-                } catch (error) {
-                    console.warn("TienHub device lock check error:", error);
-                }
-            }, 10000);
-
-            // Check immediately when returning to the tab.
-            window.addEventListener("visibilitychange", async () => {
-                if (document.visibilityState !== "visible" || lockLostHandled) return;
-                try {
-                    const latest = (await get(lockRef)).val();
-                    if (!latest || latest.deviceId !== id) await handleLostLock();
-                } catch (error) {
-                    console.warn("TienHub device lock visibility check error:", error);
-                }
             });
 
 
@@ -557,8 +587,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         profileName.textContent = "Đăng nhập";
 
-        profileAvatar.style.backgroundImage = "";
-        profileAvatar.classList.remove("has-image");
         profileAvatar.textContent = "→";
 
         profileButton.setAttribute("aria-label", "Đăng nhập TienHub");
@@ -579,46 +607,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function renderLoggedIn(user) {
 
-        // The login username is immutable; the visible name belongs to the profile.
-        // Never let the old localStorage cache override the Firebase profile.
-        let displayName =
+        const saved = localStorage.getItem("tienhub_username");
 
-            user.displayName?.trim() ||
+        const username =
+
+            saved?.trim() ||
+
+            user.displayName ||
 
             user.email?.split("@")[0] ||
 
             "Người chơi";
 
-        let avatar = displayName.charAt(0).toUpperCase() || "T";
 
-        try {
-            const core = await import("../src/core/firebase.js");
-            const { ref, get } = await import(
-                "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
-            );
-            const snapshot = await get(ref(core.db, `users/${user.uid}`));
-            const profileData = snapshot.exists() ? snapshot.val() : null;
 
-            if (profileData?.displayName && typeof profileData.displayName === "string") {
-                displayName = profileData.displayName.trim() || displayName;
-            }
-            if (profileData?.avatar && typeof profileData.avatar === "string") {
-                avatar = profileData.avatar;
-            }
-        } catch (error) {
-            console.warn("TienHub profile read skipped:", error);
-        }
+        profileName.textContent = username;
 
-        profileName.textContent = displayName;
-        profileAvatar.style.backgroundImage = "";
-        profileAvatar.classList.remove("has-image");
-        profileAvatar.textContent = avatar;
+        profileAvatar.textContent = username.charAt(0).toUpperCase() || "T";
 
-        if (menuUsername) menuUsername.textContent = displayName;
+        if (menuUsername) menuUsername.textContent = username;
 
         if (profileMenu) profileMenu.hidden = false;
 
-        profileButton.setAttribute("aria-label", `Tài khoản ${displayName}`);
+        profileButton.setAttribute("aria-label", `Tài khoản ${username}`);
 
 
 
