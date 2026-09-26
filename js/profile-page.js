@@ -370,7 +370,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
         );
 
-        const { ref, get, runTransaction, update } = await import(
+        const { ref, get, runTransaction, update, query, orderByChild, equalTo } = await import(
 
             "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
 
@@ -392,14 +392,29 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
 
 
-        // Reserve the exact displayName atomically. Case is intentionally sensitive.
+        // Check public profiles first so old accounts (created before the name-lock)
+        // are also protected. The comparison is case-sensitive.
+        const publicProfilesQuery = query(
+            ref(core.db, "publicProfiles"),
+            orderByChild("displayName"),
+            equalTo(name)
+        );
+        const publicProfilesSnapshot = await get(publicProfilesQuery);
+        const existingPublicProfiles = publicProfilesSnapshot.val() || {};
+        const duplicateUid = Object.keys(existingPublicProfiles).find(
+            uid => uid !== currentUser.uid
+        );
 
-        // Therefore "acedia" and "Acedia" can both exist, but two "acedia" accounts cannot.
+        if (duplicateUid) {
+            const error = new Error("Tên hiển thị đã được sử dụng.");
+            error.code = "tienhub/display-name-taken";
+            throw error;
+        }
 
+        // Reserve the exact displayName atomically as the final race-condition
+        // protection. "acedia" and "Acedia" remain different names.
         const newNameKey = getDisplayNameKey(name);
-
         const nameLockRef = ref(core.db, `displayNames/${newNameKey}`);
-
         const lockResult = await runTransaction(nameLockRef, current => {
 
             if (!current || current.uid === currentUser.uid) {
