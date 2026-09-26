@@ -9,6 +9,7 @@ let tienHubUser = null;
 let firebaseLeaderboard = [];
 
 let firebaseUsername = null;
+let firebaseDisplayName = null;
 
 
 
@@ -83,7 +84,7 @@ async function refreshSnakeLeaderboard(snapshotValue) {
     firebaseLeaderboard = await Promise.all(entries.map(async ([uid, record]) => {
 
         try {
-            const profileSnapshot = await get(ref(db, `users/${uid}`));
+            const profileSnapshot = await get(ref(db, `publicProfiles/${uid}`));
             const profile = profileSnapshot.val() || {};
             const displayName = typeof profile.displayName === "string" && profile.displayName.trim()
                 ? profile.displayName.trim()
@@ -136,35 +137,43 @@ onValue(snakeLeaderboardRef(), (snapshot) => {
 async function loadSnakeUsername(user) {
 
     if (!user || user.isAnonymous) {
-
         firebaseUsername = null;
-
+        firebaseDisplayName = null;
         return null;
-
     }
-
-
 
     try {
-
         const snapshot = await get(ref(db, `users/${user.uid}`));
-
-        const username = snapshot.val()?.username;
+        const profile = snapshot.val() || {};
+        const username = profile.username;
+        const displayName = typeof profile.displayName === "string" && profile.displayName.trim()
+            ? profile.displayName.trim()
+            : (typeof user.displayName === "string" && user.displayName.trim() ? user.displayName.trim() : "");
 
         firebaseUsername = typeof username === "string" && username.trim() ? username.trim() : null;
+        firebaseDisplayName = displayName || null;
+
+        // Publish the display name so the public Snake leaderboard can read it.
+        if (firebaseDisplayName) {
+            try {
+                const { update } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js");
+                await update(ref(db, `publicProfiles/${user.uid}`), {
+                    displayName: firebaseDisplayName
+                });
+            } catch (syncError) {
+                console.warn("[Snake] Không thể đồng bộ public displayName:", syncError);
+            }
+        }
 
         return firebaseUsername;
-
     } catch (error) {
-
         console.error("[Snake] Không thể đọc username:", error);
-
         firebaseUsername = null;
-
+        firebaseDisplayName = typeof user.displayName === "string" && user.displayName.trim()
+            ? user.displayName.trim()
+            : null;
         return null;
-
     }
-
 }
 
 
@@ -258,6 +267,7 @@ auth.onAuthStateChanged(async (user) => {
     tienHubUser = user && !user.isAnonymous ? user : null;
 
     firebaseUsername = null;
+    firebaseDisplayName = null;
 
 
 
