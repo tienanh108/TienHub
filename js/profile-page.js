@@ -16,19 +16,13 @@ const avatarGrid = document.getElementById("avatarGrid");
 
 const toast = document.getElementById("toast");
 
-const avatarUpload = document.getElementById("avatarUpload");
-
-const avatarUploadBtn = document.getElementById("avatarUploadBtn");
-
 
 
 let currentUser = null;
 
 let selectedAvatar = "T";
 
-let selectedPhotoURL = "";
-
-let original = { displayName: "", avatar: selectedAvatar, photoURL: "" };
+let original = { displayName: "", avatar: selectedAvatar };
 
 
 
@@ -46,31 +40,15 @@ function showToast(message) {
 
 
 
-function setAvatarElement(element, photoURL, fallback) {
+function setAvatarElement(element, fallback) {
 
     if (!element) return;
 
-    if (photoURL) {
-
-        element.style.backgroundImage = `url("${photoURL}")`;
-
-        element.classList.add("has-image");
-
-        element.textContent = "";
-
-    } else {
-
-        element.style.backgroundImage = "";
-
-        element.classList.remove("has-image");
-
-        element.textContent = fallback;
-
-    }
+    element.style.backgroundImage = "";
+    element.classList.remove("has-image");
+    element.textContent = fallback;
 
 }
-
-
 
 function updatePreview() {
 
@@ -78,15 +56,15 @@ function updatePreview() {
 
     const fallback = selectedAvatar || name.charAt(0).toUpperCase() || "T";
 
-    setAvatarElement(largeAvatar, selectedPhotoURL, fallback);
+    setAvatarElement(largeAvatar, fallback);
 
-    setAvatarElement(previewAvatar, selectedPhotoURL, fallback);
+    setAvatarElement(previewAvatar, fallback);
 
     previewName.textContent = name;
 
     headerName.textContent = name;
 
-    setAvatarElement(headerAvatar, selectedPhotoURL, fallback);
+    setAvatarElement(headerAvatar, fallback);
 
 }
 
@@ -112,11 +90,6 @@ function getUsername(user) {
 function getAvatarStorageKey(user) {
     return user?.uid ? `tienhub_avatar_${user.uid}` : "tienhub_avatar";
 }
-
-function getAvatarUrlStorageKey(user) {
-    return user?.uid ? `tienhub_avatar_url_${user.uid}` : "tienhub_avatar_url";
-}
-
 
 async function initProfile() {
 
@@ -164,8 +137,6 @@ async function initProfile() {
 
         selectedAvatar = localStorage.getItem(getAvatarStorageKey(currentUser)) || displayName.charAt(0).toUpperCase() || "T";
 
-        selectedPhotoURL = currentUser.photoURL || localStorage.getItem(getAvatarUrlStorageKey(currentUser)) || "";
-
         // Shared profile source for hub and games.
         try {
             const { ref, get } = await import(
@@ -185,10 +156,6 @@ async function initProfile() {
             if (typeof profileData.avatar === "string" && profileData.avatar.trim()) {
     selectedAvatar = profileData.avatar.trim();
 }
-
-            if (typeof profileData.avatarUrl === "string" && profileData.avatarUrl) {
-                selectedPhotoURL = profileData.avatarUrl;
-            }
         } catch (profileReadError) {
             console.warn("TienHub profile database read skipped:", profileReadError);
         }
@@ -213,7 +180,7 @@ async function initProfile() {
 
 
 
-        original = { displayName, avatar: selectedAvatar, photoURL: selectedPhotoURL };
+        original = { displayName, avatar: selectedAvatar };
 
         updatePreview();
 
@@ -250,62 +217,6 @@ avatarGrid.addEventListener("click", event => {
 
 
 displayNameInput.addEventListener("input", updatePreview);
-
-
-
-avatarUploadBtn?.addEventListener("click", () => avatarUpload?.click());
-
-
-
-avatarUpload?.addEventListener("change", event => {
-
-    const file = event.target.files?.[0];
-
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) { showToast("Vui lòng chọn một file ảnh."); return; }
-
-    if (file.size > 5 * 1024 * 1024) { showToast("Ảnh tối đa 5MB."); avatarUpload.value = ""; return; }
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-
-        const img = new Image();
-
-        img.onload = () => {
-
-            const size = 256, canvas = document.createElement("canvas");
-
-            canvas.width = size; canvas.height = size;
-
-            const ctx = canvas.getContext("2d");
-
-            const scale = Math.max(size / img.width, size / img.height);
-
-            const w = img.width * scale, h = img.height * scale;
-
-            ctx.drawImage(img, (size-w)/2, (size-h)/2, w, h);
-
-            selectedPhotoURL = canvas.toDataURL("image/webp", 0.78);
-
-            selectedAvatar = "";
-
-            document.querySelectorAll(".avatar-option").forEach(el => el.classList.remove("selected"));
-
-            updatePreview();
-
-            showToast("Đã chọn ảnh avatar. Nhấn Lưu thay đổi để lưu.");
-
-        };
-
-        img.src = reader.result;
-
-    };
-
-    reader.readAsDataURL(file);
-
-});
 
 
 
@@ -394,7 +305,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
         await update(ref(core.db, `publicProfiles/${currentUser.uid}`), {
             displayName: name,
-            avatarUrl: selectedPhotoURL || ""
+            avatar: selectedAvatar || name.charAt(0).toUpperCase() || "T"
         });
 
         localStorage.setItem("tienhub_username", name);
@@ -403,16 +314,10 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
             selectedAvatar || name.charAt(0).toUpperCase() || "T"
         );
 
-        if (selectedPhotoURL) {
-            localStorage.setItem(getAvatarUrlStorageKey(currentUser), selectedPhotoURL);
-        } else {
-            localStorage.removeItem(getAvatarUrlStorageKey(currentUser));
-        }
 
         original = {
             displayName: name,
-            avatar: selectedAvatar,
-            photoURL: selectedPhotoURL
+            avatar: selectedAvatar
         };
 
         updatePreview();
@@ -441,8 +346,6 @@ document.getElementById("cancelBtn").addEventListener("click", () => {
     displayNameInput.value = original.displayName;
 
     selectedAvatar = original.avatar;
-
-    selectedPhotoURL = original.photoURL || "";
 
 
 
