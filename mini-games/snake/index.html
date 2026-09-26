@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TienHub Snake</title>
+    <meta name="description" content="TienHub Snake - mini game rắn săn mồi.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="game-shell">
+        <header class="topbar">
+            <a class="brand" href="../../index.html" aria-label="Về TienHub">
+                <span class="brand-dot"></span>
+                <span>TienHub</span>
+            </a>
+            <div class="top-actions">
+                <button id="soundBtn" class="icon-btn" type="button" aria-label="Bật tắt âm thanh">🔊</button>
+                <a class="back-btn" href="../../index.html">← TienHub</a>
+            </div>
+        </header>
+
+        <section class="game-header">
+            <div>
+                <p class="eyebrow">MINI GAME</p>
+                <h1>Snake</h1>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <span>Score</span>
+                    <strong id="score">0</strong>
+                </div>
+                <div class="stat">
+                    <span>High Score</span>
+                    <strong id="highScore">0</strong>
+                </div>
+                <div class="stat time-stat">
+                    <span>Thời gian</span>
+                    <strong id="gameTime">00:00</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="game-layout">
+            <aside class="leaderboard-panel panel-card" aria-label="Bảng xếp hạng Snake">
+                <div class="panel-heading">
+                    <div>
+                        <p class="panel-kicker">BẢNG XẾP HẠNG</p>
+                        <h2>Top 10</h2>
+                    </div>
+                    <span class="panel-badge">🏆</span>
+                </div>
+                <div id="leaderboardList" class="leaderboard-list">
+                    <div class="leaderboard-empty">Chưa có dữ liệu BXH.</div>
+                </div>
+            </aside>
+
+            <section class="game-area">
+                <div class="board-wrap">
+                <canvas id="gameCanvas" width="600" height="600" aria-label="Bàn chơi Snake"></canvas>
+
+                <div id="overlay" class="overlay">
+                    <div class="overlay-card">
+                        <div id="overlayIcon" class="overlay-icon">🐍</div>
+                        <h2 id="overlayTitle">Snake</h2>
+                        <p id="overlayText">Sẵn sàng chưa?</p>
+                        <button id="mainBtn" class="primary-btn" type="button">▶ Chơi</button>
+                    </div>
+                </div>
+                </div>
+
+                <div class="controls">
+                <button id="pauseBtn" class="secondary-btn" type="button">⏸ Tạm dừng</button>
+                <button id="restartBtn" class="secondary-btn" type="button">↻ Chơi lại</button>
+            </div>
+
+            <div class="mobile-controls" aria-label="Điều khiển cảm ứng">
+                <button data-dir="up" type="button">▲</button>
+                <div>
+                    <button data-dir="left" type="button">◀</button>
+                    <button data-dir="down" type="button">▼</button>
+                    <button data-dir="right" type="button">▶</button>
+                </div>
+            </div>
+
+                <p class="hint">WASD / ↑ ↓ ← → để di chuyển · Space để tạm dừng · R để chơi lại</p>
+            </section>
+
+            <aside class="personal-panel panel-card" aria-label="Thành tích của bạn">
+                <div class="panel-heading">
+                    <div>
+                        <p class="panel-kicker">BXH CỦA BẠN</p>
+                        <h2>Thành tích</h2>
+                    </div>
+                    <span class="panel-badge">👤</span>
+                </div>
+
+                <div class="personal-stat primary">
+                    <span>Điểm cao nhất</span>
+                    <strong id="myHighScore">0</strong>
+                </div>
+                <div class="personal-stat">
+                    <span>Thời gian đạt điểm</span>
+                    <strong id="myBestTime">—</strong>
+                </div>
+                <div class="personal-stat">
+                    <span>Hạng hiện tại</span>
+                    <strong id="myRank">—</strong>
+                </div>
+            </aside>
+        </section>
+    </main>
+
+    <script type="module" src="game.js"></script>
+</body>
+</html>
