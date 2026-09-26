@@ -95,6 +95,19 @@
 <!-- Styles -->
 <link rel="stylesheet" href="css/global.css">
 <link rel="stylesheet" href="css/home.css">
+
+<script>
+    // Ẩn /index.html khỏi URL nhưng không reload trang
+    if (window.location.pathname.endsWith('/index.html')) {
+        const cleanPath = window.location.pathname.replace(/index\.html$/, '');
+        window.history.replaceState(
+            null,
+            '',
+            cleanPath + window.location.search + window.location.hash
+        );
+    }
+</script>
+
 </head>
 
 <body>
