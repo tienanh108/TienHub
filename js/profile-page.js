@@ -370,7 +370,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
         );
 
-        const { ref, get, runTransaction, update, query, orderByChild, equalTo } = await import(
+        const { ref, get, runTransaction, update } = await import(
 
             "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
 
@@ -394,16 +394,15 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
         // Check public profiles first so old accounts (created before the name-lock)
         // are also protected. The comparison is case-sensitive.
-        const publicProfilesQuery = query(
-            ref(core.db, "publicProfiles"),
-            orderByChild("displayName"),
-            equalTo(name)
-        );
-        const publicProfilesSnapshot = await get(publicProfilesQuery);
+        const publicProfilesSnapshot = await get(ref(core.db, "publicProfiles"));
         const existingPublicProfiles = publicProfilesSnapshot.val() || {};
-        const duplicateUid = Object.keys(existingPublicProfiles).find(
-            uid => uid !== currentUser.uid
-        );
+        const duplicateUid = Object.entries(existingPublicProfiles).find(
+            ([uid, profile]) =>
+                uid !== currentUser.uid &&
+                profile &&
+                typeof profile.displayName === "string" &&
+                profile.displayName === name
+        )?.[0] || null;
 
         if (duplicateUid) {
             const error = new Error("Tên hiển thị đã được sử dụng.");
