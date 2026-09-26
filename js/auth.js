@@ -626,7 +626,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             get,
 
-            set
+            update
 
         } = await import(
 
@@ -682,7 +682,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-        await set(userRef, {
+        // Keep profile fields such as displayName and avatar intact.
+        // Using set() here used to overwrite users/{uid} on every login,
+        // which erased the saved avatar.
+        await update(userRef, {
 
             username: cleanUsername,
 
