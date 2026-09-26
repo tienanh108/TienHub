@@ -162,7 +162,11 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
             "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"
         );
 
-        await updateProfile(currentUser, { displayName: name, photoURL: selectedPhotoURL || null });
+        // Firebase Auth photoURL is intended for a URL, not a large base64/data URL.
+        // Passing the generated avatar data URL to updateProfile can make Firebase
+        // reject the whole profile update. Save only the display name to Auth and
+        // keep the cropped avatar locally for the current browser.
+        await updateProfile(currentUser, { displayName: name });
 
         // Existing TienHub pages use this value for the visible account name.
         // Keep the login username separate so changing displayName never changes it.
@@ -176,7 +180,11 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
         showToast("Đã lưu thay đổi.");
     } catch (error) {
         console.error("TienHub profile save error:", error);
-        showToast("Không thể lưu tên hiển thị.");
+        const code = error?.code || "";
+        console.error("TienHub profile save error code:", code);
+        showToast(code === "auth/requires-recent-login"
+            ? "Phiên đăng nhập đã cũ. Vui lòng đăng nhập lại rồi thử lại."
+            : "Không thể lưu thay đổi. Vui lòng thử lại.");
     } finally {
         saveBtn.disabled = false;
     }
