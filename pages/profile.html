@@ -8,23 +8,29 @@
 </head>
 <body>
     <header class="site-header">
-        <a class="brand" href="../index.html" aria-label="TienHub">
-    <img class="brand-mark" src="../assets/icon/tienhub-mark.png" alt="TienHub">
-    <span class="brand-name">TienHub</span>
-</a>
-
-        <nav class="main-nav">
-            <a href="../index.html">Trang chủ</a>
-            <a href="./mini-game.html">Mini Games</a>
-            <a href="./download.html">Tải về</a>
-            <a class="active" href="./profile.html">Hồ sơ</a>
-        </nav>
-
-        <button class="account-trigger" id="accountTrigger" type="button">
-            <span class="account-avatar" id="headerAvatar">T</span>
-            <span class="account-name" id="headerName">tienanh1</span>
-            <span class="chevron">⌄</span>
-        </button>
+        <div class="nav-shell">
+            <a class="brand" href="../index.html" aria-label="TienHub">
+                <span class="brand-mark"><img src="../assets/icon/tienhub-mark.png" alt="TienHub"></span>
+                <span class="brand-name">TienHub</span>
+            </a>
+            <nav class="main-nav" aria-label="Điều hướng chính">
+                <a href="../index.html">Trang chủ</a>
+                <a href="mini-game.html">Mini Games</a>
+                <a href="download.html">Tải về</a>
+                <a class="active" href="profile.html">Hồ sơ</a>
+            </nav>
+            <div class="nav-actions">
+                <label class="search">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.8"></circle><path d="m16.2 16.2 4.2 4.2"></path></svg>
+                    <input type="search" placeholder="Tìm kiếm game..." aria-label="Tìm kiếm game">
+                </label>
+                <span class="nav-divider"></span>
+                <button class="account-trigger" id="accountTrigger" type="button" aria-label="Hồ sơ">
+                    <span class="account-avatar" id="headerAvatar">T</span>
+                    <span class="account-name" id="headerName">tienanh</span>
+                </button>
+            </div>
+        </div>
     </header>
 
     <main class="profile-page">
@@ -48,9 +54,7 @@
                 <div class="avatar-editor">
                     <div class="large-avatar" id="largeAvatar">T</div>
                     <button class="avatar-change" id="focusAvatar" type="button">Thay đổi avatar</button>
-                    <input id="avatarUpload" class="avatar-upload-input" type="file" accept="image/png,image/jpeg,image/webp" hidden>
-                    <button class="avatar-upload-btn" id="avatarUploadBtn" type="button">📷 Tải ảnh lên</button>
-                </div>
+                                </div>
 
                 <label class="field-label" for="displayName">Tên hiển thị trong game</label>
                 <div class="input-wrap">
@@ -73,9 +77,6 @@
                     <button class="avatar-option" data-letter="N" type="button">N</button>
                     <button class="avatar-option" data-letter="K" type="button">K</button>
                     <button class="avatar-option" data-letter="M" type="button">M</button>
-                    <button class="avatar-option" data-letter="S" type="button">S</button>
-                    <button class="avatar-option" data-letter="X" type="button">X</button>
-                    <button class="avatar-option" data-letter="P" type="button">P</button>
                 </div>
 
                 <div class="actions">
