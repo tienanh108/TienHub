@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>TienHub - Brick Breaker</title>
+
+    <!-- QUAN TRỌNG: style.css nằm cùng thư mục -->
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+<div class="game-wrapper">
+
+    <!-- =========================
+         TOP BAR
+    ========================== -->
+
+    <header class="topbar">
+
+        <div class="brand">
+            <div>TIENHUB</div>
+            <small>BRICK BREAKER</small>
+        </div>
+
+
+        <div class="stats">
+
+            <div class="stat">
+                <small>SCORE</small>
+                <strong id="score">0</strong>
+            </div>
+
+            <div class="stat">
+                <small>BEST</small>
+                <strong id="best">0</strong>
+            </div>
+
+            <div class="stat hearts-stat">
+                <strong id="lives">♥ ♥ ♥</strong>
+            </div>
+
+        </div>
+
+
+        <div class="top-actions">
+
+            <button
+                id="menuBtn"
+                class="icon-btn"
+                type="button"
+                title="Quay về menu"
+            >
+                ⌂
+            </button>
+
+            <button
+                id="pauseBtn"
+                class="icon-btn"
+                type="button"
+                title="Tạm dừng"
+            >
+                Ⅱ
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================
+         GAME
+    ========================== -->
+
+    <main class="game-shell">
+
+        <canvas
+            id="gameCanvas"
+            width="1100"
+            height="650"
+        ></canvas>
+
+
+        <!-- GAME OVERLAY -->
+
+        <div
+            id="overlay"
+            class="overlay"
+        >
+
+            <div class="menu-card">
+
+                <div class="mini-bricks">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+
+                <h1 id="menuTitle">
+                    BRICK BREAKER
+                </h1>
+
+
+                <p id="menuText">
+                    Phá toàn bộ gạch và đạt điểm cao nhất.
+                </p>
+
+
+                <button
+                    id="playBtn"
+                    class="play-btn"
+                    type="button"
+                >
+                    PLAY
+                </button>
+
+
+                <div class="controls">
+                    <span>← →</span>
+                    <span>hoặc</span>
+                    <span>A D</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <footer>
+
+        <div>
+            <b>BRICK BREAKER</b>
+            <span>•</span>
+            <span>TIENHUB</span>
+        </div>
+
+
+        <div id="powerText">
+            POWER-UP: NONE
+        </div>
+
+    </footer>
+
+</div>
+
+
+<script src="./main.js"></script>
+
+</body>
+</html>

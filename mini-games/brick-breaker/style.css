@@ -1,0 +1,861 @@
+/* =====================================================
+   RESET
+===================================================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
+
+
+body {
+
+    min-height: 100vh;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    padding: 12px;
+
+    overflow: hidden;
+
+    background:
+        radial-gradient(
+            circle at 15% 20%,
+            rgba(20, 90, 220, 0.16),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 85% 75%,
+            rgba(130, 40, 220, 0.14),
+            transparent 35%
+        ),
+        #02050b;
+
+    color: #f5f8ff;
+
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+}
+
+
+/* =====================================================
+   MAIN WRAPPER
+
+   Canvas = 1100 x 650
+   Tỉ lệ = 1.6923
+
+   Wrapper tự co theo:
+   - chiều rộng
+   - chiều cao màn hình
+===================================================== */
+
+.game-wrapper {
+
+    width: min(
+        calc(100vw - 24px),
+        calc((100vh - 110px) * 1.6923),
+        1100px
+    );
+
+    max-width: 1100px;
+
+    min-width: 0;
+}
+
+
+/* =====================================================
+   TOP BAR
+===================================================== */
+
+.topbar {
+
+    width: 100%;
+
+    height: 58px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 9px;
+}
+
+
+.brand {
+
+    flex-shrink: 0;
+
+    font-size: 22px;
+
+    line-height: 1;
+
+    font-weight: 900;
+
+    letter-spacing: 2px;
+}
+
+
+.brand small {
+
+    display: block;
+
+    margin-top: 5px;
+
+    color: #5d6a82;
+
+    font-size: 7px;
+
+    letter-spacing: 3px;
+
+    font-weight: 700;
+}
+
+
+/* =====================================================
+   STATS
+===================================================== */
+
+.stats {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 30px;
+
+    min-width: 0;
+}
+
+
+.stat {
+
+    text-align: center;
+
+    min-width: 55px;
+}
+
+
+.stat small {
+
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #68758d;
+
+    font-size: 8px;
+
+    letter-spacing: 1.5px;
+
+    font-weight: 700;
+}
+
+
+.stat strong {
+
+    display: block;
+
+    font-size: 17px;
+
+    line-height: 1;
+}
+
+
+/* =====================================================
+   HEARTS
+===================================================== */
+
+.hearts-stat {
+
+    min-width: auto;
+}
+
+
+.hearts-stat strong {
+
+    color: #ff3f5f;
+
+    font-size: 24px;
+
+    letter-spacing: 3px;
+
+    white-space: nowrap;
+
+    text-shadow:
+        0 0 8px rgba(255, 55, 85, 0.4),
+        0 0 18px rgba(255, 55, 85, 0.15);
+}
+
+
+/* =====================================================
+   TOP ACTIONS
+===================================================== */
+
+.top-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    flex-shrink: 0;
+}
+
+
+.icon-btn {
+
+    width: 40px;
+
+    height: 40px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: 1px solid rgba(255,255,255,0.14);
+
+    border-radius: 10px;
+
+    background:
+        rgba(255,255,255,0.055);
+
+    color: white;
+
+    font-size: 17px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease;
+}
+
+
+.icon-btn:hover {
+
+    background:
+        rgba(255,255,255,0.12);
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* =====================================================
+   GAME SHELL
+
+   CỰC KỲ QUAN TRỌNG:
+   Luôn giữ đúng tỉ lệ 1100 / 650.
+===================================================== */
+
+.game-shell {
+
+    position: relative;
+
+    width: 100%;
+
+    aspect-ratio: 1100 / 650;
+
+    overflow: hidden;
+
+    border-radius: 16px;
+
+    border:
+        1px solid rgba(60,150,255,0.30);
+
+    background: #030711;
+
+    box-shadow:
+        0 20px 70px rgba(0,0,0,0.60),
+        0 0 45px rgba(0,100,255,0.08);
+}
+
+
+/* =====================================================
+   CANVAS
+===================================================== */
+
+#gameCanvas {
+
+    display: block;
+
+    width: 100%;
+
+    height: 100%;
+
+    max-width: 100%;
+
+    max-height: 100%;
+
+    background: #030711;
+}
+
+
+/* =====================================================
+   OVERLAY
+===================================================== */
+
+.overlay {
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background:
+        rgba(2,5,12,0.70);
+
+    backdrop-filter:
+        blur(5px);
+
+    -webkit-backdrop-filter:
+        blur(5px);
+
+    opacity: 1;
+
+    visibility: visible;
+
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease;
+}
+
+
+.overlay.hidden {
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    pointer-events: none;
+}
+
+
+/* =====================================================
+   MENU CARD
+===================================================== */
+
+.menu-card {
+
+    width: min(
+        90%,
+        500px
+    );
+
+    text-align: center;
+
+    padding: 25px;
+}
+
+
+.menu-card h1 {
+
+    margin-bottom: 9px;
+
+    font-size:
+        clamp(
+            24px,
+            4vw,
+            48px
+        );
+
+    line-height: 1;
+
+    letter-spacing: 3px;
+
+    font-weight: 900;
+}
+
+
+.menu-card p {
+
+    margin-bottom: 21px;
+
+    color: #8794ac;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+
+/* =====================================================
+   MINI BRICKS
+===================================================== */
+
+.mini-bricks {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    margin-bottom: 17px;
+}
+
+
+.mini-bricks span {
+
+    width: 31px;
+
+    height: 9px;
+
+    border-radius: 3px;
+
+    box-shadow:
+        0 0 12px currentColor;
+}
+
+
+.mini-bricks span:nth-child(1) {
+
+    background: #ff4662;
+
+    color: #ff4662;
+}
+
+
+.mini-bricks span:nth-child(2) {
+
+    background: #ffb52f;
+
+    color: #ffb52f;
+}
+
+
+.mini-bricks span:nth-child(3) {
+
+    background: #35d77b;
+
+    color: #35d77b;
+}
+
+
+.mini-bricks span:nth-child(4) {
+
+    background: #38b9ff;
+
+    color: #38b9ff;
+}
+
+
+/* =====================================================
+   PLAY BUTTON
+===================================================== */
+
+.play-btn {
+
+    border: 0;
+
+    border-radius: 8px;
+
+    padding:
+        11px
+        45px;
+
+    background: #ffffff;
+
+    color: #050810;
+
+    font-size: 13px;
+
+    font-weight: 900;
+
+    letter-spacing: 1px;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+
+.play-btn:hover {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 8px 25px
+        rgba(255,255,255,0.20);
+}
+
+
+.play-btn:active {
+
+    transform:
+        translateY(0);
+}
+
+
+/* =====================================================
+   CONTROLS
+===================================================== */
+
+.controls {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 15px;
+
+    color: #5d6a82;
+
+    font-size: 10px;
+}
+
+
+.controls span:first-child,
+.controls span:last-child {
+
+    color: #c8d5ea;
+
+    font-weight: 700;
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+footer {
+
+    width: 100%;
+
+    height: 20px;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: space-between;
+
+    margin-top: 5px;
+
+    color: #4f5d75;
+
+    font-size: 8px;
+
+    letter-spacing: 1.2px;
+}
+
+
+footer b {
+
+    color: #7e8ba1;
+}
+
+
+footer span {
+
+    margin:
+        0 4px;
+}
+
+
+#powerText {
+
+    color: #60708b;
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 800px) {
+
+    body {
+
+        padding: 8px;
+    }
+
+
+    .game-wrapper {
+
+        width: min(
+            calc(100vw - 16px),
+            calc((100vh - 90px) * 1.6923)
+        );
+    }
+
+
+    .topbar {
+
+        height: 48px;
+
+        gap: 10px;
+
+        margin-bottom: 7px;
+    }
+
+
+    .brand {
+
+        font-size: 18px;
+
+        letter-spacing: 1.5px;
+    }
+
+
+    .brand small {
+
+        font-size: 6px;
+
+        letter-spacing: 2px;
+
+        margin-top: 3px;
+    }
+
+
+    .stats {
+
+        gap: 14px;
+    }
+
+
+    .stat {
+
+        min-width: 40px;
+    }
+
+
+    .stat small {
+
+        font-size: 7px;
+    }
+
+
+    .stat strong {
+
+        font-size: 14px;
+    }
+
+
+    .hearts-stat strong {
+
+        font-size: 19px;
+
+        letter-spacing: 2px;
+    }
+
+
+    .icon-btn {
+
+        width: 35px;
+
+        height: 35px;
+
+        border-radius: 8px;
+
+        font-size: 15px;
+    }
+}
+
+
+/* =====================================================
+   PHONE
+===================================================== */
+
+@media (max-width: 550px) {
+
+    body {
+
+        padding: 5px;
+
+        align-items: center;
+    }
+
+
+    .game-wrapper {
+
+        width:
+            calc(100vw - 10px);
+    }
+
+
+    .topbar {
+
+        height: 40px;
+
+        gap: 5px;
+
+        margin-bottom: 6px;
+    }
+
+
+    .brand {
+
+        font-size: 13px;
+
+        letter-spacing: 1px;
+    }
+
+
+    .brand small {
+
+        display: none;
+    }
+
+
+    .stats {
+
+        gap: 6px;
+    }
+
+
+    .stat {
+
+        min-width: 30px;
+    }
+
+
+    .stat small {
+
+        font-size: 5px;
+
+        margin-bottom: 2px;
+    }
+
+
+    .stat strong {
+
+        font-size: 10px;
+    }
+
+
+    .hearts-stat strong {
+
+        font-size: 15px;
+
+        letter-spacing: 1px;
+    }
+
+
+    .top-actions {
+
+        gap: 4px;
+    }
+
+
+    .icon-btn {
+
+        width: 29px;
+
+        height: 29px;
+
+        border-radius: 7px;
+
+        font-size: 12px;
+    }
+
+
+    .game-shell {
+
+        border-radius: 9px;
+    }
+
+
+    footer {
+
+        display: none;
+    }
+
+
+    .menu-card {
+
+        padding: 12px;
+    }
+
+
+    .menu-card h1 {
+
+        font-size: 21px;
+
+        letter-spacing: 2px;
+    }
+
+
+    .menu-card p {
+
+        font-size: 10px;
+
+        margin-bottom: 12px;
+    }
+
+
+    .mini-bricks {
+
+        margin-bottom: 11px;
+    }
+
+
+    .mini-bricks span {
+
+        width: 23px;
+
+        height: 7px;
+    }
+
+
+    .play-btn {
+
+        padding:
+            8px
+            30px;
+
+        font-size: 10px;
+    }
+
+
+    .controls {
+
+        margin-top: 9px;
+
+        font-size: 8px;
+    }
+}
