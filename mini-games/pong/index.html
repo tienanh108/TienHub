@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#061522">
+  <title>Pong - TienHub</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="pong-app">
+    <header class="game-topbar">
+      <a class="back-btn" id="backBtn" href="../../pages/mini-game.html" aria-label="Quay lại Mini Games">‹ <span>Mini Games</span></a>
+      <div class="brand">TIEN<span>HUB</span></div>
+      <div class="top-actions">
+        <button id="pauseBtn" type="button" disabled>Ⅱ</button>
+        <button id="menuBtn" type="button">☰</button>
+      </div>
+    </header>
+
+    <section class="game-shell">
+      <div class="scoreboard" aria-live="polite">
+        <div class="score-block player-one"><span>PLAYER 1</span><strong id="scoreLeft">0</strong></div>
+        <div class="score-divider">:</div>
+        <div class="score-block player-two"><span id="rightLabel">PLAYER 2</span><strong id="scoreRight">0</strong></div>
+      </div>
+
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="pongCanvas" aria-label="Bàn chơi Pong"></canvas>
+        <div class="touch-label left-touch">P1<br><small>kéo lên / xuống</small></div>
+        <div class="touch-label right-touch">P2<br><small>kéo lên / xuống</small></div>
+      </div>
+
+      <div class="game-hint" id="gameHint">P1: W / S hoặc A / D &nbsp; • &nbsp; P2: ↑ / ↓ hoặc ← / →</div>
+
+      <div class="menu-panel" id="menuPanel">
+        <div class="menu-card">
+          <div class="menu-eyebrow">TIENHUB MINI GAME</div>
+          <h1>PONG</h1>
+          <p>Đưa bóng qua vợt đối thủ và chạm mốc 5 điểm.</p>
+          <div class="mode-grid">
+            <button class="mode-btn active" data-mode="ai" type="button">🤖 Chơi với máy</button>
+            <button class="mode-btn" data-mode="2p" type="button">👥 2 người</button>
+          </div>
+          <button class="primary-btn" id="startBtn" type="button">Bắt đầu</button>
+          <button class="secondary-btn hub-menu-btn" id="hubMenuBtn" type="button">Về menu TienHub</button>
+          <div class="controls-note" id="controlsNote">Máy tính: W / S &nbsp; • &nbsp; Mobile: kéo vợt bên trái</div>
+        </div>
+      </div>
+
+      <div class="pause-panel" id="pausePanel" hidden>
+        <div class="small-panel">
+          <div class="menu-eyebrow">TẠM DỪNG</div>
+          <h2>Game đang tạm dừng</h2>
+          <button class="primary-btn" id="resumeBtn" type="button">Tiếp tục</button>
+          <button class="secondary-btn" id="restartBtn" type="button">Chơi lại</button>
+        </div>
+      </div>
+
+      <div class="result-panel" id="resultPanel" hidden>
+        <div class="small-panel">
+          <div class="menu-eyebrow">KẾT THÚC</div>
+          <h2 id="resultTitle">PLAYER 1 THẮNG</h2>
+          <p id="resultScore">5 : 3</p>
+          <button class="primary-btn" id="againBtn" type="button">Chơi lại</button>
+          <button class="secondary-btn" id="resultMenuBtn" type="button">Về menu Pong</button>
+        </div>
+      </div>
+
+      <div class="rotate-panel" id="rotatePanel">
+        <div>
+          <div class="rotate-icon">↻</div>
+          <h2>Hãy xoay điện thoại</h2>
+          <p>Pong được tối ưu cho màn hình ngang.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="main.js"></script>
+</body>
+</html>
