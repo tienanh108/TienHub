@@ -37,9 +37,13 @@ button{cursor:pointer}
 
 .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;font-size:21px}
 .brand-mark{
-    width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
-    color:#03111b;background:linear-gradient(135deg,#4bd7ff,#1698d7);
-    box-shadow:0 0 22px rgba(42,193,255,.24);font-weight:900
+    width:34px;
+    height:34px;
+    display:block;
+    object-fit:contain;
+    background:transparent;
+    border-radius:0;
+    box-shadow:none;
 }
 .main-nav{display:flex;gap:34px;margin-left:52px}
 .main-nav a{color:#8fa4b9;text-decoration:none;font-size:14px;font-weight:600;transition:.2s}
