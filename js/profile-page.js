@@ -65,14 +65,14 @@ async function initProfile() {
         }
 
         const username = getUsername(currentUser);
-        const displayName = (currentUser.displayName || localStorage.getItem("tienhub_username") || username).trim();
+        let displayName = (currentUser.displayName || username).trim();
 
         usernameInput.value = username;
         displayNameInput.value = displayName;
         headerName.textContent = displayName;
         selectedAvatar = localStorage.getItem(getAvatarStorageKey(currentUser)) || displayName.charAt(0).toUpperCase() || "T";
 
-        // Firebase Realtime Database is the shared source of truth for the avatar.
+        // Firebase Realtime Database is the shared source of truth for profile data.
         try {
             const coreDb = await import("../src/core/firebase.js");
             const { ref, get } = await import(
@@ -85,8 +85,9 @@ async function initProfile() {
                 localStorage.setItem(getAvatarStorageKey(currentUser), selectedAvatar);
             }
             if (profileData && typeof profileData.displayName === "string" && profileData.displayName.trim()) {
-                displayNameInput.value = profileData.displayName.trim();
-                headerName.textContent = profileData.displayName.trim();
+                displayName = profileData.displayName.trim();
+                displayNameInput.value = displayName;
+                headerName.textContent = displayName;
             }
         } catch (profileReadError) {
             console.warn("TienHub profile database read skipped:", profileReadError);
@@ -101,7 +102,10 @@ async function initProfile() {
             selectedAvatar = "T";
         }
 
-        original = { displayName, avatar: selectedAvatar };
+        original = {
+            displayName: displayNameInput.value.trim() || username,
+            avatar: selectedAvatar
+        };
         updatePreview();
     } catch (error) {
         console.error("TienHub profile init error:", error);
@@ -160,7 +164,6 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
         });
 
         localStorage.setItem(getAvatarStorageKey(currentUser), selectedAvatar || "T");
-        localStorage.setItem("tienhub_username", name);
 
         original = { displayName: name, avatar: selectedAvatar };
         updatePreview();
