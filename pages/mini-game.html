@@ -162,7 +162,7 @@
 
             </div>
 
-            <span id="gameCount" class="game-count">10 game</span>
+            <span id="gameCount" class="game-count">11 game</span>
 
         </div>
 
@@ -209,6 +209,14 @@
                     data-category="puzzle">
 
                 🧩 Puzzle
+
+            </button>
+
+            <button class="category-btn" type="button"
+
+                    data-category="sports">
+
+                ⚽ Sports
 
             </button>
 
@@ -264,6 +272,40 @@
 
                     <a href="../mini-games/caro5/index.html">Chơi</a>
 
+                </div>
+
+            </article>
+
+
+
+            <!-- SOCCER -->
+
+            <article class="library-mini-card"
+
+                     data-category="sports"
+
+                     data-name="soccer football bóng đá">
+
+                <div class="library-cover soccer-cover">
+                    <span class="soccer-field-line midfield"></span>
+                    <span class="soccer-field-line box-left"></span>
+                    <span class="soccer-field-line box-right"></span>
+                    <span class="soccer-player blue p1"></span>
+                    <span class="soccer-player blue p2"></span>
+                    <span class="soccer-player blue p3"></span>
+                    <span class="soccer-player red p4"></span>
+                    <span class="soccer-player red p5"></span>
+                    <span class="soccer-player red p6"></span>
+                    <span class="soccer-ball"></span>
+                </div>
+
+                <div class="library-info">
+                    <div>
+                        <h3>Soccer</h3>
+                        <span>Sports</span>
+                        <p>Điều khiển các cầu thủ tròn và ghi bàn.</p>
+                    </div>
+                    <a href="#">Sắp ra mắt</a>
                 </div>
 
             </article>
@@ -674,6 +716,12 @@
 
         </div>
 
+        <div class="mini-library-pagination" id="miniLibraryPagination" hidden aria-label="Chuyển trang Mini Games">
+            <button type="button" id="miniLibraryPrev" aria-label="Trang trước">‹</button>
+            <span id="miniLibraryPageInfo">1 / 1</span>
+            <button type="button" id="miniLibraryNext" aria-label="Trang tiếp theo">›</button>
+        </div>
+
     </section>
 
 </main>
@@ -771,135 +819,88 @@
 
 
 <script>
-
-(function () {
-
-    const buttons = [...document.querySelectorAll(".category-btn")];
-
-    const cards = [...document.querySelectorAll(".library-mini-card")];
-
+(() => {
     const search = document.getElementById("gameSearch");
-
     const count = document.getElementById("gameCount");
-
     const filterText = document.getElementById("filterText");
-
+    const buttons = [...document.querySelectorAll(".category-btn")];
+    const grid = document.getElementById("miniGameGrid");
     const noGames = document.getElementById("noGames");
-
-
-
+    const pagination = document.getElementById("miniLibraryPagination");
+    const prev = document.getElementById("miniLibraryPrev");
+    const next = document.getElementById("miniLibraryNext");
+    const pageInfo = document.getElementById("miniLibraryPageInfo");
+    const cards = [...grid.querySelectorAll(".library-mini-card")];
+    const perPage = 15;
     let activeCategory = "all";
+    let currentPage = 1;
 
-
-
-    function applyFilter() {
-
+    function getFilteredCards() {
         const keyword = (search?.value || "").trim().toLowerCase();
-
-        let visible = 0;
-
-
-
-        cards.forEach(card => {
-
+        return cards.filter(card => {
             const category = card.dataset.category || "";
-
             const name = card.dataset.name || "";
-
-            const categoryMatch =
-
-                activeCategory === "all" || category === activeCategory;
-
+            const categoryMatch = activeCategory === "all" || category === activeCategory;
             const searchMatch = !keyword || name.includes(keyword);
-
-
-
-            const show = categoryMatch && searchMatch;
-
-            card.hidden = !show;
-
-
-
-            if (show) visible++;
-
+            return categoryMatch && searchMatch;
         });
-
-
-
-        if (count) {
-
-            count.textContent = `${visible} game`;
-
-        }
-
-
-
-        if (filterText) {
-
-            const activeButton =
-
-                buttons.find(btn => btn.dataset.category === activeCategory);
-
-            const label = activeButton
-
-                ? activeButton.textContent.trim()
-
-                : "Tất cả";
-
-
-
-            filterText.textContent = keyword
-
-                ? `Tìm kiếm: "${keyword}" • ${visible} game`
-
-                : `Đang hiển thị: ${label} • ${visible} game`;
-
-        }
-
-
-
-        if (noGames) {
-
-            noGames.hidden = visible !== 0;
-
-        }
-
     }
 
+    function render() {
+        const keyword = (search?.value || "").trim().toLowerCase();
+        const filtered = getFilteredCards();
+        const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+        currentPage = Math.min(currentPage, totalPages);
 
+        cards.forEach(card => { card.hidden = true; });
+        const start = (currentPage - 1) * perPage;
+        filtered.slice(start, start + perPage).forEach(card => { card.hidden = false; });
+
+        const visible = filtered.length;
+        count.textContent = `${visible} game`;
+        noGames.hidden = visible !== 0;
+
+        const activeButton = buttons.find(btn => btn.dataset.category === activeCategory);
+        const label = activeButton ? activeButton.textContent.trim() : "Tất cả";
+        filterText.textContent = keyword
+            ? `Tìm kiếm: "${keyword}" • ${visible} game`
+            : `Đang hiển thị: ${label} • ${visible} game`;
+
+        pagination.hidden = totalPages <= 1;
+        pageInfo.textContent = `${currentPage} / ${totalPages}`;
+        prev.disabled = currentPage === 1;
+        next.disabled = currentPage === totalPages;
+    }
 
     buttons.forEach(button => {
-
         button.addEventListener("click", () => {
-
             activeCategory = button.dataset.category || "all";
-
-
-
-            buttons.forEach(btn => {
-
-                btn.classList.toggle("active", btn === button);
-
-            });
-
-
-
-            applyFilter();
-
+            currentPage = 1;
+            buttons.forEach(btn => btn.classList.toggle("active", btn === button));
+            render();
         });
-
     });
 
+    search?.addEventListener("input", () => {
+        currentPage = 1;
+        render();
+    });
 
+    prev.addEventListener("click", () => {
+        if (currentPage > 1) { currentPage--; render(); }
+    });
 
-    search?.addEventListener("input", applyFilter);
+    next.addEventListener("click", () => {
+        const totalPages = Math.max(1, Math.ceil(getFilteredCards().length / perPage));
+        if (currentPage < totalPages) {
+            currentPage++;
+            render();
+            grid.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    });
 
-
-
-    applyFilter();
-
+    render();
 })();
-
 </script>
 
 </body>
