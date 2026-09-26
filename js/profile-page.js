@@ -166,6 +166,30 @@ async function initProfile() {
 
         selectedPhotoURL = currentUser.photoURL || localStorage.getItem(getAvatarUrlStorageKey(currentUser)) || "";
 
+        // Shared profile source for hub and games.
+        try {
+            const { ref, get } = await import(
+                "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
+            );
+
+            const profileSnapshot = await get(
+                ref(core.db, `users/${currentUser.uid}`)
+            );
+
+            const profileData = profileSnapshot.val() || {};
+
+            if (typeof profileData.displayName === "string" && profileData.displayName.trim()) {
+                displayNameInput.value = profileData.displayName.trim();
+                headerName.textContent = profileData.displayName.trim();
+            }
+
+            if (typeof profileData.avatarUrl === "string" && profileData.avatarUrl) {
+                selectedPhotoURL = profileData.avatarUrl;
+            }
+        } catch (profileReadError) {
+            console.warn("TienHub profile database read skipped:", profileReadError);
+        }
+
 
 
         const avatarOption = [...document.querySelectorAll(".avatar-option")]
@@ -326,6 +350,8 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
     try {
 
+        const core = await import("../src/core/firebase.js");
+
         const { updateProfile } = await import(
 
             "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"
@@ -343,6 +369,19 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
         // keep the cropped avatar locally for the current browser.
 
         await updateProfile(currentUser, { displayName: name });
+
+        // Save shared profile data so hub and mini-games show the same avatar.
+        const { ref, update } = await import(
+            "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js"
+        );
+
+        await update(
+            ref(core.db, `users/${currentUser.uid}`),
+            {
+                displayName: name,
+                avatarUrl: selectedPhotoURL || ""
+            }
+        );
 
 
 
