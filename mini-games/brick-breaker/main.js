@@ -52,6 +52,16 @@ canvas.height = H;
 
 // =====================================================
 
+// THÊM NÚT MENU
+
+// =====================================================
+
+
+
+const menuBtn = document.getElementById("menuBtn");
+
+// =====================================================
+
 // GAME STATE
 
 // =====================================================
@@ -192,7 +202,7 @@ function createBall(
 
 
 
-        radius: 8,
+        radius: MOBILE ? 6 : 8,
 
 
 
@@ -236,39 +246,27 @@ function resetBalls() {
 
 
 
-const brick = {
-
-
-
-    rows: 7,
-
-
-
-    cols: 11,
-
-
-
-    width: 80,
-
-
-
-    height: 25,
-
-
-
-    gap: 8,
-
-
-
-    top: 60
-
-};
+const brick = MOBILE
+    ? {
+        rows: 7,
+        cols: 7,
+        width: 44,
+        height: 20,
+        gap: 6,
+        top: 48
+    }
+    : {
+        rows: 6,
+        cols: 11,
+        width: 80,
+        height: 25,
+        gap: 8,
+        top: 60
+    };
 
 
 
 let bricks = [];
-let nextRowId = 0;
-let replacedRows = new Set();
 
 
 
@@ -307,8 +305,6 @@ function createInitialBricks() {
 
 
     bricks = [];
-    nextRowId = 0;
-    replacedRows = new Set();
 
 
 
@@ -381,207 +377,126 @@ function createInitialBricks() {
 function addBrickRow(
 
     y,
+
     rowOffset = 0
 
 ) {
 
+
+
     const totalWidth =
+
         brick.cols * brick.width +
+
         (brick.cols - 1) * brick.gap;
 
+
+
     const startX =
+
         (W - totalWidth) / 2;
 
-    // Mỗi lần tạo hàng sẽ có một ID riêng để
-    // biết chính xác khi nào cả hàng đó đã bị phá.
-    const rowId = nextRowId++;
+
+
+
 
     for (
+
         let col = 0;
+
         col < brick.cols;
+
         col++
+
     ) {
 
-        // Bố cục ngẫu nhiên kiểu Brick Breaker:
-        // nhiều khoảng trống để bóng có đường đi.
-        // Một vài ô liền nhau tạo thành cụm gạch.
-        const emptyChance =
-            rowOffset <= 2
-                ? 0.42
-                : 0.34;
+
+
+        // Một vài vị trí trống
 
         if (
-            Math.random() < emptyChance
+
+            Math.random() < 0.10
+
         ) {
+
             continue;
+
         }
+
+
+
+
 
         bricks.push({
 
+
+
             x:
+
                 startX +
-                col * (brick.width + brick.gap),
+
+                col *
+
+                (brick.width + brick.gap),
+
+
 
             y,
 
-            width: brick.width,
 
-            height: brick.height,
+
+            width:
+
+                brick.width,
+
+
+
+            height:
+
+                brick.height,
+
+
 
             row:
+
                 Math.abs(
-                    rowOffset % brickColors.length
+
+                    rowOffset %
+
+                    brickColors.length
+
                 ),
 
-            rowId,
 
-            col,
 
             alive: true,
 
+
+
             special:
-                Math.random() < 0.07,
+
+                Math.random() < 0.10,
+
+
 
             hp:
+
                 Math.random() < 0.10
+
                     ? 2
+
                     : 1
+
         });
+
     }
+
 }
 
 
-// =====================================================
-// KIỂM TRA DÒNG NGANG / DỌC ĐÃ BỊ PHÁ HẾT
-// =====================================================
-
-function checkClearedLines(rowId, col) {
-
-    // Không đẩy toàn bộ gạch xuống ngay khi clear.
-    // Chỉ thưởng một hàng random mới ở phía trên.
-    // Nhờ vậy sân vẫn thoáng và bóng luôn có đường chơi.
-
-    const rowBricks = bricks.filter(
-        b => b.rowId === rowId
-    );
-
-    const rowCleared =
-        rowBricks.length >= 4 &&
-        rowBricks.every(b => !b.alive);
-
-    if (rowCleared) {
-
-        for (const b of rowBricks) {
-            b.rowId = -1;
-        }
-
-        spawnReplacementRow(false);
-        return;
-    }
-
-    const colBricks = bricks.filter(
-        b => b.col === col
-    );
-
-    const colCleared =
-        colBricks.length >= 4 &&
-        colBricks.every(b => !b.alive);
-
-    if (colCleared) {
-
-        for (const b of colBricks) {
-            b.col = -1;
-        }
-
-        spawnReplacementRow(false);
-    }
-}
 
 
-// =====================================================
-// THÊM HÀNG RANDOM
-// =====================================================
-
-function spawnReplacementRow(pushDown = false) {
-
-    const aliveBricks =
-        bricks.filter(
-            b => b.alive
-        );
-
-    // Chỉ các lần spawn theo nhịp game mới đẩy gạch xuống.
-    // Clear hàng/cột không làm cả đống gạch lao xuống đáy.
-    if (pushDown) {
-
-        for (const b of aliveBricks) {
-            b.y += 24;
-        }
-    }
-
-    // Tìm vị trí hàng trên cùng.
-    let minY = brick.top;
-
-    if (aliveBricks.length > 0) {
-
-        minY = Math.min(
-            ...aliveBricks.map(
-                b => b.y
-            )
-        );
-    }
-
-    // Hàng mới nằm phía trên cùng,
-    // không chen vào giữa các cụm gạch.
-    const newY =
-        Math.min(
-            brick.top,
-            minY - brick.height - brick.gap
-        );
-
-    addBrickRow(
-        newY,
-        Math.floor(gameTime * 2)
-    );
-
-    // Particle nhẹ báo hàng mới.
-    for (
-        let i = 0;
-        i < 30;
-        i++
-    ) {
-
-        particles.push({
-
-            x: Math.random() * W,
-
-            y: Math.max(
-                2,
-                newY
-            ),
-
-            vx:
-                (Math.random() - 0.5) * 2.5,
-
-            vy:
-                Math.random() * 3 + 1,
-
-            size:
-                Math.random() * 2 + 1,
-
-            life: 1,
-
-            decay: 0.035,
-
-            color: "#42baff",
-
-            rotation: 0,
-
-            spin: 0
-        });
-    }
-
-    shake = 3;
-}
 
 // =====================================================
 
@@ -593,21 +508,181 @@ function spawnReplacementRow(pushDown = false) {
 
 function dropBricks() {
 
-    // Mỗi nhịp chỉ hạ gạch một chút.
-    // Không để các hàng dồn xuống quá nhanh.
-    const amount = 24;
 
-    for (const b of bricks) {
+
+    const amount = 32;
+
+
+
+
+
+    for (
+
+        const b of bricks
+
+    ) {
+
+
 
         if (!b.alive) {
+
             continue;
+
         }
 
+
+
         b.y += amount;
+
     }
 
-    spawnReplacementRow(false);
+
+
+
+
+    const aliveBricks =
+
+        bricks.filter(
+
+            b => b.alive
+
+        );
+
+
+
+
+
+    if (
+
+        aliveBricks.length === 0
+
+    ) {
+
+        return;
+
+    }
+
+
+
+
+
+    const minY =
+
+        Math.min(
+
+            ...aliveBricks.map(
+
+                b => b.y
+
+            )
+
+        );
+
+
+
+
+
+    // Hàng mới nằm phía trên
+
+    addBrickRow(
+
+        minY -
+
+        brick.height -
+
+        brick.gap,
+
+        Math.floor(
+
+            gameTime / 10
+
+        )
+
+    );
+
+
+
+
+
+    // Hiệu ứng khi hàng mới xuất hiện
+
+
+
+    for (
+
+        let i = 0;
+
+        i < 35;
+
+        i++
+
+    ) {
+
+
+
+        particles.push({
+
+
+
+            x:
+
+                Math.random() * W,
+
+
+
+            y: 5,
+
+
+
+            vx:
+
+                (Math.random() - 0.5) * 3,
+
+
+
+            vy:
+
+                Math.random() * 5 + 2,
+
+
+
+            size:
+
+                Math.random() * 2 + 1,
+
+
+
+            life: 1,
+
+
+
+            decay: 0.025,
+
+
+
+            color: "#42baff",
+
+
+
+            rotation: 0,
+
+
+
+            spin: 0
+
+        });
+
+    }
+
+
+
+    shake = 4;
+
 }
+
+
+
+
 
 // =====================================================
 
@@ -2647,7 +2722,7 @@ function checkBrickCollision(
 
 
 
-                    65
+                    50
 
                 );
 
@@ -2724,10 +2799,6 @@ function checkBrickCollision(
 
 
 
-
-                // Phá sạch một hàng ngang hoặc một cột dọc
-                // => lập tức thêm hàng gạch mới.
-                checkClearedLines(b.rowId, b.col);
 
                 shake = 9;
 
@@ -3029,7 +3100,7 @@ function updateBalls() {
 
 
 
-    const targetSpeed = 10.5;
+    const targetSpeed = MOBILE ? 8.5 : 10.5;
 
 
 
@@ -3805,11 +3876,11 @@ function updateBrickSystem() {
 
         Math.max(
 
-            2200,
+            4200,
 
-            4200 -
+            8500 -
 
-            gameTime * 80
+            gameTime * 60
 
         );
 
@@ -3953,15 +4024,15 @@ function updateBallSpeed() {
 
             if (
 
-                speed < 14
+                speed < 12
 
             ) {
 
 
 
-                ball.dx *= 1.045;
+                ball.dx *= 1.035;
 
-                ball.dy *= 1.045;
+                ball.dy *= 1.035;
 
             }
 
