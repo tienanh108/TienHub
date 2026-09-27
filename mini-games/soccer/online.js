@@ -235,6 +235,44 @@ import {
     });
   }
 
+  async function switchTeam(targetSlot) {
+    if (!api.roomId || api.slot == null) return;
+    const roomSnap = await get(roomRef(api.roomId));
+    const room = roomSnap.val();
+    if (!room || room.status !== 'waiting') throw new Error('Chỉ có thể đổi đội trước khi bắt đầu trận.');
+
+    const roster = normalizeRoster(room.players);
+    const current = roster[api.slot];
+    const target = roster[Number(targetSlot)];
+    if (!current || current.type !== 'human' || current.uid !== api.uid) {
+      throw new Error('Không tìm thấy cầu thủ của bạn trong phòng.');
+    }
+    if (!target || target.type !== 'empty') {
+      throw new Error('Slot này vừa được người khác chọn.');
+    }
+    if (current.team === target.team) {
+      throw new Error('Hãy chọn slot trống ở đội còn lại.');
+    }
+
+    // The target is written first so the player never disappears from the
+    // lobby while switching. Then the old slot is released. hostUid is kept
+    // unchanged, so moving the host never transfers room ownership.
+    const moved = {
+      slot: Number(targetSlot),
+      team: Number(targetSlot) < 3 ? 'blue' : 'red',
+      type: 'human',
+      uid: api.uid,
+      displayName: api.displayName,
+      number: Number(current.number),
+      online: true,
+      host: !!api.host
+    };
+    await set(slotPath(api.roomId, Number(targetSlot)), moved);
+    api.slot = Number(targetSlot);
+    await armPresence();
+    await remove(slotPath(api.roomId, Number(current.slot)));
+  }
+
   async function removeSlot(slot) {
     if (!api.roomId) return;
     const snap = await get(slotPath(api.roomId, slot));
@@ -345,6 +383,7 @@ import {
     getRoomInfo,
     addAI,
     removeSlot,
+    switchTeam,
     startRoom,
     leaveRoom,
     sendInput,

@@ -299,12 +299,31 @@ import './online.js';
 
   function renderOnlineLobby(roster) {
     const blue=$('#blueSlots'), red=$('#redSlots'); blue.innerHTML=''; red.innerHTML='';
+    const mine = roster.find(s => s.type === 'human' && s.uid === window.TienHubSoccerOnline?.getUid());
+    const room = window.TienHubSoccerOnline?.getRoom?.() || {};
+    const waiting = room.status === 'waiting' || !room.status;
     roster.forEach((s,i)=>{
       const el=document.createElement('div'); el.className='slot '+(s.type==='empty'?'empty':'filled');
       if(s.type==='empty'){
+        const actions=document.createElement('div');
+        actions.className='slot-actions';
         if(window.TienHubSoccerOnline?.isHost()){
-          const btn=document.createElement('button');btn.className='slot-plus';btn.textContent='+';btn.title='Thêm AI';btn.onclick=()=>window.TienHubSoccerOnline.addAI(i).catch(showOnlineError);el.append(btn);
-        } else { const wait=document.createElement('span');wait.className='slot-plus';wait.textContent='·';el.append(wait); }
+          const btn=document.createElement('button');btn.className='slot-plus';btn.textContent='+';btn.title='Thêm AI';btn.onclick=()=>window.TienHubSoccerOnline.addAI(i).catch(showOnlineError);actions.append(btn);
+        }
+        // Any human player can move to an empty slot on the opposite team.
+        // The arrow is deliberately placed inside the empty slot so the player
+        // can switch teams without a keyboard shortcut.
+        if(waiting && mine && mine.team !== s.team){
+          const swap=document.createElement('button');
+          swap.className='slot-switch';
+          swap.textContent='↔';
+          swap.title=s.team==='blue'?'Đổi sang đội Xanh':'Đổi sang đội Đỏ';
+          swap.setAttribute('aria-label', swap.title);
+          swap.onclick=()=>window.TienHubSoccerOnline.switchTeam(i).catch(showOnlineError);
+          actions.append(swap);
+        }
+        if(actions.children.length) el.append(actions);
+        else { const wait=document.createElement('span');wait.className='slot-plus';wait.textContent='·';el.append(wait); }
       } else {
         const number=document.createElement('div');number.className='slot-number';number.textContent=s.number??'—';
         const av=document.createElement('div');av.className='slot-avatar';av.textContent=s.type==='ai'?'🤖':'👤';
@@ -955,14 +974,17 @@ import './online.js';
     ctx.fillStyle=p.team==='blue'?COLORS.blue:COLORS.red;ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);ctx.fill();
     ctx.shadowBlur=0;ctx.strokeStyle='rgba(255,255,255,.78)';ctx.lineWidth=2;ctx.stroke();
     if(p.human){ctx.strokeStyle='white';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,p.r+8,-Math.PI/2,Math.PI*1.5);ctx.stroke();}
-    // Small directional marker makes the player's facing direction visible.
-    const fx = Number(p.faceX || (p.team === 'blue' ? 1 : -1));
-    const fy = Number(p.faceY || 0);
-    const fd = Math.hypot(fx, fy) || 1;
-    const ax = (fx / fd) * (p.r + 8);
-    const ay = (fy / fd) * (p.r + 8);
-    ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=3;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(ax,ay);ctx.stroke();
+    // Direction marker is useful on touch screens, but PC players already have
+    // the keyboard controls and should not have the extra white indicator.
+    if(p.human && isTouchDevice()){
+      const fx = Number(p.faceX || (p.team === 'blue' ? 1 : -1));
+      const fy = Number(p.faceY || 0);
+      const fd = Math.hypot(fx, fy) || 1;
+      const ax = (fx / fd) * (p.r + 8);
+      const ay = (fy / fd) * (p.r + 8);
+      ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=3;ctx.lineCap='round';
+      ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(ax,ay);ctx.stroke();
+    }
     ctx.fillStyle='white';ctx.font='900 13px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(p.number ?? ''),0,1);
     ctx.restore();
   }
