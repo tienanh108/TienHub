@@ -147,9 +147,19 @@ import {
     if (room.status !== 'waiting') throw new Error('Phòng đã bắt đầu hoặc đã kết thúc.');
 
     const roster = normalizeRoster(room.players);
-    const already = roster.find(s => s.uid === me.uid);
-    let slot = already?.slot ?? null;
-    if (slot == null) {
+    const already = roster.find(s => s.uid === me.uid && s.type === 'human');
+    // Never let a second device using the same account overwrite the existing
+    // player/host slot. That was the cause of the "number 4 becomes host" bug:
+    // the old code found the host by UID and updated that slot with the new jersey.
+    if (already) {
+      if (already.online !== false) {
+        throw new Error('Tài khoản này đã ở trong phòng trên một thiết bị khác.');
+      }
+      // A stale/offline slot can be reclaimed by the same account.
+      await remove(slotPath(roomId, already.slot));
+    }
+    let slot = null;
+    {
       const blueCount = roster.filter(s => s.team === 'blue' && s.type !== 'empty').length;
       const redCount = roster.filter(s => s.team === 'red' && s.type !== 'empty').length;
       const preferredTeam = blueCount <= redCount ? 'blue' : 'red';
@@ -162,10 +172,10 @@ import {
         slot, team: slot < 3 ? 'blue' : 'red', type: 'human', uid: me.uid,
         displayName: me.displayName, number: Number(jerseyNumber), online: true, host: false
       });
-    } else {
-      await update(slotPath(roomId, slot), { online: true, displayName: me.displayName, number: Number(jerseyNumber) });
     }
 
+    // Joining a room can never grant host ownership. Only createRoom sets
+    // hostUid, and start/close operations remain restricted to that UID.
     api.roomId = roomId; api.uid = me.uid; api.slot = slot; api.host = room.hostUid === me.uid;
     await armPresence();
     watchRoom();
@@ -277,17 +287,16 @@ import {
     };
     if (!api.host) {
       // Input nodes are only written by their own user; the host consumes them.
-      // Online movement is intentionally sent at a low fixed rate from main.js.
-      // Firebase only receives the latest input, not a frame-by-frame stream.
       await set(ref(db, `${ROOM_ROOT}/${api.roomId}/inputs/${api.uid}`), api.lastInput);
     }
   }
 
   async function publishState(state) {
     if (!api.host || !api.roomId) return;
-    // Write directly to the state node so the realtime listener only receives
-    // the actual game snapshot instead of touching the whole room path.
-    await set(ref(db, `${ROOM_ROOT}/${api.roomId}/state`), state);
+    await update(ref(db, `${ROOM_ROOT}/${api.roomId}`), {
+      state,
+      updatedAt: serverTimestamp()
+    });
   }
 
   async function finishRoom(state) {

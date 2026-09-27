@@ -33,8 +33,9 @@ import './online.js';
     onlineActionSeq: 0,
     onlinePublishAt: 0,
     onlineLastSnapshotAt: 0,
-    onlineLastInputAt: 0,
     onlineStarted: false,
+    remoteTargets: {},
+    remoteBallTarget: null,
     authenticated: false
   };
 
@@ -55,16 +56,23 @@ import './online.js';
   const ball = { x:720, y:405, vx:0, vy:0, r:11, owner:null, cooldown:0 };
   const soccerAI = new window.TienHubSoccerAI(FIELD);
 
-  function isMobileGameDevice() {
-    return window.matchMedia('(max-width: 900px) and (pointer: coarse)').matches
-      || ('ontouchstart' in window && Math.min(window.innerWidth, window.innerHeight) <= 900);
+  function isTouchDevice() {
+    const ua = navigator.userAgent || '';
+    const mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+    const iPadDesktopUA = /Macintosh/i.test(ua) && Number(navigator.maxTouchPoints || 0) > 1;
+    const coarse = window.matchMedia?.('(pointer: coarse)')?.matches === true;
+    const touchPoints = Number(navigator.maxTouchPoints || 0) > 0;
+    // Prefer an actual mobile/tablet signal. Do not use coarse alone because
+    // some desktop/touchscreen browsers report a coarse pointer.
+    return mobileUA || iPadDesktopUA || (touchPoints && /Android|Mobile/i.test(ua));
   }
 
   function setMobileControls(visible) {
     const controls = $('#mobileControls');
     if (!controls) return;
-    controls.classList.toggle('hidden', !(visible && isMobileGameDevice()));
-    if (!visible) {
+    const showControls = visible && isTouchDevice();
+    controls.classList.toggle('hidden', !showControls);
+    if (!showControls) {
       joy.x = 0; joy.y = 0; joy.id = null;
       const stick = $('.joy-stick');
       if (stick) stick.style.transform = 'translate(0,0)';
@@ -367,10 +375,7 @@ import './online.js';
     state.blueScore = 0; state.redScore = 0; state.timeLeft = 180;
     state.running = true; state.paused = false; state.goalPause = 0;
     state.passRequestFor = null; state.passRequestAt = 0;
-    state.onlineInputs = {}; state.onlineStarted = true;
-    state.onlineLastInputAt = 0;
-    state.onlineBallTarget = null;
-    players.forEach(p => { p.onlineTarget = null; });
+    state.onlineInputs = {}; state.onlineStarted = true; state.remoteTargets = {}; state.remoteBallTarget = null;
     resetStats();
     resetPlayers();
     $('#blueScore').textContent='0'; $('#redScore').textContent='0';
@@ -392,19 +397,30 @@ import './online.js';
       const p = players[Number(slotKey)];
       if (!p || !d) return;
       p.active = true;
-      const tx=Number(d.x??p.x), ty=Number(d.y??p.y);
-      if (!p.onlineTarget) p.onlineTarget={x:tx,y:ty,vx:0,vy:0};
-      p.onlineTarget.x=tx; p.onlineTarget.y=ty;
-      p.onlineTarget.vx=Number(d.vx||0); p.onlineTarget.vy=Number(d.vy||0);
-      p.faceX=Number(d.faceX||p.faceX||1); p.faceY=Number(d.faceY||0);
+      const nx = Number(d.x ?? p.x), ny = Number(d.y ?? p.y);
+      const mine = p.uid === window.TienHubSoccerOnline?.getUid();
+      if (mine) {
+        // Keep the local player's movement predicted locally. The host snapshot
+        // is used only as a gentle correction so network jitter does not make
+        // the mobile joystick feel like it is dragging the player backwards.
+        const err = Math.hypot(nx - p.x, ny - p.y);
+        if (err > 110) { p.x = nx; p.y = ny; }
+        p._serverX = nx; p._serverY = ny;
+      } else {
+        if (!state.remoteTargets[p.slot]) { p.x = nx; p.y = ny; }
+        state.remoteTargets[p.slot] = { x:nx, y:ny };
+      }
+      p.vx=Number(d.vx||0); p.vy=Number(d.vy||0);
+      p.faceX=Number(d.faceX ?? p.faceX ?? 1); p.faceY=Number(d.faceY ?? p.faceY ?? 0);
       p.name=d.displayName||p.name; p.number=d.number??p.number;
     });
     players.forEach((p,i)=>{ if (!(String(i) in bySlot)) p.active=false; });
     if (snap.ball) {
-      const bx=Number(snap.ball.x??ball.x), by=Number(snap.ball.y??ball.y);
-      if (!state.onlineBallTarget) state.onlineBallTarget={x:bx,y:by,vx:0,vy:0};
-      state.onlineBallTarget.x=bx; state.onlineBallTarget.y=by;
-      state.onlineBallTarget.vx=Number(snap.ball.vx||0); state.onlineBallTarget.vy=Number(snap.ball.vy||0);
+      state.remoteBallTarget = {
+        x:Number(snap.ball.x ?? ball.x), y:Number(snap.ball.y ?? ball.y),
+        vx:Number(snap.ball.vx || 0), vy:Number(snap.ball.vy || 0)
+      };
+      ball.vx=Number(snap.ball.vx||0); ball.vy=Number(snap.ball.vy||0);
       ball.owner = snap.ball.owner == null ? null : players[Number(snap.ball.owner)] || null;
       ball.lastTouch = snap.ball.lastTouch == null ? null : players[Number(snap.ball.lastTouch)] || null;
       ball.lastPasser = snap.ball.lastPasser == null ? null : players[Number(snap.ball.lastPasser)] || null;
@@ -480,7 +496,7 @@ import './online.js';
     if(keys.has('KeyW'))dy-=1;if(keys.has('KeyS'))dy+=1;if(keys.has('KeyA'))dx-=1;if(keys.has('KeyD'))dx+=1;
     if(joy.x||joy.y){dx=joy.x;dy=joy.y;}
     if(dx||dy)[dx,dy]=normalize(dx,dy);
-    return {dx,dy};
+    return {dx,dy,faceX:dx,faceY:dy};
   }
 
   function applyHumanInput(p, input, dt) {
@@ -504,6 +520,7 @@ import './online.js';
     const isOnlineHost = state.online && state.onlineHost;
     if (!isOnlineClient) updateTimer(dt);
     if (!state.running) return;
+    smoothRemoteState(dt);
 
     if (state.passRequestFor && performance.now() - state.passRequestAt > 6500) { state.passRequestFor = null; state.passRequestAt = 0; }
     if (state.goalPause > 0) { state.goalPause -= dt; if (state.goalPause <= 0 && (!state.online || state.onlineHost)) resetRound(); return; }
@@ -525,7 +542,7 @@ import './online.js';
       // the host advances the shared ball/player state and publishes snapshots.
       players.filter(p=>p.active !== false && p.human).forEach(p=>{
         const input = p.uid === window.TienHubSoccerOnline?.getUid()
-          ? {...localInput, faceX: p.faceX, faceY: p.faceY}
+          ? {...localInput, faceX: localInput.faceX, faceY: localInput.faceY}
           : state.onlineInputs[p.uid] || {dx:0,dy:0,faceX:p.faceX,faceY:p.faceY,actionSeq:0};
         applyHumanInput(p,input,dt);
         const seq=Number(input.actionSeq||0);
@@ -539,46 +556,40 @@ import './online.js';
       ball.cooldown=Math.max(0,ball.cooldown-dt);
       if(state.actionHeld===false && actionReleased){doAction(me);actionReleased=false;}
 
-      if(performance.now()-state.onlinePublishAt>100 && !state.onlinePublishing){
+      if(performance.now()-state.onlinePublishAt>80 && !state.onlinePublishing){
         state.onlinePublishAt=performance.now(); state.onlinePublishing=true;
         window.TienHubSoccerOnline.publishState(buildOnlineSnapshot())
           .catch(console.error).finally(()=>state.onlinePublishing=false);
       }
     } else {
-      // Keep the local player responsive with prediction, while remote players
-      // and the ball smoothly catch up to the latest host snapshot. This avoids
-      // snapping the canvas 10 times/second when mobile receives Firebase data.
-      const smooth = 1 - Math.exp(-dt * 14);
-      players.forEach(p => {
-        if (!p.active || p === me || !p.onlineTarget) return;
-        p.x += (p.onlineTarget.x - p.x) * smooth;
-        p.y += (p.onlineTarget.y - p.y) * smooth;
-        p.vx = p.onlineTarget.vx; p.vy = p.onlineTarget.vy;
-      });
-      if (state.onlineBallTarget && !ball.owner) {
-        ball.x += (state.onlineBallTarget.x - ball.x) * (1 - Math.exp(-dt * 16));
-        ball.y += (state.onlineBallTarget.y - ball.y) * (1 - Math.exp(-dt * 16));
-        ball.vx = state.onlineBallTarget.vx; ball.vy = state.onlineBallTarget.vy;
-      } else if (ball.owner) {
-        const [fx, fy] = normalize(ball.owner.faceX || (ball.owner.team === 'blue' ? 1 : -1), ball.owner.faceY || 0);
-        ball.x = ball.owner.x + fx * 30;
-        ball.y = ball.owner.y + fy * 30;
-        ball.vx = ball.vy = 0;
-      }
       // Remote clients send only their own input. The visible game state comes
       // from the host snapshot so two clients cannot independently move the ball.
       applyHumanInput(me, localInput, dt);
-      if (me?.onlineTarget) {
-        me.x += (me.onlineTarget.x - me.x) * Math.min(0.08, dt * 2.5);
-        me.y += (me.onlineTarget.y - me.y) * Math.min(0.08, dt * 2.5);
-      }
       const now=performance.now();
-      if(now-(state.onlineLastInputAt||0)>100){
+      if(now-(state.onlineLastInputAt||0)>50){
         state.onlineLastInputAt=now;
-        const meInput={...localInput,faceX:me?.faceX||localInput.dx||1,faceY:me?.faceY||localInput.dy||0,actionSeq:state.onlineActionSeq};
+        const meInput={...localInput,faceX:localInput.faceX,faceY:localInput.faceY,actionSeq:state.onlineActionSeq};
         window.TienHubSoccerOnline.sendInput(meInput).catch(()=>{});
       }
       if(state.actionHeld===false && actionReleased){state.onlineActionSeq++;actionReleased=false;}
+    }
+  }
+
+  function smoothRemoteState(dt) {
+    if (!state.online || state.onlineHost) return;
+    const alpha = 1 - Math.exp(-dt * 14);
+    players.forEach(p => {
+      if (!p.active || p.uid === window.TienHubSoccerOnline?.getUid()) return;
+      const target = state.remoteTargets[p.slot];
+      if (!target) return;
+      p.x += (target.x - p.x) * alpha;
+      p.y += (target.y - p.y) * alpha;
+    });
+    const bt = state.remoteBallTarget;
+    if (bt) {
+      const ba = 1 - Math.exp(-dt * 18);
+      ball.x += (bt.x - ball.x) * ba;
+      ball.y += (bt.y - ball.y) * ba;
     }
   }
 
@@ -944,6 +955,14 @@ import './online.js';
     ctx.fillStyle=p.team==='blue'?COLORS.blue:COLORS.red;ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);ctx.fill();
     ctx.shadowBlur=0;ctx.strokeStyle='rgba(255,255,255,.78)';ctx.lineWidth=2;ctx.stroke();
     if(p.human){ctx.strokeStyle='white';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,p.r+8,-Math.PI/2,Math.PI*1.5);ctx.stroke();}
+    // Small directional marker makes the player's facing direction visible.
+    const fx = Number(p.faceX || (p.team === 'blue' ? 1 : -1));
+    const fy = Number(p.faceY || 0);
+    const fd = Math.hypot(fx, fy) || 1;
+    const ax = (fx / fd) * (p.r + 8);
+    const ay = (fy / fd) * (p.r + 8);
+    ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=3;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(ax,ay);ctx.stroke();
     ctx.fillStyle='white';ctx.font='900 13px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(p.number ?? ''),0,1);
     ctx.restore();
   }
@@ -972,5 +991,7 @@ import './online.js';
   setupOnlineCallbacks();
   show('menu');
   setMobileControls(false);
+  window.addEventListener('resize', () => { setMobileControls(!screens.game.classList.contains('hidden')); });
+  window.addEventListener('orientationchange', () => setTimeout(() => setMobileControls(!screens.game.classList.contains('hidden')), 80));
   draw();
 })();
