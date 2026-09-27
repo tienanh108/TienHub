@@ -32,18 +32,25 @@ import {
 
   async function loadDisplayName(user) {
     if (!user) return '';
-    const snap = await get(ref(db, `publicProfiles/${user.uid}`));
-    const profile = snap.val() || {};
-    const name = String(profile.displayName || '').trim();
-    return name;
+    try {
+      const profileSnap = await get(ref(db, `publicProfiles/${user.uid}`));
+      const profile = profileSnap.val() || {};
+      const profileName = String(profile.displayName || '').trim();
+      if (profileName) return profileName;
+    } catch {}
+    try {
+      const userSnap = await get(ref(db, `users/${user.uid}`));
+      const userData = userSnap.val() || {};
+      const username = String(userData.username || '').trim();
+      if (username) return username;
+    } catch {}
+    return String(user.displayName || '').trim();
   }
 
   async function ensureUser() {
     if (!api.user) throw new Error('Bạn cần đăng nhập TienHub để chơi online.');
-    if (!api.displayName) {
-      api.displayName = await loadDisplayName(api.user);
-    }
-    if (!api.displayName) throw new Error('Tài khoản chưa có Display Name. Hãy đặt Display Name trước khi chơi online.');
+    if (!api.displayName) api.displayName = await loadDisplayName(api.user);
+    if (!api.displayName) api.displayName = 'Player';
     return { uid: api.user.uid, displayName: api.displayName };
   }
 
@@ -57,8 +64,8 @@ import {
   function slotPath(roomId, slot) { return ref(db, `${ROOM_ROOT}/${roomId}/players/${slot}`); }
 
   function emptySlots() {
-    return Array.from({ length: 6 }, (_, i) => ({
-      slot: i, team: i < 3 ? 'blue' : 'red', type: 'empty',
+    return Array.from({ length: 10 }, (_, i) => ({
+      slot: i, team: i < 5 ? 'blue' : 'red', type: 'empty',
       uid: null, displayName: '', number: null, online: false
     }));
   }
@@ -67,10 +74,10 @@ import {
     const slots = emptySlots();
     Object.entries(raw || {}).forEach(([key, value]) => {
       const i = Number(key);
-      if (!Number.isInteger(i) || i < 0 || i > 5 || !value) return;
+      if (!Number.isInteger(i) || i < 0 || i > 9 || !value) return;
       slots[i] = {
         slot: i,
-        team: i < 3 ? 'blue' : 'red',
+        team: i < 5 ? 'blue' : 'red',
         type: value.type === 'ai' ? 'ai' : 'human',
         uid: value.uid || null,
         displayName: value.displayName || (value.type === 'ai' ? 'AI' : 'Player'),
@@ -89,7 +96,7 @@ import {
     api.inputTimer = null;
   }
 
-  async function createRoom({ code, jerseyNumber }) {
+  async function createRoom({ code, jerseyNumber, duration = 180 }) {
     const me = await ensureUser();
     clearListeners();
     const roomId = String(code || code6()).toUpperCase();
@@ -103,9 +110,10 @@ import {
     };
 
     const data = {
-      game: 'soccer3v3',
+      game: 'soccer5v5',
       roomId,
       status: 'waiting',
+      duration: [180, 300, 420, 600].includes(Number(duration)) ? Number(duration) : 180,
       hostUid: me.uid,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -128,10 +136,10 @@ import {
     const snap = await get(roomRef(roomId));
     if (!snap.exists()) throw new Error('Không tìm thấy phòng.');
     const room = snap.val();
-    if (room.game !== 'soccer3v3') throw new Error('Mã phòng không phải Soccer 3v3.');
+    if (room.game !== 'soccer5v5') throw new Error('Mã phòng không phải Soccer 5v5.');
     if (room.status !== 'waiting') throw new Error('Phòng đã bắt đầu hoặc đã kết thúc.');
     const roster = normalizeRoster(room.players);
-    if (!roster.some(s => s.type === 'empty')) throw new Error('Phòng đã đủ 6 người.');
+    if (!roster.some(s => s.type === 'empty')) throw new Error('Phòng đã đủ 10 người.');
     return { room, roster, takenNumbers: roster.map(s => Number(s.number)).filter(Number.isInteger) };
   }
 
@@ -143,7 +151,7 @@ import {
     const snap = await get(roomRef(roomId));
     if (!snap.exists()) throw new Error('Không tìm thấy phòng.');
     const room = snap.val();
-    if (room.game !== 'soccer3v3') throw new Error('Mã phòng không phải Soccer 3v3.');
+    if (room.game !== 'soccer5v5') throw new Error('Mã phòng không phải Soccer 5v5.');
     if (room.status !== 'waiting') throw new Error('Phòng đã bắt đầu hoặc đã kết thúc.');
 
     const roster = normalizeRoster(room.players);
@@ -165,11 +173,11 @@ import {
       const preferredTeam = blueCount <= redCount ? 'blue' : 'red';
       slot = roster.findIndex(s => s.type === 'empty' && s.team === preferredTeam);
       if (slot < 0) slot = roster.findIndex(s => s.type === 'empty');
-      if (slot < 0) throw new Error('Phòng đã đủ 6 người.');
+      if (slot < 0) throw new Error('Phòng đã đủ 10 người.');
       const usedNumbers = new Set(roster.map(s => Number(s.number)).filter(Boolean));
       if (usedNumbers.has(Number(jerseyNumber))) throw new Error(`Số áo ${jerseyNumber} đã có trong phòng.`);
       await set(slotPath(roomId, slot), {
-        slot, team: slot < 3 ? 'blue' : 'red', type: 'human', uid: me.uid,
+        slot, team: slot < 5 ? 'blue' : 'red', type: 'human', uid: me.uid,
         displayName: me.displayName, number: Number(jerseyNumber), online: true, host: false
       });
     }
@@ -200,6 +208,7 @@ import {
     const inputsNode = ref(db, `${base}/inputs`);
     const statusNode = ref(db, `${base}/status`);
     const hostNode = ref(db, `${base}/hostUid`);
+    const durationNode = ref(db, `${base}/duration`);
 
     const pushRoom = () => {
       const room = api.room || {};
@@ -214,9 +223,10 @@ import {
       if (snap.val() === 'finished') emit('finished', null);
     });
     const hostUnsub = onValue(hostNode, snap => { api.room = api.room || {}; api.room.hostUid = snap.val(); api.host = snap.val() === api.uid; pushRoom(); });
+    const durationUnsub = onValue(durationNode, snap => { api.room = api.room || {}; api.room.duration = Number(snap.val()) || 180; pushRoom(); });
     const stateUnsub = onValue(stateNode, snap => { const value=snap.val(); if(value) emit('state', value); });
     const inputUnsub = onValue(inputsNode, snap => emit('inputs', snap.val() || {}));
-    api.unsubs.push(pUnsub,statusUnsub,hostUnsub,stateUnsub,inputUnsub);
+    api.unsubs.push(pUnsub,statusUnsub,hostUnsub,durationUnsub,stateUnsub,inputUnsub);
   }
 
   async function addAI(slot) {
@@ -230,7 +240,7 @@ import {
     let n = slot + 2;
     while (used.has(n) || n > 99) n++;
     await set(slotPath(api.roomId, slot), {
-      slot, team: slot < 3 ? 'blue' : 'red', type: 'ai', uid: `ai-${slot}`,
+      slot, team: slot < 5 ? 'blue' : 'red', type: 'ai', uid: `ai-${slot}`,
       displayName: 'AI', number: n, online: true, host: false
     });
   }
@@ -259,7 +269,7 @@ import {
     // unchanged, so moving the host never transfers room ownership.
     const moved = {
       slot: Number(targetSlot),
-      team: Number(targetSlot) < 3 ? 'blue' : 'red',
+      team: Number(targetSlot) < 5 ? 'blue' : 'red',
       type: 'human',
       uid: api.uid,
       displayName: api.displayName,
@@ -297,7 +307,7 @@ import {
     const red = roster.filter(s => s.team === 'red' && s.type !== 'empty');
     if (!blue.length || !red.length) throw new Error('Cần ít nhất 1 người/cầu thủ ở mỗi đội để bắt đầu.');
     const initial = {
-      blueScore: 0, redScore: 0, timeLeft: 180,
+      blueScore: 0, redScore: 0, timeLeft: [180,300,420,600].includes(Number(room.duration)) ? Number(room.duration) : 180,
       players: {},
       ball: { x: 800, y: 450, vx: 0, vy: 0, owner: null, lastTouch: null, lastPasser: null, shotBy: null, shotTeam: null, isShot: false },
       startedAt: serverTimestamp()
@@ -307,8 +317,10 @@ import {
       initial.players[s.slot] = {
         id: `p${s.slot}`, uid: s.uid, slot: s.slot, team: s.team,
         type: s.type, displayName: s.displayName, number: s.number,
-        x: s.team === 'blue' ? (s.slot === 0 ? 300 : 520) : (s.slot === 3 ? 1300 : 1080),
-        y: s.slot % 3 === 0 ? 450 : s.slot % 3 === 1 ? 270 : 630,
+        x: s.team === 'blue'
+          ? (s.slot === 0 ? 280 : s.slot === 1 ? 460 : s.slot === 2 ? 520 : s.slot === 3 ? 460 : 520)
+          : (s.slot === 5 ? 1320 : s.slot === 6 ? 1140 : s.slot === 7 ? 1080 : s.slot === 8 ? 1140 : 1080),
+        y: [450, 220, 680, 360, 540][s.slot % 5],
         vx: 0, vy: 0, faceX: s.team === 'blue' ? 1 : -1, faceY: 0
       };
     });

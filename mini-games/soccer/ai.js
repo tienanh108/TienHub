@@ -1,5 +1,5 @@
-/* TienHub Soccer 3v3 - AI brain v7
- * Natural 3v3 movement: support runs, defensive shape, slower reactions,
+/* TienHub Soccer 5v5 - AI brain v7
+ * Natural 5v5 movement: support runs, defensive shape, slower reactions,
  * one player contests the ball at a time, and teammates keep moving.
  */
 (() => {
@@ -90,7 +90,7 @@
           const target = this.bestPassTarget(p, teammates, opponents, direction);
           // AI should carry the ball forward by default. Passing is reserved
           // for a teammate who is clearly ahead and in useful space; this
-          // prevents the three players from endlessly recycling the ball.
+          // prevents the five players from endlessly recycling the ball.
           if (target && ((target.x - p.x) * direction) > 115) {
             action = 'pass';
             tx = target.x;
@@ -148,7 +148,7 @@
           ty = this.clamp(centerY + (carrier.y - centerY) * .58, 145, this.field.h - 145);
         } else {
           // Give each attacker a different lane. They continually move even
-          // when the human is standing still, which feels much more like 3v3.
+          // when the human is standing still, which feels much more like 5v5.
           const index = attackers.indexOf(p);
           const laneSide = index % 2 === 0 ? -1 : 1;
           const forward = 240 + index * 55;

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#07130d">
-  <title>Soccer 3v3 - TienHub</title>
+  <title>Soccer 5v5 - TienHub</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,7 +15,7 @@
           <button id="backHub" class="icon-btn" aria-label="Về TienHub">←</button>
           <div>
             <div class="eyebrow">TIENHUB MINI GAME</div>
-            <h1><span>⚽</span> SOCCER <b>3V3</b></h1>
+            <h1><span>⚽</span> SOCCER <b>5V5</b></h1>
             <p>Chỉ một cầu thủ. Một nút hành động. Sút hoặc chuyền theo tình huống.</p>
           </div>
         </div>
@@ -43,7 +43,7 @@
         <div class="lobby-head">
           <button id="lobbyBack" class="icon-btn">←</button>
           <div>
-            <div class="eyebrow">SOCCER 3V3</div>
+            <div class="eyebrow">SOCCER 5V5</div>
             <h2 id="lobbyTitle">Phòng</h2>
           </div>
           <div class="room-code-wrap"><span>MÃ PHÒNG</span><b id="roomCode">TH7K9Q</b><button id="copyRoom" class="copy-btn">📋</button></div>
@@ -53,11 +53,11 @@
         </div>
         <div class="teams">
           <div class="team blue-team">
-            <div class="team-title"><span>🔵 ĐỘI XANH</span><small id="blueCount">0/3</small></div>
+            <div class="team-title"><span>🔵 ĐỘI XANH</span><small id="blueCount">0/5</small></div>
             <div id="blueSlots" class="slots"></div>
           </div>
           <div class="team red-team">
-            <div class="team-title"><span>🔴 ĐỘI ĐỎ</span><small id="redCount">0/3</small></div>
+            <div class="team-title"><span>🔴 ĐỘI ĐỎ</span><small id="redCount">0/5</small></div>
             <div id="redSlots" class="slots"></div>
           </div>
         </div>
@@ -100,6 +100,14 @@
         <h2>Tạo phòng mới</h2>
         <p>Phòng dùng mã 6 ký tự. Gửi mã này cho người muốn tham gia.</p>
         <div class="generated-code"><span>MÃ PHÒNG</span><b id="createCode">TH7K9Q</b></div>
+        <label class="room-setting"><span>Thời gian trận</span>
+          <select id="matchDuration" class="room-input">
+            <option value="180">3 phút</option>
+            <option value="300">5 phút</option>
+            <option value="420">7 phút</option>
+            <option value="600">10 phút</option>
+          </select>
+        </label>
         <button id="createConfirm" class="main-btn blue">Tạo phòng</button>
       </div>
     </section>
@@ -127,7 +135,7 @@
 
     <section id="statsScreen" class="screen hidden stats-screen">
       <div class="stats-shell card">
-        <div class="eyebrow">SOCCER 3V3</div>
+        <div class="eyebrow">SOCCER 5V5</div>
         <h2>Thống kê trận đấu</h2>
         <div class="final-score"><span id="finalBlueScore">0</span><b>:</b><span id="finalRedScore">0</span></div>
         <div id="finalResult" class="final-result">Trận đấu kết thúc</div>

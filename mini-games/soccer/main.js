@@ -24,6 +24,7 @@ import './online.js';
     goalPause: 0, jerseyNumber: null, pendingAction: null,
     takenNumbers: [],
     timeLeft: 180,
+    matchDuration: 180,
     stats: {},
     passRequestFor: null,
     passRequestAt: 0,
@@ -42,16 +43,20 @@ import './online.js';
   // Formation positions are deliberately kept spread out. Only the nearest AI
   // actively attacks the ball; the others return toward their home positions.
   const HOME = {
-    b1: [300, 450], b2: [520, 270], b3: [520, 630],
-    r1: [1300, 450], r2: [1080, 270], r3: [1080, 630]
+    b1: [280, 450], b2: [460, 220], b3: [520, 680], b4: [460, 360], b5: [520, 540],
+    r1: [1320, 450], r2: [1140, 220], r3: [1080, 680], r4: [1140, 360], r5: [1080, 540]
   };
   const players = [
-    { id:'b1', team:'blue', uid:null, active:true, x:300, y:450, vx:0, vy:0, name:'Bạn', human:true, r:23, number:null, home:HOME.b1, faceX:1, faceY:0 },
-    { id:'b2', team:'blue', uid:null, active:true, x:520, y:270, vx:0, vy:0, name:'AI', human:false, r:23, number:2, role:'attack', home:HOME.b2, faceX:1, faceY:0 },
-    { id:'b3', team:'blue', uid:null, active:true, x:520, y:630, vx:0, vy:0, name:'AI', human:false, r:23, number:3, role:'defend', home:HOME.b3, faceX:1, faceY:0 },
-    { id:'r1', team:'red', uid:null, active:true, x:1300, y:450, vx:0, vy:0, name:'AI', human:false, r:23, number:4, role:'attack', home:HOME.r1, faceX:-1, faceY:0 },
-    { id:'r2', team:'red', uid:null, active:true, x:1080, y:270, vx:0, vy:0, name:'AI', human:false, r:23, number:5, role:'attack', home:HOME.r2, faceX:-1, faceY:0 },
-    { id:'r3', team:'red', uid:null, active:true, x:1080, y:630, vx:0, vy:0, name:'AI', human:false, r:23, number:6, role:'defend', home:HOME.r3, faceX:-1, faceY:0 }
+    { id:'b1', team:'blue', uid:null, active:true, x:280, y:450, vx:0, vy:0, name:'Bạn', human:true, r:23, number:null, role:'attack', home:HOME.b1, faceX:1, faceY:0 },
+    { id:'b2', team:'blue', uid:null, active:true, x:460, y:220, vx:0, vy:0, name:'AI', human:false, r:23, number:2, role:'attack', home:HOME.b2, faceX:1, faceY:0 },
+    { id:'b3', team:'blue', uid:null, active:true, x:520, y:680, vx:0, vy:0, name:'AI', human:false, r:23, number:3, role:'defend', home:HOME.b3, faceX:1, faceY:0 },
+    { id:'b4', team:'blue', uid:null, active:true, x:460, y:360, vx:0, vy:0, name:'AI', human:false, r:23, number:4, role:'attack', home:HOME.b4, faceX:1, faceY:0 },
+    { id:'b5', team:'blue', uid:null, active:true, x:520, y:540, vx:0, vy:0, name:'AI', human:false, r:23, number:5, role:'defend', home:HOME.b5, faceX:1, faceY:0 },
+    { id:'r1', team:'red', uid:null, active:true, x:1320, y:450, vx:0, vy:0, name:'AI', human:false, r:23, number:6, role:'attack', home:HOME.r1, faceX:-1, faceY:0 },
+    { id:'r2', team:'red', uid:null, active:true, x:1140, y:220, vx:0, vy:0, name:'AI', human:false, r:23, number:7, role:'attack', home:HOME.r2, faceX:-1, faceY:0 },
+    { id:'r3', team:'red', uid:null, active:true, x:1080, y:680, vx:0, vy:0, name:'AI', human:false, r:23, number:8, role:'defend', home:HOME.r3, faceX:-1, faceY:0 },
+    { id:'r4', team:'red', uid:null, active:true, x:1140, y:360, vx:0, vy:0, name:'AI', human:false, r:23, number:9, role:'attack', home:HOME.r4, faceX:-1, faceY:0 },
+    { id:'r5', team:'red', uid:null, active:true, x:1080, y:540, vx:0, vy:0, name:'AI', human:false, r:23, number:10, role:'defend', home:HOME.r5, faceX:-1, faceY:0 }
   ];
   const ball = { x:720, y:405, vx:0, vy:0, r:11, owner:null, cooldown:0 };
   const soccerAI = new window.TienHubSoccerAI(FIELD);
@@ -154,7 +159,7 @@ import './online.js';
       p.faceX = p.team === 'blue' ? 1 : -1; p.faceY = 0;
     });
     ball.x = FIELD.w / 2; ball.y = FIELD.h / 2;
-    ball.vx = ball.vy = 0; ball.owner = null; ball.cooldown = 0; ball.lastTouch = null; ball.lastPasser = null; ball.shotBy = null; ball.shotTeam = null; ball.isShot = false;
+    ball.vx = ball.vy = 0; ball.owner = null; ball.cooldown = 0; ball.lastTouch = null; ball.lastPasser = null; ball.shotBy = null; ball.shotTeam = null; ball.isShot = false; ball.saveAwarded = false;
     soccerAI.reset(players);
   }
   function setPlayerNumber(n) {
@@ -172,12 +177,16 @@ import './online.js';
     const n = Number(raw);
     if (!Number.isInteger(n) || n < 1 || n > 99) return { ok:false, message:'Số áo phải từ 1 đến 99.' };
 
-    // Online join/random uses the numbers actually read from Firebase.
-    // Solo keeps the local AI-number protection.
-    const onlineAction = state.pendingAction === 'join';
-    const taken = onlineAction
+    // Online join uses the numbers actually read from Firebase.
+    // Creating a room must NOT compare against the local solo AI roster: those
+    // AI players do not exist in the Firebase room yet, so every number 1–99
+    // is available for the host. Solo keeps the local AI-number protection.
+    const action = state.pendingAction;
+    const taken = action === 'join'
       ? new Set((state.takenNumbers || []).map(Number).filter(Number.isInteger))
-      : getTakenNumbers();
+      : action === 'create'
+        ? new Set()
+        : getTakenNumbers();
 
     if (taken.has(n)) return { ok:false, message:`Số áo ${n} đã có trong phòng.` };
     return { ok:true, number:n };
@@ -268,11 +277,11 @@ import './online.js';
     blue.innerHTML = ''; red.innerHTML = '';
     const slots = [
       {team:'blue', label:'Bạn', type:'human', number:state.jerseyNumber},
-      {team:'blue', label:'', type:'empty'}, {team:'blue', label:'', type:'empty'},
-      {team:'red', label:'', type:'empty'}, {team:'red', label:'', type:'empty'}, {team:'red', label:'', type:'empty'}
+      {team:'blue', label:'', type:'empty'}, {team:'blue', label:'', type:'empty'}, {team:'blue', label:'', type:'empty'}, {team:'blue', label:'', type:'empty'},
+      {team:'red', label:'', type:'empty'}, {team:'red', label:'', type:'empty'}, {team:'red', label:'', type:'empty'}, {team:'red', label:'', type:'empty'}, {team:'red', label:'', type:'empty'}
     ];
     const localAI = readAI();
-    localAI.forEach(k => { if (slots[k]) slots[k] = { team:k < 3 ? 'blue' : 'red', label:'AI', type:'ai', number:autoAINumber(k) }; });
+    localAI.forEach(k => { if (slots[k]) slots[k] = { team:k < 5 ? 'blue' : 'red', label:'AI', type:'ai', number:autoAINumber(k) }; });
     slots.forEach((s, i) => {
       const el = document.createElement('div'); el.className = 'slot ' + (s.type === 'empty' ? 'empty' : 'filled');
       if (s.type === 'empty') {
@@ -286,14 +295,14 @@ import './online.js';
         const kick=document.createElement('button');kick.className='kick';kick.textContent='×';kick.title='Kick / xóa';
         kick.onclick=()=>{const arr=readAI().filter(x=>x!==i);writeAI(arr);buildLobby();}; el.append(number,av,name,tag,kick);
       }
-      (i<3?blue:red).append(el);
+      (i<5?blue:red).append(el);
     });
-    const ai=readAI();$('#blueCount').textContent=`${1+ai.filter(i=>i<3).length}/3`;$('#redCount').textContent=`${ai.filter(i=>i>=3).length}/3`;
+    const ai=readAI();$('#blueCount').textContent=`${1+ai.filter(i=>i<5).length}/5`;$('#redCount').textContent=`${ai.filter(i=>i>=5).length}/5`;
   }
 
   function onlineNormalizeRoster(raw) {
-    const out = Array.from({length:6}, (_,i)=>({slot:i,team:i<3?'blue':'red',type:'empty',uid:null,displayName:'',number:null,online:false}));
-    Object.entries(raw||{}).forEach(([k,v])=>{const i=Number(k);if(i>=0&&i<6&&v)out[i]={slot:i,team:i<3?'blue':'red',type:v.type||'human',uid:v.uid||null,displayName:v.displayName||'',number:v.number??null,online:v.online!==false,host:!!v.host};});
+    const out = Array.from({length:10}, (_,i)=>({slot:i,team:i<5?'blue':'red',type:'empty',uid:null,displayName:'',number:null,online:false}));
+    Object.entries(raw||{}).forEach(([k,v])=>{const i=Number(k);if(i>=0&&i<10&&v)out[i]={slot:i,team:i<5?'blue':'red',type:v.type||'human',uid:v.uid||null,displayName:v.displayName||'',number:v.number??null,online:v.online!==false,host:!!v.host};});
     return out;
   }
 
@@ -327,19 +336,19 @@ import './online.js';
       } else {
         const number=document.createElement('div');number.className='slot-number';number.textContent=s.number??'—';
         const av=document.createElement('div');av.className='slot-avatar';av.textContent=s.type==='ai'?'🤖':'👤';
-        const name=document.createElement('div');name.className='slot-name';name.textContent=s.displayName||'Player';
+        const name=document.createElement('div');name.className='slot-name';name.textContent=s.displayName||(s.uid===window.TienHubSoccerOnline?.getUid()?window.TienHubSoccerOnline?.getDisplayName?.():'Player')||'Player';
         const tag=document.createElement('div');tag.className='slot-tag';tag.textContent=s.type==='ai'?'AI':(s.online?'PLAYER':'OFFLINE');
         const kick=document.createElement('button');kick.className='kick';kick.textContent='×';kick.title='Kick / xóa';
         kick.disabled=!(window.TienHubSoccerOnline?.isHost() || s.uid===window.TienHubSoccerOnline?.getUid());
         kick.onclick=()=>window.TienHubSoccerOnline.removeSlot(i).catch(showOnlineError);
         el.append(number,av,name,tag,kick);
       }
-      (i<3?blue:red).append(el);
+      (i<5?blue:red).append(el);
     });
     const bc=roster.filter(s=>s.team==='blue'&&s.type!=='empty').length;
     const rc=roster.filter(s=>s.team==='red'&&s.type!=='empty').length;
-    $('#blueCount').textContent=`${bc}/3`;$('#redCount').textContent=`${rc}/3`;
-    $('#lobbyHint').textContent=window.TienHubSoccerOnline?.isHost()?'Bạn là chủ phòng · + để thêm AI':'Đang chờ chủ phòng bắt đầu trận';
+    $('#blueCount').textContent=`${bc}/5`;$('#redCount').textContent=`${rc}/5`;
+    $('#lobbyHint').textContent=window.TienHubSoccerOnline?.isHost()?`Bạn là chủ phòng · + để thêm AI · ${({180:'3 phút',300:'5 phút',420:'7 phút',600:'10 phút'})[Number(room.duration)]||'3 phút'}`:`Đang chờ chủ phòng bắt đầu trận · ${({180:'3 phút',300:'5 phút',420:'7 phút',600:'10 phút'})[Number(room.duration)]||'3 phút'}`;
   }
 
   function showOnlineError(error){
@@ -351,7 +360,7 @@ import './online.js';
     try {
       if (!state.authenticated) throw new Error('Bạn cần đăng nhập TienHub để chơi online.');
       state.online=true;
-      const id=await window.TienHubSoccerOnline.createRoom({code:state.roomCode,jerseyNumber:state.jerseyNumber});
+      const id=await window.TienHubSoccerOnline.createRoom({code:state.roomCode,jerseyNumber:state.jerseyNumber,duration:Number($('#matchDuration')?.value||180)});
       state.roomCode=id; enterLobby('Phòng của bạn');
     } catch(e){state.online=false;show('menu');alert(e.message||'Không thể tạo phòng.');}
   }
@@ -375,10 +384,10 @@ import './online.js';
       p.active = !!s && s.type !== 'empty';
       p.uid = s?.uid || null;
       p.human = s?.type === 'human';
-      p.name = s?.displayName || (p.human ? 'Player' : 'AI');
+      p.name = s?.displayName || (p.human ? (window.TienHubSoccerOnline?.getDisplayName?.() || 'Player') : 'AI');
       p.number = s?.number ?? null;
-      p.team = i < 3 ? 'blue' : 'red';
-      p.role = i % 3 === 2 ? 'defend' : 'attack';
+      p.team = i < 5 ? 'blue' : 'red';
+      p.role = (i % 5 === 2 || i % 5 === 4) ? 'defend' : 'attack';
       p.slot = i;
       p.home = HOME[p.id];
     });
@@ -386,19 +395,19 @@ import './online.js';
     if (me) state.controlledId = me.id;
   }
 
-  function startOnlineGame(roster) {
+  function startOnlineGame(roster, duration = 180) {
     configureOnlineRoster(roster);
     state.mode = 'online';
     state.online = true;
     state.onlineHost = !!window.TienHubSoccerOnline?.isHost();
-    state.blueScore = 0; state.redScore = 0; state.timeLeft = 180;
+    state.blueScore = 0; state.redScore = 0; state.matchDuration = [180,300,420,600].includes(Number(duration)) ? Number(duration) : 180; state.timeLeft = state.matchDuration;
     state.running = true; state.paused = false; state.goalPause = 0;
     state.passRequestFor = null; state.passRequestAt = 0;
     state.onlineInputs = {}; state.onlineStarted = true; state.remoteTargets = {}; state.remoteBallTarget = null;
     resetStats();
     resetPlayers();
     $('#blueScore').textContent='0'; $('#redScore').textContent='0';
-    $('#gameTimer').textContent=formatTime(180); $('#gameStatus').textContent='Đang online';
+    $('#gameTimer').textContent=formatTime(state.matchDuration); $('#gameStatus').textContent='Đang online';
     show('game'); requestAnimationFrame(resizeCanvas);
     state.last = performance.now(); state.onlinePublishAt = 0;
     requestAnimationFrame(loop);
@@ -411,6 +420,7 @@ import './online.js';
     state.timeLeft = Number(snap.timeLeft ?? state.timeLeft);
     $('#blueScore').textContent=state.blueScore; $('#redScore').textContent=state.redScore;
     $('#gameTimer').textContent=formatTime(state.timeLeft);
+    if (snap.stats) state.stats = snap.stats;
     const bySlot = snap.players || {};
     Object.entries(bySlot).forEach(([slotKey,d]) => {
       const p = players[Number(slotKey)];
@@ -457,6 +467,7 @@ import './online.js';
     return {
       blueScore:state.blueScore, redScore:state.redScore, timeLeft:state.timeLeft,
       players:ps,
+      stats: state.stats,
       ball:{x:ball.x,y:ball.y,vx:ball.vx,vy:ball.vy,
         owner:slotOf(ball.owner),lastTouch:slotOf(ball.lastTouch),lastPasser:slotOf(ball.lastPasser),
         shotBy:slotOf(ball.shotBy),shotTeam:ball.shotTeam||null,isShot:!!ball.isShot}
@@ -475,13 +486,13 @@ import './online.js';
           btn.title = user ? '' : 'Đăng nhập TienHub để chơi online';
         });
         if (!user) $('#lobbyHint').textContent='Chưa đăng nhập: chỉ có thể chơi đơn.';
-        else if (!displayName) $('#lobbyHint').textContent='Hãy đặt Display Name trong hồ sơ TienHub trước khi chơi online.';
+        else if (!displayName) $('#lobbyHint').textContent='Tên hiển thị sẽ dùng username của bạn.';
       },
       room: ({room,roster}) => {
         state.roomCode=room.roomId || state.roomCode;
         $('#roomCode').textContent=state.roomCode;
         renderOnlineLobby(roster);
-        if (room.status === 'playing' && !state.onlineStarted) startOnlineGame(roster);
+        if (room.status === 'playing' && !state.onlineStarted) startOnlineGame(roster, room.duration);
         if (room.status === 'waiting' && !screens.lobby.classList.contains('hidden')) $('#startLobby').disabled=!online.isHost();
       },
       inputs: inputs => { state.onlineInputs=inputs||{}; },
@@ -494,7 +505,7 @@ import './online.js';
   function startSolo() {
     state.online = false; state.onlineHost = false; state.onlineStarted = false; state.onlineInputs = {};
     state.mode = 'solo'; state.blueScore = 0; state.redScore = 0;
-    state.timeLeft = 180; resetStats(); state.passRequestFor = null; state.passRequestAt = 0;
+    state.matchDuration = 180; state.timeLeft = 180; resetStats(); state.passRequestFor = null; state.passRequestAt = 0;
     state.running = true; state.paused = false; state.goalPause = 0;
     resetPlayers();
     $('#blueScore').textContent = '0'; $('#redScore').textContent = '0'; $('#gameTimer').textContent = formatTime(state.timeLeft); $('#gameStatus').textContent = 'Trận đấu';
@@ -671,6 +682,20 @@ import './online.js';
     const inY = Math.abs(p.y - FIELD.h/2) < boxH/2;
     return inY && (p.team === 'blue' ? p.x < boxW + 20 : p.x > FIELD.w - boxW - 20);
   }
+  function shotOnTarget(){
+    if (!ball.isShot || !ball.shotTeam) return false;
+    const goalX = ball.shotTeam === 'blue' ? FIELD.w : 0;
+    const dx = goalX - ball.x;
+    if ((ball.shotTeam === 'blue' && ball.vx <= 0) || (ball.shotTeam === 'red' && ball.vx >= 0)) return false;
+    if (Math.abs(ball.vx) < 1) return false;
+    const t = dx / ball.vx;
+    if (t < 0 || t > 4) return false;
+    const yAtGoal = ball.y + ball.vy * t;
+    const goalTop = FIELD.h / 2 - 95;
+    const goalBottom = FIELD.h / 2 + 95;
+    return yAtGoal >= goalTop && yAtGoal <= goalBottom;
+  }
+
   function handleBall(dt){
     const contactRange = 8;
 
@@ -727,8 +752,11 @@ import './online.js';
         .sort((a,b) => a.d - b.d);
       if(contacts.length){
         const p = contacts[0].p;
-        if (ball.isShot && ball.shotTeam && p.team !== ball.shotTeam && inPenaltyArea(p)) {
-          stat(p, 'saves');
+        if (ball.isShot && ball.shotTeam && p.team !== ball.shotTeam && shotOnTarget()) {
+          if (!ball.saveAwarded) {
+            stat(p, 'saves');
+            ball.saveAwarded = true;
+          }
         }
         ball.owner=p;
         ball.lastTouch=p;
