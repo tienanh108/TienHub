@@ -1,0 +1,30 @@
+/* TienHub Daily Login — isolated widget; does not alter existing pages. */
+.th-reward-overlay[hidden]{display:none!important}
+.th-reward-overlay,.th-welcome-overlay{position:fixed;inset:0;z-index:10050;display:grid;place-items:center;padding:18px;font-family:Inter,system-ui,sans-serif;color:#f4f7ff}
+.th-welcome-overlay{z-index:10060}
+.th-reward-backdrop{position:absolute;inset:0;background:rgba(1,7,20,.83);backdrop-filter:blur(9px)}
+.th-reward-panel,.th-welcome-card{position:relative;width:min(100%,560px);max-height:94dvh;overflow:auto;background:radial-gradient(circle at 40% -15%,#203e82 0,transparent 55%),linear-gradient(145deg,#0c1d42,#080f29 70%);border:1px solid #4863a6;border-radius:26px;box-shadow:0 20px 75px #000c;padding:30px 26px 24px;text-align:center}
+.th-reward-eyebrow{font-size:11px;letter-spacing:3px;font-weight:900;color:#9bc2ff}
+.th-reward-panel h2{font-size:27px;line-height:1.25;margin:10px 0 7px;color:#fff}
+.th-reward-subtitle{font-size:13px;line-height:1.55;color:#c3cee9;margin:0 0 24px}
+.th-reward-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.th-reward-slot{min-height:112px;background:#122449;border:1px solid #334a79;border-radius:16px;padding:12px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
+.th-reward-slot span{font-size:12px;font-weight:800;color:#cddaf8}
+.th-reward-slot strong{font-size:27px;line-height:1.15}
+.th-reward-slot b{font-size:13px;color:#fce78f}
+.th-reward-slot.is-current{background:linear-gradient(150deg,#1953a6,#35288a);border:2px solid #8de4ff;box-shadow:0 0 0 2px #4c81c634,0 0 18px #339af455}
+.th-reward-slot.is-bonus b{color:#ffe182}
+.th-reward-slot.is-done{background:#163c36;border-color:#2d8777}
+.th-reward-slot.is-done strong{color:#4ee9bd}
+.th-reward-slot:last-child{grid-column:span 2}
+.th-reward-message{min-height:20px;margin:20px 0 12px;color:#bed8fd;font-size:13px}
+.th-reward-claim,.th-welcome-card button{border:0;border-radius:13px;padding:13px 25px;min-width:215px;background:linear-gradient(105deg,#4cbcff,#8661ff);color:white;font:800 15px system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 30px #325ca763}
+.th-reward-claim:disabled{opacity:.56;cursor:default;box-shadow:none}
+.th-reward-footnote{margin:15px 0 0;color:#889dc5;font-size:11px}
+.th-welcome-card{max-width:440px;padding:38px 22px}
+.th-welcome-icon{font-size:55px}
+.th-welcome-card h2{font-size:26px;margin:10px 0 4px;color:#fff}
+.th-welcome-card p{font-size:14px;color:#c1d1f5}
+.th-welcome-card strong{display:block;font-size:43px;color:#ffdf82;margin:12px 0}
+.th-welcome-card span{display:block;color:#a7c4e9;font-size:13px;margin-bottom:22px}
+@media(max-width:520px){.th-reward-panel{padding:29px 13px 20px;border-radius:18px}.th-reward-panel h2{font-size:22px}.th-reward-slots{gap:7px}.th-reward-slot{min-height:96px;padding:9px 2px;border-radius:11px}.th-reward-slot span{font-size:11px}.th-reward-slot strong{font-size:23px}.th-reward-slot b{font-size:11px}}
