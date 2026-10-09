@@ -523,3 +523,13 @@ button{cursor:pointer}
     .password-actions{flex-direction:column-reverse}
     .password-actions .btn{width:100%}
 }
+
+/* v0.4 — recovery/contact-email modal */
+.email-code-group { display: flex; gap: 10px; align-items: stretch; }
+.email-code-group input { flex: 1; min-width: 0; }
+.email-code-group button { flex: 0 0 108px; padding-inline: 8px; }
+.email-code-group button:disabled { opacity: .65; cursor: not-allowed; }
+
+/* v0.4.1: hide the linking form on already verified accounts. */
+#emailLinkForm[hidden] { display: none !important; }
+#emailAccountStatus { overflow-wrap: anywhere; }

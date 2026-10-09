@@ -983,3 +983,39 @@
         padding-bottom: 40px;
     }
 }
+/* Email migration staging: keep field hidden until feature flag enabled. */
+.auth-field[hidden] { display: none; }
+
+/* TienHub Account v0.4 — recovery / verification actions */
+.auth-form[hidden], .auth-field[hidden] { display: none !important; }
+.auth-help-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin: 4px 0 12px; }
+.auth-help-links button, .auth-recovery-back {
+    appearance: none; background: transparent; border: 0; padding: 4px 0;
+    color: #84d9ff; cursor: pointer; font: inherit; font-size: 12px;
+    text-decoration: underline; text-underline-offset: 3px;
+}
+.auth-help-links button:hover, .auth-recovery-back:hover { color: #fff; }
+.auth-help-links button:disabled { opacity: .55; cursor: wait; }
+.auth-recovery-back { display: block; margin: 14px auto 0; font-size: 13px; }
+
+/* v0.4 — 6-digit code field, adaptive on mobile */
+.auth-code-row { display: flex; gap: 10px; align-items: stretch; }
+.auth-code-row .auth-input-wrap { flex: 1 1 auto; min-width: 0; }
+.auth-send-code {
+  flex: 0 0 116px; padding: 0 9px; border: 1px solid rgba(38,187,230,.55);
+  border-radius: 11px; background: rgba(3,116,159,.23); color: #7cddfb;
+  font: inherit; font-weight: 700; cursor: pointer;
+}
+.auth-send-code:hover:not(:disabled) { background: rgba(3,116,159,.42); }
+.auth-send-code:disabled { opacity: .65; cursor: not-allowed; }
+@media (max-width:360px) {.auth-send-code { flex-basis: 92px; font-size: 12px; }}
+
+/* TienHub Account v0.4.2: in-page email-OTP password recovery. */
+.auth-recovery-step[hidden] { display: none !important; }
+.auth-recovery-inline { display: inline-block; align-self: flex-start; margin-top: -2px;
+  padding: 8px 0; border: 0; background: transparent; color: #6bdcff;
+  font-size: 13px; cursor: pointer; text-decoration: underline; }
+.auth-recovery-inline:disabled { opacity: .52; cursor: not-allowed; text-decoration: none; }
+.auth-recovery-step { display: flex; flex-direction: column; gap: 12px; }
+
+.auth-form-recovery #recoverySubmit[hidden] { display: none !important; }
