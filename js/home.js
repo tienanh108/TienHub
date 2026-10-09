@@ -6,218 +6,131 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================================
-       1. RACING HERO CAROUSEL
+       1. HERO: CHUYỂN GIỮA 2 GAME (RACING / STICKMAN)
+       - Mũi tên trái/phải: chuyển GAME.
+       - Racing tự đổi qua 3 ảnh, vẫn ở cùng một GAME.
+       - Soul Fighters hiển thị ảnh đấu trường cố định.
     ===================================================== */
 
     const heroImage = document.getElementById("heroImage");
     const heroPrev = document.getElementById("heroPrev");
     const heroNext = document.getElementById("heroNext");
-    const heroDots = Array.from(
-        document.querySelectorAll(".hero-dot")
-    );
+    const heroDots = Array.from(document.querySelectorAll(".hero-dot"));
     const hero = document.getElementById("racingHero");
+    const heroTitle = document.getElementById("heroTitle");
+    const heroDescription = document.getElementById("heroDescription");
+    const heroButtonIcon = document.getElementById("heroButtonIcon");
 
-    // 3 ảnh Racing
-    const heroImages = [
-        "assets/images/games/racing/sunset-coast.png",
-        "assets/images/games/racing/greenvalley.png",
-        "assets/images/games/racing/car-concept.png"
+    const heroGames = [
+        {
+            title: "Racing",
+            description: "Những cuộc đua tốc độ cao đang được phát triển cho TienHub.",
+            icon: "🏁",
+            images: [
+                "assets/images/games/racing/sunset-coast.png",
+                "assets/images/games/racing/greenvalley.png",
+                "assets/images/games/racing/car-concept.png"
+            ]
+        },
+        {
+            title: "Soul Fighters",
+            description: "Trải nghiệm những trận đấu võ thuật 3D trên đấu trường TienHub.",
+            icon: "⚔️",
+            images: ["assets/images/games/stickman-3d/training-arena.png"]
+        }
     ];
 
-    let currentHero = 0;
-    let heroTimer = null;
+    let currentGame = 0;
+    let currentRacingPhoto = 0;
+    let racingPhotoTimer = null;
+    let renderTimer = null;
+    let heroHovered = false;
 
+    function renderHero() {
+        const game = heroGames[currentGame];
+        const photoIndex = currentGame === 0 ? currentRacingPhoto : 0;
+        const photo = game.images[photoIndex];
 
-    /* -----------------------------------------------------
-       Cập nhật ảnh Hero
-    ----------------------------------------------------- */
+        if (renderTimer !== null) window.clearTimeout(renderTimer);
+        if (heroImage) heroImage.classList.add("is-changing");
 
-    function updateHero() {
-
-        if (!heroImage) return;
-
-        // Hiệu ứng chuyển ảnh
-        heroImage.classList.add("is-changing");
-
-        window.setTimeout(() => {
-
-            heroImage.src = heroImages[currentHero];
-
-            heroImage.alt =
-                `TienHub Racing - hình ${currentHero + 1}`;
-
-            // Cập nhật các dấu chấm
-            heroDots.forEach((dot, index) => {
-
-                dot.classList.toggle(
-                    "active",
-                    index === currentHero
-                );
-
-                dot.setAttribute(
-                    "aria-selected",
-                    index === currentHero
-                        ? "true"
-                        : "false"
-                );
-            });
-
-            window.setTimeout(() => {
+        // Tránh ảnh cũ chồng lên ảnh mới khi nhấn mũi tên nhanh.
+        renderTimer = window.setTimeout(() => {
+            if (heroImage) {
+                heroImage.src = photo;
+                heroImage.alt = `${game.title} - hình giới thiệu ${photoIndex + 1}`;
                 heroImage.classList.remove("is-changing");
-            }, 40);
-
+            }
+            renderTimer = null;
         }, 120);
+
+        if (heroTitle) heroTitle.textContent = game.title;
+        if (heroDescription) heroDescription.textContent = game.description;
+        if (heroButtonIcon) heroButtonIcon.textContent = game.icon;
+
+        // Chỉ có 2 chấm, mỗi chấm đại diện cho một GAME.
+        heroDots.forEach((dot, index) => {
+            const selected = index === currentGame;
+            dot.classList.toggle("active", selected);
+            dot.setAttribute("aria-selected", selected ? "true" : "false");
+        });
     }
 
-
-    /* -----------------------------------------------------
-       Chuyển tới ảnh cụ thể
-    ----------------------------------------------------- */
-
-    function showHero(index) {
-
-        currentHero =
-            (index + heroImages.length) %
-            heroImages.length;
-
-        updateHero();
-
-        restartHeroTimer();
-    }
-
-
-    /* -----------------------------------------------------
-       Ảnh tiếp theo
-    ----------------------------------------------------- */
-
-    function nextHero() {
-
-        showHero(currentHero + 1);
-
-    }
-
-
-    /* -----------------------------------------------------
-       Ảnh trước
-    ----------------------------------------------------- */
-
-    function prevHero() {
-
-        showHero(currentHero - 1);
-
-    }
-
-
-    /* -----------------------------------------------------
-       Reset bộ đếm tự động
-    ----------------------------------------------------- */
-
-    function restartHeroTimer() {
-
-        if (heroTimer) {
-            window.clearInterval(heroTimer);
+    function stopRacingTimer() {
+        if (racingPhotoTimer !== null) {
+            window.clearInterval(racingPhotoTimer);
+            racingPhotoTimer = null;
         }
-
-        // Tự động chuyển sau 5.5 giây
-        heroTimer = window.setInterval(
-            nextHero,
-            5500
-        );
     }
 
-
-    /* -----------------------------------------------------
-       Nút Previous / Next
-    ----------------------------------------------------- */
-
-    if (heroNext) {
-
-        heroNext.addEventListener(
-            "click",
-            nextHero
-        );
-
+    function startRacingTimer() {
+        stopRacingTimer();
+        // Stickman không có bộ đếm chuyển ảnh.
+        if (currentGame !== 0 || heroHovered) return;
+        racingPhotoTimer = window.setInterval(() => {
+            if (currentGame !== 0) return;
+            currentRacingPhoto = (currentRacingPhoto + 1) % heroGames[0].images.length;
+            renderHero();
+        }, 5500);
     }
 
-
-    if (heroPrev) {
-
-        heroPrev.addEventListener(
-            "click",
-            prevHero
-        );
-
+    function showGame(index) {
+        currentGame = (index + heroGames.length) % heroGames.length;
+        // Quay lại Racing sẽ bắt đầu từ ảnh đầu tiên.
+        if (currentGame === 0) currentRacingPhoto = 0;
+        renderHero();
+        startRacingTimer();
     }
 
-
-    /* -----------------------------------------------------
-       Các dấu chấm
-    ----------------------------------------------------- */
+    // Nút trái/phải đi thẳng sang game còn lại.
+    if (heroPrev) heroPrev.addEventListener("click", () => showGame(currentGame - 1));
+    if (heroNext) heroNext.addEventListener("click", () => showGame(currentGame + 1));
 
     heroDots.forEach((dot, index) => {
-
-        dot.addEventListener(
-            "click",
-            () => showHero(index)
-        );
-
+        dot.addEventListener("click", () => showGame(index));
     });
 
-
-    /* -----------------------------------------------------
-       Phím ← →
-    ----------------------------------------------------- */
-
-    document.addEventListener(
-        "keydown",
-        (event) => {
-
-            if (event.key === "ArrowRight") {
-                nextHero();
-            }
-
-            if (event.key === "ArrowLeft") {
-                prevHero();
-            }
-
-        }
-    );
-
-
-    /* -----------------------------------------------------
-       Hover vào Hero → tạm dừng tự động chuyển
-    ----------------------------------------------------- */
+    document.addEventListener("keydown", (event) => {
+        // Đừng chiếm phím điều hướng khi người chơi đang nhập/chọn văn bản.
+        const target = event.target;
+        if (target instanceof Element && target.closest("input, textarea, select, [contenteditable]")) return;
+        if (event.key === "ArrowRight") showGame(currentGame + 1);
+        if (event.key === "ArrowLeft") showGame(currentGame - 1);
+    });
 
     if (hero) {
-
-        hero.addEventListener(
-            "mouseenter",
-            () => {
-
-                if (heroTimer) {
-                    window.clearInterval(heroTimer);
-                }
-
-            }
-        );
-
-
-        hero.addEventListener(
-            "mouseleave",
-            restartHeroTimer
-        );
-
+        hero.addEventListener("mouseenter", () => {
+            heroHovered = true;
+            stopRacingTimer();
+        });
+        hero.addEventListener("mouseleave", () => {
+            heroHovered = false;
+            startRacingTimer();
+        });
     }
 
-
-    /* -----------------------------------------------------
-       Khởi động Hero
-    ----------------------------------------------------- */
-
-    updateHero();
-
-    restartHeroTimer();
-
+    renderHero();
+    startRacingTimer();
 
 
     /* =====================================================
