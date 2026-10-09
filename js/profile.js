@@ -266,6 +266,88 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const profileMenu = profileWrap?.querySelector(".profile-menu");
 
+    // Wallet is part of the small account menu on Home / Mini Games / Download.
+    // No wallet UI is inserted on the dedicated Profile page (no .profile-wrap).
+    let walletBalance = null;
+    let walletStatus = null;
+    if (profileMenu) {
+        const card = document.createElement("div");
+        card.className = "tienhub-wallet-card";
+        card.setAttribute("aria-label", "Ví TienHub Coin");
+        card.innerHTML = `
+            <span class="tienhub-wallet-coin" aria-hidden="true">T</span>
+            <div class="tienhub-wallet-details">
+                <span class="tienhub-wallet-label">Số dư TienHub Coin</span>
+                <strong class="tienhub-wallet-balance" aria-live="polite">— THC</strong>
+                <span class="tienhub-wallet-status">Chưa kết nối ví</span>
+            </div>
+        `;
+        const profileLink = profileMenu.querySelector(".profile-menu-profile");
+        if (profileLink) profileLink.before(card);
+        walletBalance = card.querySelector(".tienhub-wallet-balance");
+        walletStatus = card.querySelector(".tienhub-wallet-status");
+    }
+
+    let walletUid = null;
+    let walletLastFetch = 0;
+    let walletRequest = null;
+    let walletRequestUid = null;
+
+    function resetWallet() {
+        if (walletBalance) walletBalance.textContent = "— THC";
+        if (walletStatus) walletStatus.textContent = "Chưa kết nối ví";
+    }
+
+    async function refreshWallet(user) {
+        if (!walletBalance || !user || user.isAnonymous || currentUser?.uid !== user.uid) return;
+        if (walletUid !== user.uid) {
+            walletUid = user.uid;
+            walletLastFetch = 0;
+            resetWallet();
+        }
+        if (walletRequest && walletRequestUid === user.uid) return walletRequest;
+        // Recheck on reopening the account menu, not on every click or auth callback.
+        if (Date.now() - walletLastFetch < 30_000) return;
+        walletLastFetch = Date.now();
+        if (walletStatus) walletStatus.textContent = "Đang đồng bộ...";
+
+        const expectedUid = user.uid;
+        const task = (async () => {
+            try {
+                const { syncUser } = await import("./tienhub-api.js?v=20261009-live1");
+                const result = await syncUser(user);
+                // Ignore stale responses after logout / account changes.
+                if (currentUser?.uid !== expectedUid || walletUid !== expectedUid) return;
+                const balance = result?.account?.thc;
+                if (result?.status === "connected" &&
+                    Number.isSafeInteger(balance) && balance >= 0) {
+                    walletBalance.textContent = `${new Intl.NumberFormat("vi-VN").format(balance)} THC`;
+                    if (walletStatus) walletStatus.textContent = "Ví THC dùng chung";
+                } else {
+                    walletBalance.textContent = "— THC";
+                    if (walletStatus) {
+                        walletStatus.textContent = result?.status === "not-configured"
+                            ? "Chưa kết nối ví"
+                            : "Không tải được số dư";
+                    }
+                }
+            } catch (error) {
+                if (currentUser?.uid !== expectedUid || walletUid !== expectedUid) return;
+                walletBalance.textContent = "— THC";
+                if (walletStatus) walletStatus.textContent = "Không tải được số dư";
+                console.warn("TienHub wallet read error:", error);
+            }
+        })();
+        walletRequest = task;
+        walletRequestUid = expectedUid;
+        try { await task; } finally {
+            if (walletRequest === task) {
+                walletRequest = null;
+                walletRequestUid = null;
+            }
+        }
+    }
+
 
 
     if (!profileWrap || !profileButton) return;
@@ -651,7 +733,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const lockOk = await setupDeviceLock(user);
 
-        if (!lockOk) return;
+        if (!lockOk) return false;
 
 
 
@@ -661,9 +743,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             event.stopPropagation();
 
-            profileWrap.classList.contains("open") ? closeProfile() : openProfile();
+            if (profileWrap.classList.contains("open")) {
+                closeProfile();
+            } else {
+                openProfile();
+                void refreshWallet(user);
+            }
 
         };
+        return true;
 
     }
 
@@ -769,16 +857,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         }
 
+        const previousUid = currentUser?.uid ?? null;
         currentUser = user || null;
+        if (previousUid !== (currentUser?.uid ?? null)) {
+            walletUid = null;
+            walletLastFetch = 0;
+            resetWallet();
+        }
 
         if (!currentUser || currentUser.isAnonymous) {
-
             renderGuest();
-
         } else {
-
-            await renderLoggedIn(currentUser);
-
+            const rendered = await renderLoggedIn(currentUser);
+            // Balance is read from the verified server API, never browser storage.
+            if (rendered) void refreshWallet(currentUser);
         }
 
     }

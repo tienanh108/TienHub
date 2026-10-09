@@ -148,6 +148,10 @@ async function initProfile() {
             );
 
             const profileData = profileSnapshot.val() || {};
+            if (typeof profileData.username === "string" && profileData.username.trim()) {
+                usernameInput.value = profileData.username.trim();
+            }
+
 
             if (typeof profileData.displayName === "string" && profileData.displayName.trim()) {
                 displayNameInput.value = profileData.displayName.trim();
@@ -523,9 +527,12 @@ passwordForm?.addEventListener("submit", async (event) => {
 
         const username = getUsername(currentUser);
 
-        const technicalEmail = `${username.trim().toLowerCase()}@auth.tienhub.vn`;
+        // Use the actual Firebase email: legacy technical email or verified Gmail.
+        const signInEmail = currentUser.email;
+        if (!signInEmail) throw new Error("Tài khoản không có email để xác thực lại.");
+        const credential = EmailAuthProvider.credential(signInEmail, currentPassword);
 
-        const credential = EmailAuthProvider.credential(technicalEmail, currentPassword);
+
 
 
 
@@ -607,11 +614,125 @@ passwordForm?.addEventListener("submit", async (event) => {
 
 
 
-document.getElementById("emailBtn").addEventListener("click", () => {
 
-    showToast("Liên kết email sẽ được bổ sung sau.");
+// Contact email is stored by TienHub Backend after a server-verified OTP.
+// It does NOT replace the legacy Firebase @auth.tienhub.vn sign-in email.
+const emailModal = document.getElementById("emailModal");
+const contactEmail = document.getElementById("contactEmail");
+const contactCode = document.getElementById("contactCode");
+const emailLinkMessage = document.getElementById("emailLinkMessage");
+const contactSendCode = document.getElementById("contactSendCode");
+const emailLinkSubmit = document.getElementById("emailLinkSubmit");
+const linkedEmailStatus = document.getElementById("linkedEmailStatus");
+const emailAccountLabel = document.getElementById("emailAccountLabel");
+const emailAccountStatus = document.getElementById("emailAccountStatus");
+const emailLinkForm = document.getElementById("emailLinkForm");
+let verifiedLinkedEmail = null;
+function updateLinkedEmailUI(email) {
+    verifiedLinkedEmail = email || null;
+    if (emailAccountLabel) emailAccountLabel.textContent = email ? "Đã liên kết" : "Liên kết email";
+    if (emailAccountStatus) emailAccountStatus.textContent = email || "Thêm email liên hệ đã xác minh";
+    if (linkedEmailStatus) linkedEmailStatus.textContent = email
+        ? `Đã liên kết: ${email}` : "Chưa có email liên kết.";
+    if (emailLinkForm) emailLinkForm.hidden = Boolean(email);
+    if (email && contactEmail) contactEmail.value = email;
+}
+async function refreshLinkedEmail() {
+    if (!currentUser) return;
+    const data = await emailApi("status");
+    updateLinkedEmailUI(data.linkedEmail || null);
+}
 
+const CONTACT_API = "https://tienhub-api.tienhub-api.workers.dev";
+let contactTimer = null;
+function setEmailMessage(value, failed = false) {
+    emailLinkMessage.textContent = value;
+    emailLinkMessage.className = `password-message ${failed ? "error" : "success"}`;
+}
+function closeEmailModal() {
+    emailModal.classList.remove("show");
+    emailModal.setAttribute("aria-hidden", "true");
+    clearInterval(contactTimer);
+}
+async function emailApi(action, payload=null) {
+    if (!currentUser) throw new Error("Vui lòng đăng nhập lại.");
+    const response = await fetch(`${CONTACT_API}/api/v1/email/${action}`, {
+        method: payload ? "POST" : "GET",
+        headers: {
+            "Authorization": `Bearer ${await currentUser.getIdToken()}`,
+            ...(payload ? { "Content-Type":"application/json" } : {})
+        },
+        ...(payload ? { body:JSON.stringify(payload) } : {}),
+        cache:"no-store"
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Dịch vụ email chưa sẵn sàng.");
+    return data;
+}
+document.getElementById("emailBtn")?.addEventListener("click", async () => {
+    // The row itself identifies already-linked emails. No second linking flow.
+    if (verifiedLinkedEmail) {
+        showToast(`Email đã liên kết: ${verifiedLinkedEmail}`);
+        return;
+    }
+    // Recheck on the server to avoid working with stale state between tabs.
+    try {
+        await refreshLinkedEmail();
+    } catch (_) {
+        showToast("Chưa kiểm tra được email hiện tại. Hãy thử lại.");
+        return;
+    }
+    if (verifiedLinkedEmail) {
+        showToast(`Email đã liên kết: ${verifiedLinkedEmail}`);
+        return;
+    }
+    emailModal.classList.add("show");
+    emailModal.setAttribute("aria-hidden", "false");
+    if (emailLinkForm) emailLinkForm.hidden = false;
+    setEmailMessage("");
+    contactEmail.focus();
 });
+document.getElementById("emailCloseBtn")?.addEventListener("click",closeEmailModal);
+document.getElementById("emailCancelBtn")?.addEventListener("click",closeEmailModal);
+document.querySelector("[data-close-email]")?.addEventListener("click",closeEmailModal);
+contactSendCode?.addEventListener("click",async () => {
+    const email = contactEmail?.value.trim().toLowerCase() || "";
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setEmailMessage("Hãy nhập email hợp lệ.",true); return;
+    }
+    contactSendCode.disabled = true;
+    try {
+        await emailApi("send", {email,purpose:"link"});
+        setEmailMessage("Mã 6 số đã gửi đến email. Hãy kiểm tra hộp thư và Spam.");
+        const until=Date.now()+60000;
+        clearInterval(contactTimer);
+        const update=()=>{
+            const remain=Math.max(0,Math.ceil((until-Date.now())/1000));
+            contactSendCode.disabled=remain>0;
+            contactSendCode.textContent=remain?`Gửi lại (${remain}s)`:"Gửi lại mã";
+            if(!remain)clearInterval(contactTimer);
+        };
+        update(); contactTimer=setInterval(update,1000);
+    } catch(error) {
+        contactSendCode.disabled=false;
+        setEmailMessage(error.message,true);
+    }
+});
+document.getElementById("emailLinkForm")?.addEventListener("submit",async (event)=>{
+    event.preventDefault();
+    const email=contactEmail?.value.trim().toLowerCase() || "";
+    const code=contactCode?.value.trim() || "";
+    if(!/^\d{6}$/.test(code)) {setEmailMessage("Mã xác minh gồm 6 số.",true);return;}
+    emailLinkSubmit.disabled=true;
+    try {
+        await emailApi("claim",{email,purpose:"link",code});
+        updateLinkedEmailUI(email);
+        setEmailMessage("Đã xác minh và liên kết email thành công!");
+        showToast("Đã liên kết email.");
+    }catch(error){setEmailMessage(error.message,true);}
+    finally{emailLinkSubmit.disabled=false;}
+});
+
 
 
 
@@ -650,4 +771,10 @@ document.getElementById("accountTrigger").addEventListener("click", () => {
 
 
 
-initProfile();
+initProfile().then(() => {
+    if (!currentUser) return;
+    refreshLinkedEmail().catch(() => {
+        if (emailAccountLabel) emailAccountLabel.textContent = "Liên kết email";
+        if (emailAccountStatus) emailAccountStatus.textContent = "Không tải được trạng thái email";
+    });
+});

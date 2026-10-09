@@ -1,6 +1,226 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    // TienHub Account v0.4 staging. Requires OTP Worker v0.4 before signup.
+    const ENABLE_VERIFIED_EMAIL_SIGNUP = true;
+    const registerEmail = document.getElementById("registerEmail");
+    const emailField = document.getElementById("registerEmailField");
+    if (emailField) emailField.hidden = !ENABLE_VERIFIED_EMAIL_SIGNUP;
+    if (registerEmail) registerEmail.required = ENABLE_VERIFIED_EMAIL_SIGNUP;
+    const loginUsernameLabel = document.querySelector('label[for="loginUsername"]');
+    if (loginUsernameLabel) loginUsernameLabel.textContent = "Username hoặc email";
 
+    // =========================================================
+    // ACCOUNT RECOVERY: email OTP -> verify code -> set new password.
+    // Cloudflare verifies OTP and updates Firebase Auth via server-side
+    // credentials. Never change Firebase passwords from browser code.
+    // =========================================================
+    const resetLink = document.getElementById("forgotPasswordBtn");
+    const recoveryForm = document.getElementById("recoveryForm");
+    const recoveryEmail = document.getElementById("recoveryEmail");
+    const recoveryCode = document.getElementById("recoveryCode");
+    const recoveryNewPassword = document.getElementById("recoveryNewPassword");
+    const recoveryConfirmPassword = document.getElementById("recoveryConfirmPassword");
+    const recoveryEmailStep = document.getElementById("recoveryEmailStep");
+    const recoveryCodeStep = document.getElementById("recoveryCodeStep");
+    const recoveryPasswordStep = document.getElementById("recoveryPasswordStep");
+    const recoverySubmit = document.getElementById("recoverySubmit");
+    const recoveryResend = document.getElementById("recoveryResend");
+    const recoveryMessage = document.getElementById("recoveryMessage");
+    const returnLoginBtn = document.getElementById("returnLoginBtn");
+    const RESET_API_BASE = "https://tienhub-api.tienhub-api.workers.dev";
+    let recoveryStep = "email";
+    let recoveryActiveEmail = "";
+    let recoveryResendTimer = null;
+    let recoveryResendUntil = 0;
+
+    async function resetApi(endpoint, payload) {
+        const response = await fetch(`${RESET_API_BASE}/api/v1/password/${endpoint}`, {
+            method: "POST", cache: "no-store",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        let result = {};
+        try { result = await response.json(); } catch (_) {}
+        if (!response.ok) throw new Error(result.error || "Không thể kết nối dịch vụ khôi phục mật khẩu.");
+        return result;
+    }
+    function setRecoveryStep(step) {
+        recoveryStep = step;
+        if (recoveryEmailStep) recoveryEmailStep.hidden = step !== "email";
+        if (recoveryCodeStep) recoveryCodeStep.hidden = step !== "code";
+        if (recoveryPasswordStep) recoveryPasswordStep.hidden = step !== "password";
+        if (recoverySubmit) {
+            recoverySubmit.hidden = false;
+            recoverySubmit.disabled = false;
+            recoverySubmit.innerHTML = step === "email"
+                ? 'Gửi mã xác minh <span aria-hidden="true">→</span>'
+                : step === "code"
+                    ? 'Xác minh mã <span aria-hidden="true">→</span>'
+                    : 'Đặt mật khẩu mới <span aria-hidden="true">→</span>';
+        }
+        if (authSubtitle) authSubtitle.textContent = step === "email"
+            ? "Nhập email đã đăng ký hoặc liên kết với TienHub."
+            : step === "code"
+                ? "Nhập mã 6 số đã gửi đến email của bạn."
+                : "Mã hợp lệ. Hãy đặt mật khẩu mới cho tài khoản.";
+        if (step === "code") recoveryCode?.focus();
+        if (step === "password") recoveryNewPassword?.focus();
+    }
+    function cooldownRecovery() {
+        recoveryResendUntil = Date.now() + 60000;
+        clearInterval(recoveryResendTimer);
+        const tick = () => {
+            if (!recoveryResend) return;
+            const remaining = Math.max(0, Math.ceil((recoveryResendUntil - Date.now()) / 1000));
+            recoveryResend.disabled = remaining > 0;
+            recoveryResend.textContent = remaining ? `Gửi lại (${remaining}s)` : "Gửi lại mã";
+            if (!remaining) clearInterval(recoveryResendTimer);
+        };
+        tick(); recoveryResendTimer = setInterval(tick, 1000);
+    }
+    resetLink?.addEventListener("click", (event) => {
+        event.preventDefault();
+        showMessage(loginMessage, "");
+        if (loginForm) loginForm.hidden = true;
+        if (registerForm) registerForm.hidden = true;
+        if (recoveryForm) recoveryForm.hidden = false;
+        if (authTitle) authTitle.textContent = "Quên mật khẩu";
+        if (switchAuth) switchAuth.hidden = true;
+        if (switchText) switchText.hidden = true;
+        setRecoveryStep("email");
+        if (recoveryCode) recoveryCode.value = "";
+        if (recoveryNewPassword) recoveryNewPassword.value = "";
+        if (recoveryConfirmPassword) recoveryConfirmPassword.value = "";
+        if (loginUsername?.value.includes("@")) recoveryEmail.value = loginUsername.value.trim();
+        showMessage(recoveryMessage, "");
+        recoveryEmail?.focus();
+    });
+    returnLoginBtn?.addEventListener("click", () => {
+        if (recoveryForm) recoveryForm.hidden = true;
+        if (switchAuth) switchAuth.hidden = false;
+        if (switchText) switchText.hidden = false;
+        recoveryActiveEmail = "";
+        clearInterval(recoveryResendTimer);
+        setRecoveryStep("email");
+        showLogin();
+    });
+    recoveryResend?.addEventListener("click", async () => {
+        if (!recoveryActiveEmail) return;
+        recoveryResend.disabled = true;
+        try {
+            await resetApi("send", {email:recoveryActiveEmail});
+            cooldownRecovery();
+            showMessage(recoveryMessage, "Mã xác minh mới đã được gửi. Hãy kiểm tra email và thư Spam.", "success");
+        } catch (error) {
+            recoveryResend.disabled = false;
+            showMessage(recoveryMessage, error.message, "error");
+        }
+    });
+    recoveryForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        recoverySubmit.disabled = true;
+        showMessage(recoveryMessage, "");
+        try {
+            if (recoveryStep === "email") {
+                const email = recoveryEmail?.value.trim().toLowerCase() || "";
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.endsWith("@auth.tienhub.vn")) {
+                    throw new Error("Hãy nhập email thật đã đăng ký hoặc liên kết.");
+                }
+                await resetApi("send", { email });
+                recoveryActiveEmail = email;
+                setRecoveryStep("code");
+                cooldownRecovery();
+                showMessage(recoveryMessage, "Mã xác minh đã được gửi. Hãy kiểm tra email và thư Spam.", "success");
+            } else if (recoveryStep === "code") {
+                const code = recoveryCode?.value.trim() || "";
+                if (!/^\d{6}$/.test(code)) throw new Error("Nhập đủ mã xác minh 6 số.");
+                await resetApi("check", { email: recoveryActiveEmail, code });
+                setRecoveryStep("password");
+                showMessage(recoveryMessage, "Xác minh thành công. Hãy nhập mật khẩu mới.", "success");
+            } else {
+                const nextPassword = recoveryNewPassword?.value || "";
+                const confirmation = recoveryConfirmPassword?.value || "";
+                if (nextPassword.length < 10 || nextPassword.length > 128) throw new Error("Mật khẩu mới cần từ 10 đến 128 ký tự.");
+                if (nextPassword !== confirmation) throw new Error("Hai mật khẩu mới không khớp.");
+                await resetApi("confirm", {email:recoveryActiveEmail,code:recoveryCode.value.trim(),newPassword:nextPassword});
+                recoveryNewPassword.value = "";
+                recoveryConfirmPassword.value = "";
+                if (recoveryPasswordStep) recoveryPasswordStep.hidden = true;
+                if (recoverySubmit) recoverySubmit.hidden = true;
+                if (authSubtitle) authSubtitle.textContent = "Bạn có thể quay lại đăng nhập bằng mật khẩu mới.";
+                showMessage(recoveryMessage, "Đổi mật khẩu thành công! Hãy quay lại đăng nhập.", "success");
+                return;
+            }
+        } catch (error) {
+            showMessage(recoveryMessage, error.message || "Không thể xử lý yêu cầu.", "error");
+        } finally {
+            if (recoverySubmit && !recoverySubmit.hidden) recoverySubmit.disabled = false;
+        }
+    });
+
+    // Cloudflare is authoritative for six-digit codes. Never generate/verify
+    // them in the browser. The sender must be configured on the Worker.
+    const EMAIL_API = "https://tienhub-api.tienhub-api.workers.dev";
+    const registerCode = document.getElementById("registerCode");
+    const sendRegisterCodeBtn = document.getElementById("sendRegisterCode");
+    const codeMessage = document.getElementById("codeMessage");
+    let cooldownTimer = null;
+    async function otpRequest(endpoint, body, user = null) {
+        const headers = { "Content-Type": "application/json" };
+        if (user) headers.Authorization = `Bearer ${await user.getIdToken()}`;
+        const response = await fetch(`${EMAIL_API}/api/v1/email/${endpoint}`, {
+            method: "POST", headers, body: JSON.stringify(body), cache: "no-store"
+        });
+        let data = {};
+        try { data = await response.json(); } catch (_) {}
+        if (!response.ok) throw new Error(data.error || "Dịch vụ gửi mã chưa sẵn sàng. Vui lòng thử lại sau.");
+        return data;
+    }
+    function startCooldown(email) {
+        const until = Date.now() + 60000;
+        sessionStorage.setItem(`th-email-cooldown:${email}`, String(until));
+        clearInterval(cooldownTimer);
+        const tick = () => {
+            const seconds = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+            if (!sendRegisterCodeBtn) return;
+            sendRegisterCodeBtn.disabled = seconds > 0;
+            sendRegisterCodeBtn.textContent = seconds ? `Gửi lại (${seconds}s)` : "Gửi lại mã";
+            if (!seconds) clearInterval(cooldownTimer);
+        };
+        tick();
+        cooldownTimer = setInterval(tick, 1000);
+    }
+    registerEmail?.addEventListener("input", () => {
+        const email = registerEmail.value.trim().toLowerCase();
+        const until = Number(sessionStorage.getItem(`th-email-cooldown:${email}`) || 0);
+        clearInterval(cooldownTimer);
+        if (until > Date.now()) {
+            const tick = () => {
+                const seconds = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+                sendRegisterCodeBtn.disabled = seconds > 0;
+                sendRegisterCodeBtn.textContent = seconds ? `Gửi lại (${seconds}s)` : "Gửi mã";
+                if (!seconds) clearInterval(cooldownTimer);
+            };
+            tick(); cooldownTimer = setInterval(tick, 1000);
+        } else if (sendRegisterCodeBtn) {
+            sendRegisterCodeBtn.disabled = false; sendRegisterCodeBtn.textContent = "Gửi mã";
+        }
+    });
+    sendRegisterCodeBtn?.addEventListener("click", async () => {
+        const email = registerEmail?.value.trim().toLowerCase() || "";
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            showMessage(codeMessage, "Vui lòng nhập email hợp lệ trước.", "error"); return;
+        }
+        sendRegisterCodeBtn.disabled = true;
+        try {
+            await otpRequest("send", { email, purpose: "signup" });
+            startCooldown(email);
+            showMessage(codeMessage, "Đã gửi mã 6 số. Kiểm tra hộp thư và Spam.", "success");
+        } catch (error) {
+            sendRegisterCodeBtn.disabled = false;
+            showMessage(codeMessage, error.message, "error");
+        }
+    });
 
     // =========================================================
 
@@ -714,143 +934,147 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-    async function registerUser(username, password) {
-
-
-
-        const auth =
-
-            await getFirebaseAuth();
-
-
-
-
-
+    async function registerUser(username, password, email = "", code = "") {
+        const auth = await getFirebaseAuth();
         const {
-
             createUserWithEmailAndPassword,
+            updateProfile,
+            deleteUser
+        } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js");
+        const { db } = await import("../src/core/firebase.js");
+        const {
+            ref, get, set, remove, runTransaction
+        } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js");
 
-            updateProfile
-
-        } = await import(
-
-            "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"
-
-        );
-
-
-
-
-
-        const normalizedUsername =
-
-            username.trim().toLowerCase();
-
-
-
-
-
-        const technicalEmail =
-
-            `${normalizedUsername}@auth.tienhub.vn`;
-
-
-
-
-
-        const result =
-
-            await createUserWithEmailAndPassword(
-
-                auth,
-
-                technicalEmail,
-
-                password
-
-            );
-
-
-
-
-
-        await updateProfile(
-
-            result.user,
-
-            {
-
-                displayName: username.trim()
-
-            }
-
-        );
-
-
-
-        await ensureUserRecord(
-
-            result.user,
-
-            username.trim()
-
-        );
-
-
-
-        try {
-
-            const lockPromise = acquireAccountDeviceLock(result.user);
-
-            window.TienHubDeviceLockReady = lockPromise;
-
-            await lockPromise;
-
-        } catch (error) {
-
-            await auth.signOut();
-
-            throw error;
-
+        const clean = username.trim();
+        const normalized = clean.toLowerCase();
+        const signupEmail = email.trim().toLowerCase();
+        if (!ENABLE_VERIFIED_EMAIL_SIGNUP) {
+            throw new Error("Đăng ký email chưa được bật.");
+        }
+        if (!/^[a-zA-Z0-9_]{3,20}$/.test(clean)) {
+            throw new Error("Tên đăng nhập không hợp lệ.");
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupEmail)
+            || signupEmail.endsWith("@auth.tienhub.vn")) {
+            throw new Error("Hãy nhập email thật để nhận thư xác minh.");
         }
 
+        // The old account UID and username mappings are never altered here.
+        // We must create a new Auth user before a namespaced write is allowed
+        // by the RTDB rules. A transaction then reserves ONE unique username.
+        // A multi-location update without a reservation is unsafe (last-writer wins).
+        // Check OTP before creating Firebase UID: incorrect codes cannot create
+        // abandoned Firebase users. The Worker does not consume it yet.
+        await otpRequest("check", {email: signupEmail, purpose: "signup", code});
+        // Recover a pending signup after a network failure without re-creating UID.
+        const samePending = auth.currentUser?.email?.toLowerCase() === signupEmail;
+        let resumed = Boolean(samePending);
+        let account;
+        if (samePending) {
+            account = { user: auth.currentUser };
+        } else {
+            try {
+                account = await createUserWithEmailAndPassword(auth, signupEmail, password);
+            } catch (error) {
+                if (error.code !== "auth/email-already-in-use") throw error;
+                const { signInWithEmailAndPassword } = await import(
+                    "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"
+                );
+                account = await signInWithEmailAndPassword(auth, signupEmail, password);
+                const record = await get(ref(db, `users/${account.user.uid}`));
+                if (record.exists() && record.val()?.usernameNormalized !== normalized) {
+                    await auth.signOut();
+                    throw new Error("Email này thuộc một tài khoản TienHub khác.");
+                }
+                resumed = true;
+            }
+        }
+        const user = account.user;
+        const nameRef = ref(db, `usernames/${normalized}`);
+        let reserved = false;
+        let userRecordWritten = false;
+        try {
+            const transaction = await runTransaction(
+                nameRef,
+                (existing) => (existing === null || existing === undefined || existing === user.uid)
+                    ? user.uid : undefined,
+                { applyLocally: false }
+            );
+            if (!transaction.committed || transaction.snapshot.val() !== user.uid) {
+                const conflict = new Error("Tên đăng nhập đã được sử dụng. Hãy chọn tên khác.");
+                conflict.code = "tienhub/username-taken";
+                throw conflict;
+            }
+            reserved = true;
+            // Must write AFTER reservation so the hardened user rules can
+            // check root.child('usernames').child(normalized) == auth.uid.
+            const recordRef = ref(db, `users/${user.uid}`);
+            const existingRecord = await get(recordRef);
+            if (existingRecord.exists()) {
+                if (existingRecord.val()?.usernameNormalized !== normalized) {
+                    throw new Error("Hồ sơ cũ không khớp tên đăng nhập; dừng để bảo vệ UID.");
+                }
+                // Retry after a failed email claim. Do not rewrite createdAt.
+            } else {
+                await set(recordRef, {
+                    username: clean,
+                    usernameNormalized: normalized,
+                    createdAt: Date.now()
+                });
+            }
+            userRecordWritten = true;
+            await updateProfile(user, { displayName: clean });
+        } catch (error) {
+            if (resumed) {
+                throw new Error(`Không thể tiếp tục đăng ký hiện có: ${error.message}`);
+            }
+            // Roll back ONLY this freshly created account, never existing UIDs.
+            // If cleanup itself fails, warn support rather than claiming success.
+            let cleanupFailed = false;
+            try {
+                // Check remote state even if set() lost its acknowledgement.
+                // Never delete Firebase Auth if RTDB cleanup did not succeed.
+                const userRef = ref(db, `users/${user.uid}`);
+                const storedUser = await get(userRef);
+                if (storedUser.exists() && storedUser.val()?.usernameNormalized === normalized) {
+                    await remove(userRef);
+                } else if (storedUser.exists()) {
+                    throw new Error("Signup cleanup: unexpected user record");
+                }
+                const storedName = await get(nameRef);
+                if (storedName.val() === user.uid) await remove(nameRef);
+                await deleteUser(user);
+            } catch (cleanupError) {
+                cleanupFailed = true;
+                console.error("Incomplete signup cleanup:", cleanupError);
+            } finally {
+                await auth.signOut().catch(() => {});
+            }
+            if (cleanupFailed) {
+                throw new Error("Tạo tài khoản chưa hoàn tất. Đừng đăng ký lặp lại; hãy liên hệ quản trị TienHub để kiểm tra.");
+            }
+            throw error;
+        }
 
-
-
-
-        localStorage.setItem(
-
-            "tienhub_logged_in",
-
-            "true"
-
-        );
-
-
-
-
-
-        localStorage.setItem(
-
-            "tienhub_username",
-
-            username.trim()
-
-        );
-
-
-
-
-
-        return result.user;
-
-
-
+        // Code is consumed by Worker only after new UID & username persist.
+        // If this network call fails, leave the newly created UID intact so
+        // user can retry safely; never replace/change another account's UID.
+        try {
+            await otpRequest("claim", { email: signupEmail, purpose: "signup", code }, user);
+        } catch (error) {
+            throw new Error(`Tài khoản đã được tạo nhưng chưa xác minh xong: ${error.message}. Giữ trang này và thử lại.`);
+        }
+        try {
+            await acquireAccountDeviceLock(user);
+        } catch (error) {
+            await auth.signOut().catch(() => {});
+            throw error;
+        }
+        localStorage.setItem("tienhub_logged_in", "true");
+        localStorage.setItem("tienhub_username", clean);
+        return { pendingVerification:false, user };
     }
-
-
-
-
 
     // =========================================================
 
@@ -1183,123 +1407,97 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-    async function loginUser(username, password) {
-
-
-
-        const auth =
-
-            await getFirebaseAuth();
-
-
-
-
-
-        const {
-
-            signInWithEmailAndPassword
-
-        } = await import(
-
+    async function loginUser(usernameOrEmail, password) {
+        const auth = await getFirebaseAuth();
+        const { signInWithEmailAndPassword, signInWithCustomToken, reload } = await import(
             "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"
-
         );
+        const loginInput = usernameOrEmail.trim().toLowerCase();
+        let result;
+        if (loginInput.includes("@")) {
+            // Sign-in by email: leave the proven Firebase path unchanged.
+            result = await signInWithEmailAndPassword(auth, loginInput, password);
+        } else {
+            // Existing usernames still sign in with their technical Firebase email.
+            try {
+                result = await signInWithEmailAndPassword(auth, `${loginInput}@auth.tienhub.vn`, password);
+            } catch (legacyError) {
+                // Never turn service/network failures into a second sign-in attempt.
+                if (!["auth/invalid-credential", "auth/invalid-login-credentials", "auth/wrong-password", "auth/user-not-found"]
+                    .includes(legacyError?.code)) throw legacyError;
 
-
-
-
-
-        const normalizedUsername =
-
-            username.trim().toLowerCase();
-
-
-
-
-
-        const technicalEmail =
-
-            `${normalizedUsername}@auth.tienhub.vn`;
-
-
-
-
-
-        const result =
-
-            await signInWithEmailAndPassword(
-
-                auth,
-
-                technicalEmail,
-
-                password
-
-            );
-
-
-
-        await ensureUserRecord(
-
-            result.user,
-
-            username.trim()
-
-        );
-
-
-
-        try {
-
-            await acquireAccountDeviceLock(result.user);
-
-        } catch (error) {
-
-            await auth.signOut();
-
-            throw error;
-
+                // Gmail-signup usernames need privileged resolution, but the
+                // account's real email must NEVER be returned to the browser.
+                // The backend verifies the password with Firebase and creates a
+                // short-lived custom sign-in token for the exact same UID.
+                let response;
+                try {
+                    response = await fetch(`${EMAIL_API}/api/v1/auth/username-login`, {
+                        method: "POST", cache: "no-store",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ username: loginInput, password })
+                    });
+                } catch (_networkError) {
+                    const error = new Error("Không thể kết nối máy chủ đăng nhập TienHub.");
+                    error.code = "tienhub/username-login-unavailable";
+                    throw error;
+                }
+                if (!response.ok) {
+                    const error = new Error(response.status === 401
+                        ? "Tên người dùng hoặc mật khẩu không đúng."
+                        : "Dịch vụ đăng nhập bằng username tạm thời không khả dụng.");
+                    error.code = response.status === 401 ? "auth/invalid-credential" : "tienhub/username-login-unavailable";
+                    throw error;
+                }
+                const data = await response.json();
+                if (typeof data.customToken !== "string" || data.customToken.length < 80) {
+                    const error = new Error("Máy chủ trả về dữ liệu đăng nhập không hợp lệ.");
+                    error.code = "tienhub/username-login-unavailable";
+                    throw error;
+                }
+                result = await signInWithCustomToken(auth, data.customToken);
+            }
         }
-
-
-
-
-
-        localStorage.setItem(
-
-            "tienhub_logged_in",
-
-            "true"
-
-        );
-
-
-
-
-
-        localStorage.setItem(
-
-            "tienhub_username",
-
-            result.user.displayName ||
-
-            username.trim()
-
-        );
-
-
-
-
-
-        return result.user;
-
-
-
+        const user = result.user;
+        const legacy = (user.email || "").toLowerCase().endsWith("@auth.tienhub.vn");
+        try {
+            if (!legacy) {
+                // Either Firebase's native verified flag, or TienHub's
+                // server-verified 6-digit code is accepted.
+                await reload(user);
+                if (!user.emailVerified) {
+                    const response = await fetch(`${EMAIL_API}/api/v1/email/status`, {
+                        headers: { Authorization: `Bearer ${await user.getIdToken(true)}` }, cache: "no-store"
+                    });
+                    const data = response.ok ? await response.json() : {};
+                    if (!data.verified) {
+                        const error = new Error("Email chưa được xác minh bằng mã.");
+                        error.code = "tienhub/email-not-verified";
+                        throw error;
+                    }
+                }
+            }
+            // A new Gmail user's username comes from /users; never infer it
+            // from the email address, avoiding orphan/mismatched records.
+            if (!legacy) {
+                const { db } = await import("../src/core/firebase.js");
+                const { get, ref } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js");
+                const record = (await get(ref(db, `users/${user.uid}`))).val();
+                if (!record?.username || !record?.usernameNormalized) {
+                    throw new Error("Hồ sơ đăng ký chưa hoàn tất. Hãy liên hệ quản trị TienHub để hỗ trợ.");
+                }
+            }
+            await ensureUserRecord(user, user.displayName || usernameOrEmail);
+            await acquireAccountDeviceLock(user);
+            const actualName = user.displayName || (legacy ? loginInput : "");
+            localStorage.setItem("tienhub_logged_in", "true");
+            if (actualName) localStorage.setItem("tienhub_username", actualName);
+            return user;
+        } catch (error) {
+            await auth.signOut().catch(() => {});
+            throw error;
+        }
     }
-
-
-
-
 
     // =========================================================
 
@@ -1379,6 +1577,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+            case "tienhub/username-login-unavailable":
+                return "Máy chủ đăng nhập username tạm thời không khả dụng. Hãy đăng nhập bằng Gmail trong lúc chờ khắc phục.";
+
+            case "tienhub/email-not-verified":
+                return "Email chưa xác minh. Hãy dùng mã 6 số đã gửi khi đăng ký.";
+
+            case "tienhub/username-taken":
+                return "Username đã được đăng ký. Hãy chọn tên khác.";
+
             case "auth/operation-not-allowed":
 
                 return "Firebase chưa bật Email/Password.";
@@ -1437,6 +1644,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     registerUsername?.value.trim() || "";
 
+                const email = registerEmail?.value.trim() || "";
+                const code = registerCode?.value.trim() || "";
+
+
 
 
 
@@ -1492,6 +1703,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
+                if (ENABLE_VERIFIED_EMAIL_SIGNUP && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.trim().toLowerCase().endsWith("@auth.tienhub.vn"))) {
+                    showMessage(registerMessage, "Vui lòng nhập email hợp lệ.", "error");
+                    registerEmail?.focus();
+                    return;
+                }
+
+                if (!/^\d{6}$/.test(code)) {
+                    showMessage(registerMessage, "Nhập mã xác minh gồm 6 số đã gửi đến email.", "error");
+                    registerCode?.focus();
+                    return;
+                }
 
                 if (!validPassword(password)) {
 
@@ -1589,13 +1812,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-                    await registerUser(
-
-                        username,
-
-                        password
-
-                    );
+                    const registerResult = await registerUser(username, password, email, code);
+                    if (registerResult.pendingVerification) {
+                        showMessage(registerMessage, registerResult.verificationSent
+                            ? "Tài khoản đã được tạo. Kiểm tra email (kể cả Spam) để xác minh rồi đăng nhập bằng email."
+                            : "Tài khoản đã được tạo nhưng chưa gửi được thư xác minh. Chọn Đăng nhập rồi dùng Gửi lại email xác minh.", "success");
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.textContent = "Đăng ký";
+                        }
+                        return;
+                    }
 
 
 
@@ -1733,7 +1960,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-                if (!validUsername(username)) {
+                if (!validUsername(username) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username)) {
 
 
 
