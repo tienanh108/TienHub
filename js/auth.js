@@ -2160,8 +2160,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-    showLogin();
-
-
+    // Mở thẳng biểu mẫu khi người chơi đi từ TienHub Desktop.
+    // Tham số URL không chứa mật khẩu hay thông tin đăng nhập.
+    const desktopAuthMode = new URLSearchParams(window.location.search).get('mode');
+    if (desktopAuthMode === 'register') {
+        showRegister();
+    } else if (desktopAuthMode === 'recover' || desktopAuthMode === 'reset') {
+        showLogin();
+        resetLink?.click();
+    } else {
+        showLogin();
+    }
 
 });
