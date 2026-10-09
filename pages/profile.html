@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hồ sơ — TienHub</title>
-    <link rel="stylesheet" href="../css/profile-page.css?v=20260926-1418">
+    <link rel="stylesheet" href="../css/profile-page.css?v=20261009-account041">
     <style>
         @media (max-width: 850px) {
             .profile-page { width: calc(100% - 24px) !important; }
@@ -129,13 +129,13 @@
                         <span class="row-arrow">›</span>
                     </button>
 
-                    <button class="security-row disabled" type="button" id="emailBtn">
+                    <button class="security-row" type="button" id="emailBtn">
                         <span class="security-icon">✉</span>
                         <span class="security-copy">
-                            <strong>Liên kết email</strong>
-                            <small>Tính năng sẽ được bổ sung sau</small>
+                            <strong id="emailAccountLabel">Liên kết email</strong>
+                            <small id="emailAccountStatus">Đang kiểm tra trạng thái...</small>
                         </span>
-                        <span class="coming-soon">Sắp có</span>
+                        <span class="row-arrow">›</span>
                     </button>
                 </div>
 
@@ -179,8 +179,38 @@
         </div>
     </div>
 
+
+    <div class="password-modal" id="emailModal" aria-hidden="true">
+        <div class="password-backdrop" data-close-email></div>
+        <div class="password-dialog" role="dialog" aria-modal="true" aria-labelledby="emailModalTitle">
+            <div class="password-dialog-head">
+                <div>
+                    <p class="eyebrow">SECURITY</p>
+                    <h2 id="emailModalTitle">Liên kết email</h2>
+                    <p>Liên kết email để nhận thông báo. Tên đăng nhập cũ vẫn giữ nguyên.</p>
+                </div>
+                <button class="password-close" type="button" id="emailCloseBtn" aria-label="Đóng">×</button>
+            </div>
+            <form class="password-form" id="emailLinkForm">
+                <p id="linkedEmailStatus" class="field-hint" role="status"></p>
+                <label for="contactEmail">Email</label>
+                <input type="email" id="contactEmail" autocomplete="email" placeholder="email@gmail.com" required>
+                <label for="contactCode">Mã xác minh</label>
+                <div class="email-code-group">
+                    <input type="text" id="contactCode" autocomplete="one-time-code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="6 chữ số" required>
+                    <button type="button" class="btn secondary" id="contactSendCode">Gửi mã</button>
+                </div>
+                <p class="password-message" id="emailLinkMessage" role="status"></p>
+                <div class="password-actions">
+                    <button type="button" class="btn secondary" id="emailCancelBtn">Hủy</button>
+                    <button type="submit" class="btn primary" id="emailLinkSubmit">Liên kết email</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="toast" id="toast" role="status"></div>
-    <script src="../js/profile.js?v=20260926-1418" defer></script>
-    <script type="module" src="../js/profile-page.js?v=20260926-1418"></script>
+    <script src="../js/profile.js?v=20261009-account04" defer></script>
+    <script type="module" src="../js/profile-page.js?v=20261009-account041"></script>
 </body>
 </html>

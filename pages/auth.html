@@ -25,7 +25,7 @@
 
     <link
         rel="stylesheet"
-        href="../css/auth.css"
+        href="../css/auth.css?v=20261009-account042"
     >
 
 </head>
@@ -150,8 +150,8 @@
                             name="username"
                             type="text"
                             autocomplete="username"
-                            placeholder="Nhập tên đăng nhập"
-                            maxlength="20"
+                            placeholder="Username hoặc email"
+                            maxlength="254"
                             required
                         >
 
@@ -203,6 +203,12 @@
                 </div>
 
 
+
+                
+                <div class="auth-help-links">
+                    <button type="button" id="forgotPasswordBtn">Quên mật khẩu?</button>
+
+                </div>
 
                 <p
                     class="auth-message"
@@ -276,6 +282,31 @@
 
 
 
+                <div class="auth-field" id="registerEmailField" hidden>
+                    <label for="registerEmail">Email</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon">@</span>
+                        <input id="registerEmail" name="email" type="email"
+                            autocomplete="email" placeholder="email@example.com"
+                            maxlength="254" inputmode="email">
+                    </div>
+
+                </div>
+
+
+                <div class="auth-field" id="registerCodeField">
+                    <label for="registerCode">Mã xác minh</label>
+                    <div class="auth-code-row">
+                        <div class="auth-input-wrap">
+                            <span class="auth-input-icon">#</span>
+                            <input id="registerCode" name="code" type="text" inputmode="numeric"
+                                pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code"
+                                placeholder="Nhập mã 6 số" required>
+                        </div>
+                        <button id="sendRegisterCode" class="auth-send-code" type="button">Gửi mã</button>
+                    </div>
+                    <p class="auth-message" id="codeMessage" aria-live="polite"></p>
+                </div>
                 <div class="auth-field">
 
                     <label
@@ -403,6 +434,56 @@
 
 
 
+            <form class="auth-form auth-form-recovery" id="recoveryForm" novalidate hidden>
+                <div class="auth-recovery-step" id="recoveryEmailStep">
+                    <div class="auth-field">
+                        <label for="recoveryEmail">Email đã đăng ký hoặc liên kết</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-input-icon">@</span>
+                            <input id="recoveryEmail" type="email" autocomplete="email"
+                                placeholder="tenban@gmail.com" maxlength="254" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="auth-recovery-step" id="recoveryCodeStep" hidden>
+                    <div class="auth-field">
+                        <label for="recoveryCode">Mã xác minh</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-input-icon">#</span>
+                            <input id="recoveryCode" type="text" inputmode="numeric"
+                                autocomplete="one-time-code" pattern="[0-9]{6}"
+                                placeholder="Nhập mã 6 số" maxlength="6">
+                        </div>
+                    </div>
+                    <button type="button" id="recoveryResend" class="auth-recovery-inline">Gửi lại mã</button>
+                </div>
+
+                <div class="auth-recovery-step" id="recoveryPasswordStep" hidden>
+                    <div class="auth-field">
+                        <label for="recoveryNewPassword">Mật khẩu mới</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-input-icon">•</span>
+                            <input id="recoveryNewPassword" type="password" autocomplete="new-password"
+                                placeholder="Tối thiểu 10 ký tự" minlength="10" maxlength="128">
+                            <button type="button" class="auth-password-toggle" data-target="recoveryNewPassword">Hiện</button>
+                        </div>
+                    </div>
+                    <div class="auth-field">
+                        <label for="recoveryConfirmPassword">Nhập lại mật khẩu mới</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-input-icon">•</span>
+                            <input id="recoveryConfirmPassword" type="password" autocomplete="new-password"
+                                placeholder="Nhập lại mật khẩu" minlength="10" maxlength="128">
+                            <button type="button" class="auth-password-toggle" data-target="recoveryConfirmPassword">Hiện</button>
+                        </div>
+                    </div>
+                </div>
+                <p class="auth-message" id="recoveryMessage" aria-live="polite"></p>
+                <button class="auth-submit" id="recoverySubmit" type="submit">Gửi mã xác minh <span aria-hidden="true">→</span></button>
+                <button class="auth-recovery-back" id="returnLoginBtn" type="button">← Quay lại đăng nhập</button>
+            </form>
+
             <!-- =================================================
                  SECURITY NOTE
             ================================================== -->
@@ -430,7 +511,7 @@
          AUTH SCRIPT
     ====================================================== -->
 
-    <script src="../js/auth.js?v=20260926-1418"></script>
+    <script src="../js/auth.js?v=20261009-account0444-email-check"></script>
 
 </body>
 
