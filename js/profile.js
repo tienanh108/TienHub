@@ -813,6 +813,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 
+    window.addEventListener('tienhub:wallet-changed', async () => {
+        if (!currentUser || currentUser.isAnonymous) return;
+        // Avoid showing the pre-reward balance from an in-flight request.
+        if (walletRequest) await walletRequest;
+        walletLastFetch = 0;
+        void refreshWallet(currentUser);
+    });
+
     async function initFirebaseAuth() {
 
         if (firebaseReady && auth) return auth;
@@ -866,11 +874,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         if (!currentUser || currentUser.isAnonymous) {
+            void import('./daily-rewards.js?v=20261009-reward2').then(mod => mod.hideForGuest()).catch(() => {});
             renderGuest();
         } else {
             const rendered = await renderLoggedIn(currentUser);
             // Balance is read from the verified server API, never browser storage.
-            if (rendered) void refreshWallet(currentUser);
+            if (rendered) {
+                void refreshWallet(currentUser);
+                // Daily login rewards are shared across Web and future Desktop.
+                void import('./daily-rewards.js?v=20261009-reward2')
+                    .then(mod => mod.showForUser(currentUser))
+                    .catch(error => console.warn('Daily rewards unavailable:', error));
+            }
         }
 
     }
