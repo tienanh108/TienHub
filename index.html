@@ -382,7 +382,7 @@
 
 
 
-<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/home.css?v=20261009-games03">
 
 
 
@@ -1388,7 +1388,7 @@
 
 
 
-            aria-label="Racing"
+            aria-label="Racing và Soul Fighters"
 
 
 
@@ -1508,7 +1508,7 @@
 
 
 
-                    <span class="hero-kicker">
+                    <span class="hero-kicker" id="heroKicker">
 
 
 
@@ -1524,7 +1524,7 @@
 
 
 
-                    <h1>
+                    <h1 id="heroTitle">
 
 
 
@@ -1540,7 +1540,7 @@
 
 
 
-                    <p>
+                    <p id="heroDescription">
 
 
 
@@ -1580,7 +1580,7 @@
 
 
 
-                        <span>🏁</span>
+                        <span id="heroButtonIcon">🏁</span>
 
 
 
@@ -1632,7 +1632,7 @@
 
 
 
-                    aria-label="Ảnh trước"
+                    aria-label="Game trước"
 
 
 
@@ -1680,7 +1680,7 @@
 
 
 
-                    aria-label="Ảnh tiếp theo"
+                    aria-label="Game tiếp theo"
 
 
 
@@ -1724,102 +1724,15 @@
 
 
 
-                    aria-label="Ảnh Racing"
+                    aria-label="Game nổi bật"
 
 
 
                 >
-
-
-
-
-
-
-
-                    <button
-
-
-
-                        class="hero-dot active"
-
-
-
-                        type="button"
-
-
-
-                        aria-label="Ảnh Racing 1"
-
-
-
-                        aria-selected="true"
-
-
-
-                    ></button>
-
-
-
-
-
-
-
-                    <button
-
-
-
-                        class="hero-dot"
-
-
-
-                        type="button"
-
-
-
-                        aria-label="Ảnh Racing 2"
-
-
-
-                        aria-selected="false"
-
-
-
-                    ></button>
-
-
-
-
-
-
-
-                    <button
-
-
-
-                        class="hero-dot"
-
-
-
-                        type="button"
-
-
-
-                        aria-label="Ảnh Racing 3"
-
-
-
-                        aria-selected="false"
-
-
-
-                    ></button>
-
-
-
-
-
-
-
+                    <button class="hero-dot active" type="button"
+                        aria-label="Chuyển tới Racing" aria-selected="true"></button>
+                    <button class="hero-dot" type="button"
+                        aria-label="Chuyển tới Soul Fighters" aria-selected="false"></button>
                 </div>
 
 
@@ -2180,383 +2093,35 @@
 
 
 
-                <!-- RPG -->
-
-
-
-
-
-
-
-                <a
-
-
-
-                    class="game-card"
-
-
-
-                    data-game-id="rpg"
-
-
-
-                    href="games/rpg/index.html"
-
-
-
-                >
-
-
-
-
-
-
-
+                <!-- Soul Fighters -->
+                <a class="game-card" data-game-id="stickman-3d" href="pages/download.html">
                     <div class="game-cover">
-
-
-
-
-
-
-
-                        <img
-
-
-
-                            src="assets/images/games/rpg/cover.png"
-
-
-
-                            alt="RPG Online"
-
-
-
-                        >
-
-
-
-
-
-
-
+                        <img src="assets/images/games/stickman-3d/training-arena.png" alt="Soul Fighters — Training Arena" loading="lazy" decoding="async">
                     </div>
-
-
-
-
-
-
-
-
-
-
-
                     <div class="game-info">
-
-
-
-
-
-
-
                         <div class="game-main">
-
-
-
-
-
-
-
-                            <h3>
-
-
-
-                                RPG Online
-
-
-
-                            </h3>
-
-
-
-
-
-
-
-                            <div class="game-meta">
-
-
-
-
-
-
-
-                                <span>
-
-
-
-                                    Sắp ra mắt
-
-
-
-                                </span>
-
-
-
-
-
-
-
-                            </div>
-
-
-
-
-
-
-
+                            <h3>Soul Fighters</h3>
+                            <div class="game-meta"><span>Sắp ra mắt</span></div>
                         </div>
-
-
-
-
-
-
-
-
-
-
-
-                        <span class="game-action disabled">
-
-
-
-                            Sắp ra mắt
-
-
-
-                        </span>
-
-
-
-
-
-
-
+                        <span class="game-action disabled">Sắp ra mắt</span>
                     </div>
+                </a>
 
-
-
-
-
-
-
+                <!-- RPG ONLINE -->
+                <a class="game-card" data-game-id="rpg" href="games/rpg/index.html">
+                    <div class="game-cover">
+                        <img src="assets/images/games/rpg/cover.png" alt="RPG Online" loading="lazy" decoding="async">
+                    </div>
+                    <div class="game-info">
+                        <div class="game-main">
+                            <h3>RPG Online</h3>
+                            <div class="game-meta"><span>Sắp ra mắt</span></div>
+                        </div>
+                        <span class="game-action disabled">Sắp ra mắt</span>
+                    </div>
                 </a>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <!-- PROJECT Z -->
-
-
-
-
-
-
-
-                <a
-
-
-
-                    class="game-card"
-
-
-
-                    href="#"
-
-
-
-                >
-
-
-
-
-
-
-
-                    <div class="game-cover">
-
-
-
-
-
-
-
-                        <img
-
-
-
-                            src="assets/images/games/project%20z/cover.png"
-
-
-
-                            alt="Project Z"
-
-
-
-                            onerror="this.src='assets/images/games/project-z/cover.png'"
-
-
-
-                        >
-
-
-
-
-
-
-
-                    </div>
-
-
-
-
-
-
-
-
-
-
-
-                    <div class="game-info">
-
-
-
-
-
-
-
-                        <div class="game-main">
-
-
-
-
-
-
-
-                            <h3>
-
-
-
-                                Project Z
-
-
-
-                            </h3>
-
-
-
-
-
-
-
-                            <div class="game-meta">
-
-
-
-
-
-
-
-                                <span class="game-players">
-
-
-
-                                    👥 — người chơi
-
-
-
-                                </span>
-
-
-
-
-
-
-
-                                <span>
-
-
-
-                                    Sắp ra mắt
-
-
-
-                                </span>
-
-
-
-
-
-
-
-                            </div>
-
-
-
-
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-                        <span class="game-action disabled">
-
-
-
-                            Sắp ra mắt
-
-
-
-                        </span>
-
-
-
-
-
-
-
-                    </div>
-
-
-
-
-
-
-
-                </a>
 
 
 
@@ -2882,39 +2447,20 @@
 
 
 
-                <!-- STICKMAN -->
-
-                <a class="mini-card" data-game-id="stickman" href="mini-games/stickman/index.html">
-
-                    <div class="mini-cover stickman-cover">
-
-                        <span class="stickman-head"></span>
-
-                        <span class="stickman-body"></span>
-
-                        <span class="stickman-arm arm-left"></span>
-
-                        <span class="stickman-arm arm-right"></span>
-
-                        <span class="stickman-leg leg-left"></span>
-
-                        <span class="stickman-leg leg-right"></span>
-
-                        <span class="stickman-sword"></span>
-
+                <!-- CARO 5 -->
+                <a class="mini-card" data-game-id="caro5" href="mini-games/caro5/index.html">
+                    <div class="mini-cover caro-cover" aria-hidden="true">
+                        <span class="xo x1">×</span><span class="xo o1">○</span>
+                        <span class="xo x2">×</span><span class="xo o2">○</span>
+                        <span class="xo x3">×</span><span class="xo o3">○</span>
+                        <span class="xo x4">×</span><span class="xo o4">○</span>
+                        <span class="xo x5">×</span>
                     </div>
-
                     <div class="mini-info">
-
-                        <div><h3>Stickman</h3><span>Arcade</span></div>
-
+                        <div><h3>Caro 5</h3><span>Board Game</span></div>
                         <span class="play-button">Chơi</span>
-
                     </div>
-
                 </a>
-
-
 
                 <!-- BRICK BREAKER -->
 
@@ -3526,7 +3072,7 @@
 
 
 
-        src="js/home.js"
+        src="js/home.js?v=20261009-hero02"
 
 
 
@@ -3570,7 +3116,7 @@
 
 
 
-    src="js/auth.js?v=20261009-account03"
+    src="js/auth.js?v=20261009-staging"
 
 
 
@@ -3587,8 +3133,9 @@
 
 
 
-<script src="js/visit-tracker.js" defer></script>
 
+
+<script defer src="/js/visit-tracker.js?v=20261009-admin01"></script>
 </body>
 
 
