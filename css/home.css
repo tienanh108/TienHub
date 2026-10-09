@@ -318,6 +318,7 @@ main {
     display: grid;
 
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: none;
 
     gap: 18px 22px;
     align-items: stretch;
@@ -1507,6 +1508,7 @@ main {
 
     .games-grid {
         grid-template-columns: 1fr;
+        max-width: 540px;
     }
 
     .mini-grid {
