@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ sơ — TienHub</title>
+    <title>Profile — TienHub</title>
     <link rel="stylesheet" href="../css/profile-page.css?v=20261009-account041">
     <style>
         @media (max-width: 850px) {
@@ -23,19 +23,19 @@
                 <span class="brand-mark"><img src="../assets/icon/tienhub-mark.png" alt="TienHub"></span>
                 <span class="brand-name">TienHub</span>
             </a>
-            <nav class="main-nav" aria-label="Điều hướng chính">
-                <a href="../index.html">Trang chủ</a>
+            <nav class="main-nav" aria-label="Main navigation">
+                <a href="../index.html">Home</a>
                 <a href="mini-game.html">Mini Games</a>
-                <a href="download.html">Tải về</a>
-                <a class="active" href="profile.html">Hồ sơ</a>
+                <a href="download.html">Downloads</a>
+                <a class="active" href="profile.html">Profile</a>
             </nav>
             <div class="nav-actions">
                 <label class="search">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.8"></circle><path d="m16.2 16.2 4.2 4.2"></path></svg>
-                    <input type="search" placeholder="Tìm kiếm game..." aria-label="Tìm kiếm game">
+                    <input type="search" placeholder="Search games..." aria-label="Search games">
                 </label>
                 <span class="nav-divider"></span>
-                <button class="account-trigger" id="accountTrigger" type="button" aria-label="Hồ sơ">
+                <button class="account-trigger" id="accountTrigger" type="button" aria-label="Profile">
                     <span class="account-avatar" id="headerAvatar">T</span>
                     <span class="account-name" id="headerName">tienanh</span>
                 </button>
@@ -47,8 +47,8 @@
         <div class="page-heading">
             <div>
                 <p class="eyebrow">ACCOUNT</p>
-                <h1>Hồ sơ của tôi</h1>
-                <p>Quản lý tên hiển thị và avatar được sử dụng trong các game của TienHub.</p>
+                <h1>My Profile</h1>
+                <p>Manage your display name and avatar across TienHub games.</p>
             </div>
         </div>
 
@@ -56,31 +56,31 @@
             <div class="panel edit-panel">
                 <div class="panel-title">
                     <div>
-                        <h2>Chỉnh sửa hồ sơ</h2>
-                        <p>Thông tin hiển thị trong game</p>
+                        <h2>Edit Profile</h2>
+                        <p>Information shown in games</p>
                     </div>
                 </div>
 
                 <div class="avatar-editor">
                     <div class="large-avatar" id="largeAvatar">T</div>
-                    <button class="avatar-change" id="focusAvatar" type="button">Thay đổi avatar</button>
+                    <button class="avatar-change" id="focusAvatar" type="button">Change Avatar</button>
                                 </div>
 
-                <label class="field-label" for="displayName">Tên hiển thị trong game</label>
+                <label class="field-label" for="displayName">In-Game Display Name</label>
                 <div class="input-wrap">
                     <input id="displayName" type="text" value="tienanh1" maxlength="20" autocomplete="off">
                     <span class="edit-icon">✎</span>
                 </div>
-                <p class="field-hint">Tên này sẽ được người chơi khác nhìn thấy trong game và BXH.</p>
+                <p class="field-hint">Other players will see this name in games and leaderboards.</p>
 
-                <label class="field-label" for="username">Tên đăng nhập</label>
+                <label class="field-label" for="username">Username</label>
                 <div class="input-wrap locked">
                     <input id="username" type="text" value="tienanh" readonly>
                     <span class="lock-icon">🔒</span>
                 </div>
-                <p class="field-hint">Tên đăng nhập không thể thay đổi.</p>
+                <p class="field-hint">Your username cannot be changed.</p>
 
-                <div class="field-label avatar-label">Chọn avatar</div>
+                <div class="field-label avatar-label">Choose Avatar</div>
                 <div class="avatar-grid" id="avatarGrid">
                     <button class="avatar-option selected" data-letter="T" type="button">T</button>
                     <button class="avatar-option" data-letter="A" type="button">A</button>
@@ -90,8 +90,8 @@
                 </div>
 
                 <div class="actions">
-                    <button class="btn secondary" id="cancelBtn" type="button">Hủy</button>
-                    <button class="btn primary" id="saveBtn" type="button">Lưu thay đổi</button>
+                    <button class="btn secondary" id="cancelBtn" type="button">Cancel</button>
+                    <button class="btn primary" id="saveBtn" type="button">Save Changes</button>
                 </div>
             </div>
 
@@ -99,8 +99,8 @@
                 <div class="panel preview-panel">
                     <div class="panel-title">
                         <div>
-                            <h2>Xem trước hiển thị</h2>
-                            <p>Thông tin người khác sẽ nhìn thấy</p>
+                            <h2>Profile Preview</h2>
+                            <p>What other players see</p>
                         </div>
                     </div>
 
@@ -116,16 +116,16 @@
                 <div class="panel security-panel">
                     <div class="panel-title">
                         <div>
-                            <h2>Bảo mật</h2>
-                            <p>Quản lý quyền truy cập tài khoản</p>
+                            <h2>Security</h2>
+                            <p>Manage account access</p>
                         </div>
                     </div>
 
                     <button class="security-row" type="button" id="passwordBtn">
                         <span class="security-icon">🔑</span>
                         <span class="security-copy">
-                            <strong>Đổi mật khẩu</strong>
-                            <small>Cập nhật mật khẩu đăng nhập</small>
+                            <strong>Change Password</strong>
+                            <small>Update your sign-in password</small>
                         </span>
                         <span class="row-arrow">›</span>
                     </button>
@@ -133,8 +133,8 @@
                     <button class="security-row" type="button" id="emailBtn">
                         <span class="security-icon">✉</span>
                         <span class="security-copy">
-                            <strong id="emailAccountLabel">Liên kết email</strong>
-                            <small id="emailAccountStatus">Đang kiểm tra trạng thái...</small>
+                            <strong id="emailAccountLabel">Link Email</strong>
+                            <small id="emailAccountStatus">Checking status...</small>
                         </span>
                         <span class="row-arrow">›</span>
                     </button>
@@ -142,7 +142,7 @@
 
                 <button class="logout-button" id="logoutBtn" type="button">
                     <span>↪</span>
-                    <span>Đăng xuất</span>
+                    <span>Sign Out</span>
                 </button>
             </div>
         </section>
@@ -154,27 +154,27 @@
             <div class="password-dialog-head">
                 <div>
                     <p class="eyebrow">SECURITY</p>
-                    <h2 id="passwordModalTitle">Đổi mật khẩu</h2>
-                    <p>Nhập mật khẩu hiện tại và mật khẩu mới của bạn.</p>
+                    <h2 id="passwordModalTitle">Change Password</h2>
+                    <p>Enter your current password and a new password.</p>
                 </div>
-                <button class="password-close" id="passwordCloseBtn" type="button" aria-label="Đóng">×</button>
+                <button class="password-close" id="passwordCloseBtn" type="button" aria-label="Close">×</button>
             </div>
 
             <form id="passwordForm" class="password-form">
-                <label for="currentPassword">Mật khẩu hiện tại</label>
+                <label for="currentPassword">Current Password</label>
                 <input id="currentPassword" type="password" autocomplete="current-password" minlength="6" required>
 
-                <label for="newPassword">Mật khẩu mới</label>
+                <label for="newPassword">New Password</label>
                 <input id="newPassword" type="password" autocomplete="new-password" minlength="6" required>
 
-                <label for="confirmNewPassword">Xác nhận mật khẩu mới</label>
+                <label for="confirmNewPassword">Confirm New Password</label>
                 <input id="confirmNewPassword" type="password" autocomplete="new-password" minlength="6" required>
 
                 <p class="password-message" id="passwordMessage" role="status"></p>
 
                 <div class="password-actions">
-                    <button class="btn secondary" id="passwordCancelBtn" type="button">Hủy</button>
-                    <button class="btn primary" id="passwordSubmitBtn" type="submit">Đổi mật khẩu</button>
+                    <button class="btn secondary" id="passwordCancelBtn" type="button">Cancel</button>
+                    <button class="btn primary" id="passwordSubmitBtn" type="submit">Change Password</button>
                 </div>
             </form>
         </div>
@@ -187,24 +187,24 @@
             <div class="password-dialog-head">
                 <div>
                     <p class="eyebrow">SECURITY</p>
-                    <h2 id="emailModalTitle">Liên kết email</h2>
-                    <p>Liên kết email để nhận thông báo. Tên đăng nhập cũ vẫn giữ nguyên.</p>
+                    <h2 id="emailModalTitle">Link Email</h2>
+                    <p>Link an email for notifications. Your username will stay the same.</p>
                 </div>
-                <button class="password-close" type="button" id="emailCloseBtn" aria-label="Đóng">×</button>
+                <button class="password-close" type="button" id="emailCloseBtn" aria-label="Close">×</button>
             </div>
             <form class="password-form" id="emailLinkForm">
                 <p id="linkedEmailStatus" class="field-hint" role="status"></p>
                 <label for="contactEmail">Email</label>
                 <input type="email" id="contactEmail" autocomplete="email" placeholder="email@gmail.com" required>
-                <label for="contactCode">Mã xác minh</label>
+                <label for="contactCode">Verification Code</label>
                 <div class="email-code-group">
-                    <input type="text" id="contactCode" autocomplete="one-time-code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="6 chữ số" required>
-                    <button type="button" class="btn secondary" id="contactSendCode">Gửi mã</button>
+                    <input type="text" id="contactCode" autocomplete="one-time-code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="6 digits" required>
+                    <button type="button" class="btn secondary" id="contactSendCode">Send Code</button>
                 </div>
                 <p class="password-message" id="emailLinkMessage" role="status"></p>
                 <div class="password-actions">
-                    <button type="button" class="btn secondary" id="emailCancelBtn">Hủy</button>
-                    <button type="submit" class="btn primary" id="emailLinkSubmit">Liên kết email</button>
+                    <button type="button" class="btn secondary" id="emailCancelBtn">Cancel</button>
+                    <button type="submit" class="btn primary" id="emailLinkSubmit">Link Email</button>
                 </div>
             </form>
         </div>
