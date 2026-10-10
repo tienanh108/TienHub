@@ -41,7 +41,7 @@ function formatSnakeRecord(record, displayName = "") {
 
         uid: record.uid || "",
 
-        name: displayName || "Người chơi",
+        name: displayName || "Player",
 
         score: Number(record.score || 0),
 
@@ -92,7 +92,7 @@ async function refreshSnakeLeaderboard(snapshotValue) {
 
             return formatSnakeRecord({ ...record, uid }, displayName);
         } catch (error) {
-            console.warn("[Snake] Không thể đọc displayName BXH:", uid, error);
+            console.warn("[Snake] Unable to read leaderboard display name:", uid, error);
             return formatSnakeRecord({ ...record, uid }, "");
         }
 
@@ -115,12 +115,12 @@ async function refreshSnakeLeaderboard(snapshotValue) {
 onValue(snakeLeaderboardRef(), (snapshot) => {
 
     refreshSnakeLeaderboard(snapshot.val()).catch((error) => {
-        console.error("[Snake] Không thể cập nhật tên hiển thị BXH:", error);
+        console.error("[Snake] Unable to update leaderboard display name:", error);
     });
 
 }, (error) => {
 
-    console.error("[Snake] Không thể đọc BXH Firebase:", error);
+    console.error("[Snake] Unable to read Firebase leaderboard:", error);
 
     firebaseLeaderboard = [];
 
@@ -161,13 +161,13 @@ async function loadSnakeUsername(user) {
                     displayName: firebaseDisplayName
                 });
             } catch (syncError) {
-                console.warn("[Snake] Không thể đồng bộ public displayName:", syncError);
+                console.warn("[Snake] Unable to sync public display name:", syncError);
             }
         }
 
         return firebaseUsername;
     } catch (error) {
-        console.error("[Snake] Không thể đọc username:", error);
+        console.error("[Snake] Unable to read username:", error);
         firebaseUsername = null;
         firebaseDisplayName = typeof user.displayName === "string" && user.displayName.trim()
             ? user.displayName.trim()
@@ -188,7 +188,7 @@ async function saveSnakeScore(score, timeMs) {
 
     if (!username) {
 
-        console.warn("[Snake] Tài khoản chưa có username trong /users.");
+        console.warn("[Snake] Account has no username in /users.");
 
         return false;
 
@@ -252,7 +252,7 @@ async function saveSnakeScore(score, timeMs) {
 
     } catch (error) {
 
-        console.error("[Snake] Không thể lưu điểm Firebase:", error);
+        console.error("[Snake] Unable to save Firebase score:", error);
 
         return false;
 
@@ -533,7 +533,7 @@ auth.onAuthStateChanged(async (user) => {
 
 
 
-                console.warn("[Snake] Không thể tạo AudioContext:", error);
+                console.warn("[Snake] Unable to create AudioContext:", error);
 
 
 
@@ -1009,7 +1009,7 @@ auth.onAuthStateChanged(async (user) => {
 
 
 
-        pauseBtn.textContent = "⏸ Tạm dừng";
+        pauseBtn.textContent = "⏸ Pause";
 
 
 
@@ -1037,11 +1037,11 @@ auth.onAuthStateChanged(async (user) => {
 
 
 
-            "Sẵn sàng chưa?",
+            "Ready to play?",
 
 
 
-            "▶ Chơi"
+            "▶ Play"
 
 
 
@@ -1058,6 +1058,7 @@ auth.onAuthStateChanged(async (user) => {
 
 
     function startGame() {
+    
 
 
 
@@ -1097,7 +1098,7 @@ auth.onAuthStateChanged(async (user) => {
 
 
 
-        pauseBtn.textContent = "⏸ Tạm dừng";
+        pauseBtn.textContent = "⏸ Pause";
 
 
 
@@ -1543,11 +1544,11 @@ auth.onAuthStateChanged(async (user) => {
 
             isNewRecord ? "🏆" : "💥",
 
-            isNewRecord ? "Kỷ lục mới!" : "Game Over",
+            isNewRecord ? "New Record!" : "Game Over",
 
-            `Điểm của bạn: ${score}`,
+            `Your Score: ${score}`,
 
-            "↻ Chơi lại"
+            "↻ Play Again"
 
         );
 
@@ -1593,11 +1594,11 @@ auth.onAuthStateChanged(async (user) => {
 
 
 
-            pauseBtn.textContent = "▶ Tiếp tục";
+            pauseBtn.textContent = "▶ Continue";
 
 
 
-            showOverlay("⏸", "Tạm dừng", "Nhấn tiếp tục để chơi.", "▶ Tiếp tục");
+            showOverlay("⏸", "Pause", "Press Continue to play.", "▶ Continue");
 
 
 
@@ -1609,7 +1610,7 @@ auth.onAuthStateChanged(async (user) => {
 
 
 
-            pauseBtn.textContent = "⏸ Tạm dừng";
+            pauseBtn.textContent = "⏸ Pause";
 
 
 
@@ -2187,9 +2188,9 @@ auth.onAuthStateChanged(async (user) => {
 
             leaderboardList.innerHTML = isTienHubLoggedIn()
 
-                ? '<div class="leaderboard-empty">Chưa có dữ liệu BXH.</div>'
+                ? '<div class="leaderboard-empty">No leaderboard data yet.</div>'
 
-                : '<div class="leaderboard-empty">Chưa có dữ liệu BXH.</div>';
+                : '<div class="leaderboard-empty">No leaderboard data yet.</div>';
 
             myRankEl.textContent = "—";
 
@@ -2207,7 +2208,7 @@ auth.onAuthStateChanged(async (user) => {
 
                 <div>
 
-                    <span class="player-name">${escapeHtml(player.name || "Người chơi")}</span>
+                    <span class="player-name">${escapeHtml(player.name || "Player")}</span>
 
                     <span class="player-time">${formatTime(player.timeMs)}</span>
 
@@ -2309,7 +2310,7 @@ auth.onAuthStateChanged(async (user) => {
 
 
 
-            soundEnabled ? "Tắt âm thanh" : "Bật âm thanh"
+            soundEnabled ? "Turn Sound Off" : "Turn Sound On"
 
 
 
