@@ -1,10 +1,10 @@
 /* =========================================================
    LUDO AI
-   CỜ CÁ NGỰA
+   LUDO
 
    Phụ trách:
    - AI tự tung xúc xắc
-   - AI chọn quân
+   - AI selected piece
    - Ưu tiên ăn quân
    - Ưu tiên về đích
    - Ưu tiên đưa quân ra
@@ -28,7 +28,7 @@ const LudoAI = {
     timer: null,
 
     /*
-        Độ khó:
+        Difficulty:
 
         easy
         normal
@@ -38,7 +38,7 @@ const LudoAI = {
     difficulty: "normal",
 
     /*
-        Thời gian AI suy nghĩ.
+        Time AI suy nghĩ.
     */
 
     thinkDelay: 700,
@@ -356,7 +356,7 @@ function performAITurn() {
 
 
     showAIMessage(
-        `${getCurrentAIName()} đang tung xúc xắc...`
+        `${getCurrentAIName()} is rolling the dice...`
     );
 
 
@@ -405,7 +405,7 @@ function handleDiceRolled(event) {
 
     /*
         Cho board xử lý xong
-        rồi AI mới chọn quân.
+        rồi AI mới selected piece.
     */
 
     LudoAI.timer =
@@ -502,7 +502,7 @@ function chooseAIPiece() {
 
 
     showAIMessage(
-        `${player.name} chọn quân ${selected.id + 1}`
+        `${player.name} selected piece ${selected.id + 1}`
     );
 
 
@@ -681,7 +681,7 @@ function evaluateMove(
 
         Đây phải là một lựa chọn thực sự ưu tiên.
         Trước đây progressBonus của một quân đang chạy xa
-        có thể lớn hơn exitBonus, khiến AI đổ 6 nhưng cứ chọn
+        có thể lớn hơn exitBonus, khiến AIrolled 6 nhưng cứ chọn
         quân đang ở ngoài thay vì đưa quân mới ra.
 
         Không ép tuyệt đối: ăn quân / vào đích hợp lệ vẫn có thể

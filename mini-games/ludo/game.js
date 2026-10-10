@@ -1,10 +1,10 @@
 /* =========================================================
    LUDO GAME ENGINE
-   CỜ CÁ NGỰA
+   LUDO
 
    Phụ trách:
    - Quản lý trạng thái ván
-   - Bắt đầu / kết thúc game
+   - Start / kết thúc game
    - Single player
    - Online mode
    - Quản lý player
@@ -148,7 +148,7 @@ function setupGameEvents() {
 
 
     /*
-        Khi có người thắng.
+        Khi có người wins.
     */
 
     document.addEventListener(
@@ -230,9 +230,9 @@ function setupGameEvents() {
 ========================================================= */
 
 /*
-    Chơi đơn:
+    Solo Play:
 
-    Người chơi
+    Player
        +
     3 AI
 
@@ -255,7 +255,7 @@ function startSoloGame(
 
 
     /*
-        Người chơi chính.
+        Player chính.
     */
 
     const soloColors = shuffleColors(["red", "green", "yellow", "blue"]);
@@ -269,7 +269,7 @@ function startSoloGame(
 
             name:
                 playerInfo.name ||
-                "Bạn",
+                "You",
 
             color:
                 soloColors[0],
@@ -305,7 +305,7 @@ function startSoloGame(
 
     const aiPlayers = soloColors.slice(1).map(color => ({
         id: `ai-${color}`,
-        name: `Máy ${soloColors.indexOf(color) + 1}`,
+        name: `Computer ${soloColors.indexOf(color) + 1}`,
         color
     }));
 
@@ -388,7 +388,7 @@ function createOnlineGame(
 
             name:
                 hostInfo.name ||
-                "Khách",
+                "Guest",
 
             color:
                 "red",
@@ -444,7 +444,7 @@ function joinOnlineGame(
     if (!roomId) {
 
         console.warn(
-            "Không có roomId."
+            "Missing room ID."
         );
 
         return false;
@@ -473,7 +473,7 @@ function joinOnlineGame(
 
             name:
                 playerInfo.name ||
-                "Khách",
+                "Guest",
 
             color:
                 randomAvailableColor(LudoGame.players.map(player => player.color)),
@@ -562,7 +562,7 @@ function createPlayer(
 
         name:
             data.name ||
-            "Khách",
+            "Guest",
 
         color:
             data.color ||
@@ -751,7 +751,7 @@ function removePlayer(
 ========================================================= */
 
 /*
-    Người chơi mất kết nối:
+    Player mất kết nối:
 
     0s
       ↓
@@ -802,7 +802,7 @@ function disconnectPlayer(
 
     /*
         Nếu đang tới lượt,
-        AI sẽ tiếp quản sau 30 giây.
+        AI sẽ tiếp quản sau 30 seconds.
     */
 
     clearDisconnectTimer(
@@ -1121,7 +1121,7 @@ function startOnlineGame() {
 
 
     /*
-        Phải có ít nhất 2 người.
+        Phải có ít nhất Two Players.
     */
 
     if (
@@ -1133,7 +1133,7 @@ function startOnlineGame() {
             "ludo:startDenied",
             {
                 reason:
-                    "Cần ít nhất 2 người chơi."
+                    "At least two players are required."
             }
         );
 
@@ -1155,7 +1155,7 @@ function startOnlineGame() {
             "ludo:startDenied",
             {
                 reason:
-                    "Chỉ chủ phòng mới được bắt đầu."
+                    "Only the host can start."
             }
         );
 
@@ -1214,7 +1214,7 @@ function fillMissingSlotsWithAI() {
         if (!color) break;
         LudoGame.players.push(createPlayer({
             id: `ai-${color}`,
-            name: `Máy ${aiIndex}`,
+            name: `Computer ${aiIndex}`,
             color,
             type: "ai",
             connected: false,
@@ -1707,16 +1707,16 @@ function getColorName(
     const names = {
 
         red:
-            "Đỏ",
+            "Red",
 
         green:
-            "Xanh lá",
+            "Green",
 
         yellow:
-            "Vàng",
+            "Yellow",
 
         blue:
-            "Xanh dương"
+            "Blue"
 
     };
 

@@ -7,7 +7,7 @@
    - Nút chơi lại
    - Nút menu
    - Chọn quân
-   - Khóa/mở điều khiển
+   - Harda/mở điều khiển
    - Keyboard
    - Âm thanh
    - Hiển thị trạng thái
@@ -232,7 +232,7 @@ function setupBoardEvents() {
                 event.detail || {};
 
             setRollStatus(
-                `Đã đổ: ${detail.value ?? "?"}`
+                `Rolled: ${detail.value ?? "?"}`
             );
 
             updateDiceButton();
@@ -267,7 +267,7 @@ function setupBoardEvents() {
             if (player) {
 
                 showMessage(
-                    `🎉 ${player.name} đã thắng!`
+                    `🎉 ${player.name} wins!`
                 );
 
             }
@@ -288,7 +288,7 @@ function setupBoardEvents() {
             }
 
             showMessage(
-                `${player.name} đã được AI tiếp quản.`
+                `${player.name} is now controlled by AI.`
             );
 
         }
@@ -307,7 +307,7 @@ function setupBoardEvents() {
             }
 
             showMessage(
-                `${player.name} đã quay lại!`
+                `${player.name} has returned!`
             );
 
         }
@@ -377,7 +377,7 @@ function onDiceClick(event) {
     }
 
     if (!canLocalControlCurrentPlayer()) {
-        showMessage("Chờ đến lượt của bạn.");
+        showMessage("Wait for your turn.");
         return;
     }
 
@@ -393,7 +393,7 @@ function onDiceClick(event) {
     ) {
 
         showMessage(
-            "Hãy chọn quân để di chuyển."
+            "Choose a piece to move."
         );
 
         return;
@@ -426,7 +426,7 @@ function onResetClick(event) {
 
     const confirmed =
         window.confirm(
-            "Bạn có chắc muốn chơi lại từ đầu?"
+            "Are you sure you want to restart?"
         );
 
 
@@ -457,7 +457,7 @@ function onResetClick(event) {
 
 
     showMessage(
-        "Ván mới đã bắt đầu."
+        "New game started."
     );
 
 }
@@ -560,14 +560,14 @@ function handlePieceClick(
     }
 
     if (!canLocalControlCurrentPlayer()) {
-        showMessage("Bạn không điều khiển quân của người chơi này.");
+        showMessage("You don’t control this player’s pieces.");
         return;
     }
 
 
     /*
         Chỉ người đang tới lượt
-        mới được chọn quân.
+        mới được selected piece.
     */
 
     if (
@@ -576,7 +576,7 @@ function handlePieceClick(
     ) {
 
         showMessage(
-            "Chưa tới lượt của người này."
+            "It’s not this player’s turn."
         );
 
         return;
@@ -592,7 +592,7 @@ function handlePieceClick(
     ) {
 
         showMessage(
-            "Hãy tung xúc xắc trước."
+            "Roll the dice first."
         );
 
         return;
@@ -632,7 +632,7 @@ function handlePieceClick(
     if (!canMove) {
 
         showMessage(
-            "Quân này không thể đi với số vừa đổ."
+            "This piece can’t move with the rolled number."
         );
 
         return;
@@ -659,7 +659,7 @@ function handlePieceClick(
 
 
     /*
-        board.js đã có logic chọn quân.
+        board.js đã có logic selected piece.
     */
 
     if (
@@ -859,7 +859,7 @@ function updateDiceButton() {
 
 
     /*
-        Đã đổ nhưng chưa đi.
+        Đãrolled nhưng chưa đi.
     */
 
     if (
@@ -941,7 +941,7 @@ function updateTurn() {
 
         LudoControlElements.turn
             .textContent =
-            `Lượt của ${player.name}`;
+            `Turn: ${player.name}`;
 
         LudoControlElements.turn.style.color =
             player.color;
@@ -1153,7 +1153,7 @@ function setupKeyboard() {
 
 
             /*
-                ESC = bỏ chọn quân
+                ESC = bỏ selected piece
             */
 
             if (

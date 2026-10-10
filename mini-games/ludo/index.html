@@ -1,11 +1,11 @@
 <!-- Ludo V9: explicit spawn mapping + AI extra turn on 6 -->
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="description" content="Cờ Cá Ngựa - TienHub">
-<title>Cờ Cá Ngựa — TienHub</title>
+<meta name="description" content="Ludo - TienHub">
+<title>Ludo — TienHub</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -18,7 +18,7 @@
     <section id="menuScreen" class="screen active">
         <header class="topbar">
             <a class="hub-button" href="../../index.html">← TienHub</a>
-            <div class="brand">🐴 CỜ CÁ NGỰA</div>
+            <div class="brand">🐴 LUDO</div>
             <div class="author">@tienanh</div>
         </header>
 
@@ -27,8 +27,8 @@
                 <div class="logo-horse">🐴</div>
                 <div>
                     <div class="eyebrow">TienHub BOARD GAME</div>
-                    <h1>CỜ CÁ NGỰA</h1>
-                    <p>Đua 4 quân về chuồng trước đối thủ.</p>
+                    <h1>LUDO</h1>
+                    <p>Race all four pieces home before your opponents.</p>
                 </div>
             </div>
 
@@ -36,7 +36,7 @@
                 <button class="mode-card single" id="singleButton" type="button">
                     <span class="mode-icon">🤖</span>
                     <span class="mode-text">
-                        <strong>CHƠI ĐƠN</strong>
+                        <strong>SOLO PLAY</strong>
                     </span>
                     <b class="mode-arrow">→</b>
                 </button>
@@ -44,8 +44,8 @@
                 <button class="mode-card room" id="createRoomButton" type="button">
                     <span class="mode-icon">👥</span>
                     <span class="mode-text">
-                        <strong>TẠO PHÒNG</strong>
-                        <small>Chơi cùng bạn bè</small>
+                        <strong>CREATE ROOM</strong>
+                        <small>Play with friends</small>
                     </span>
                     <b class="mode-arrow">→</b>
                 </button>
@@ -53,8 +53,8 @@
                 <button class="mode-card join" id="joinRoomButton" type="button">
                     <span class="mode-icon">🚪</span>
                     <span class="mode-text">
-                        <strong>VÀO PHÒNG</strong>
-                        <small>Nhập mã phòng</small>
+                        <strong>JOIN ROOM</strong>
+                        <small>Enter Room Code</small>
                     </span>
                     <b class="mode-arrow">→</b>
                 </button>
@@ -66,7 +66,7 @@
     <section id="joinScreen" class="screen">
         <header class="topbar">
             <button class="back-button" type="button" data-back="menuScreen">← MENU GAME</button>
-            <div class="brand">VÀO PHÒNG</div>
+            <div class="brand">JOIN ROOM</div>
             <div class="author">@tienanh</div>
         </header>
 
@@ -74,11 +74,11 @@
             <div class="panel setup-panel">
                 <div class="panel-icon">🚪</div>
                 <div class="eyebrow">JOIN ROOM</div>
-                <h2>Vào phòng bạn bè</h2>
-                <p>Nhập mã 6 ký tự của phòng</p>
+                <h2>Join a Friend’s Room</h2>
+                <p>Enter the room’s six-character code</p>
 
                 <label class="field">
-                    <span>MÃ PHÒNG</span>
+                    <span>ROOM CODE</span>
                     <input id="joinRoomCodeInput"
                            maxlength="6"
                            autocomplete="off"
@@ -88,7 +88,7 @@
                 </label>
 
                 <button class="primary-button" id="joinRoomConfirm" type="button">
-                    VÀO PHÒNG →
+                    JOIN ROOM →
                 </button>
             </div>
         </div>
@@ -98,7 +98,7 @@
     <section id="lobbyScreen" class="screen">
         <header class="topbar">
             <button class="back-button" type="button" data-back="menuScreen">← MENU GAME</button>
-            <div class="brand">PHÒNG CHƠI</div>
+            <div class="brand">GAME ROOM</div>
             <div class="author">@tienanh</div>
         </header>
 
@@ -107,18 +107,18 @@
 
                 <div class="lobby-room-header">
                     <div class="room-title-block">
-                        <span class="room-label">MÃ PHÒNG</span>
+                        <span class="room-label">ROOM CODE</span>
                         <div class="room-code-line">
                             <strong id="roomCode">------</strong>
-                            <button class="copy-small" id="copyLobbyCode" type="button">SAO CHÉP</button>
+                            <button class="copy-small" id="copyLobbyCode" type="button">COPY</button>
                         </div>
-                        <p>Gửi mã này cho bạn bè để vào phòng.</p>
+                        <p>Share this code with your friends to join.</p>
                     </div>
 
                     <div class="players-count">
                         <span></span>
                         <strong id="playerCount">1/4</strong>
-                        <em>NGƯỜI CHƠI</em>
+                        <em>PLAYERS</em>
                     </div>
                 </div>
 
@@ -129,15 +129,15 @@
                 <div class="lobby-footer">
                     <div class="lobby-status">
                         <span class="status-dot"></span>
-                        <span id="lobbyStatusText">Đang chờ người chơi...</span>
+                        <span id="lobbyStatusText">Waiting for players...</span>
                     </div>
 
                     <p class="lobby-note">
-                        Nếu chưa đủ 4 người khi bắt đầu, máy sẽ tự tham gia các vị trí còn thiếu.
+                        If fewer than four players join, AI will fill the remaining slots.
                     </p>
 
                     <button class="green-action lobby-start" id="startRoomButton" type="button">
-                        BẮT ĐẦU TRẬN →
+                        START GAME →
                     </button>
                 </div>
 
@@ -151,19 +151,19 @@
 
         <header class="topbar game-topbar">
             <button class="back-button" id="backToGameMenu" type="button">← MENU GAME</button>
-            <div class="brand">🐴 CỜ CÁ NGỰA</div>
+            <div class="brand">🐴 LUDO</div>
             <div class="author">@tienanh</div>
         </header>
 
         <div class="game-layout">
 
             <aside class="side-panel">
-                <div class="turn-badge" id="turnBadge">LƯỢT CỦA BẠN</div>
+                <div class="turn-badge" id="turnBadge">YOUR TURN</div>
 
                 <div class="dice" id="dice">🎲</div>
 
                 <button class="primary-button" id="rollButton" type="button">
-                    TUNG XÚC XẮC
+                    ROLL DICE
                 </button>
 
                 <div class="race-info" id="raceInfo"></div>
@@ -176,7 +176,7 @@
             </div>
 
             <aside class="game-right-panel">
-                <div class="mini-title">NGƯỜI CHƠI</div>
+                <div class="mini-title">PLAYERS</div>
                 <div id="gamePlayers"></div>
             </aside>
 
@@ -187,11 +187,11 @@
     <div id="winnerModal" class="winner-modal" aria-hidden="true">
         <div class="winner-card" role="dialog" aria-modal="true" aria-labelledby="winnerTitle">
             <div class="winner-trophy">🏆</div>
-            <div class="winner-eyebrow">KẾT THÚC TRẬN ĐẤU</div>
-            <h2 id="winnerTitle">CHIẾN THẮNG!</h2>
-            <p><span id="winnerName">Người chơi</span> đã về đích đầu tiên!</p>
+            <div class="winner-eyebrow">MATCH OVER</div>
+            <h2 id="winnerTitle">VICTORY!</h2>
+            <p><span id="winnerName">Player</span> reached home first!</p>
             <button id="winnerMenuButton" class="primary-button winner-menu-button" type="button">
-                ← QUAY VỀ MENU GAME
+                ← BACK TO GAME MENU
             </button>
         </div>
     </div>

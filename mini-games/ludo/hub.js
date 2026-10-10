@@ -351,13 +351,13 @@
                     <strong
                         id="TienHuBProfileMenuName"
                     >
-                        Người chơi
+                        Player
                     </strong>
 
                     <span
                         id="TienHuBProfileMenuStatus"
                     >
-                        🟢 Đang online
+                        🟢 Online
                     </span>
 
                 </div>
@@ -373,7 +373,7 @@
             >
                 <span>🚪</span>
                 <span id="TienHuBLogoutText">
-                    Đăng xuất
+                    Sign Out
                 </span>
             </button>
 
@@ -815,7 +815,7 @@
             if (logoutText) {
 
                 logoutText.textContent =
-                    "Đang đăng xuất...";
+                    "Signing out...";
 
             }
 
@@ -829,7 +829,7 @@
                 } catch (error) {
 
                     console.warn(
-                        "TienHuB logout presence lỗi:",
+                        "TienHub logout presence error:",
                         error
                     );
 
@@ -883,7 +883,7 @@
             if (logoutText) {
 
                 logoutText.textContent =
-                    "Đăng xuất";
+                    "Sign Out";
 
             }
 
@@ -1046,7 +1046,7 @@
         if (user.isAnonymous) {
 
             displayName.textContent =
-                "Khách";
+                "Guest";
 
 
             profile.classList.remove(
@@ -1075,19 +1075,19 @@
 
             if (menuName) {
                 menuName.textContent =
-                    "Khách";
+                    "Guest";
             }
 
 
             if (menuStatus) {
                 menuStatus.textContent =
-                    "🟢 Chơi với tư cách khách";
+                    "🟢 Playing as a guest";
             }
 
 
             if (logoutText) {
                 logoutText.textContent =
-                    "Thoát khách";
+                    "Exit Guest Mode";
             }
 
 
@@ -1102,7 +1102,7 @@
 
 
         displayName.textContent =
-            "Đang tải...";
+            "Loading...";
 
 
         createProfileMenu();
@@ -1126,30 +1126,30 @@
 
         if (menuName) {
             menuName.textContent =
-                "Đang tải...";
+                "Loading...";
         }
 
 
         if (menuStatus) {
             menuStatus.textContent =
-                "🟢 Đang online";
+                "🟢 Online";
         }
 
 
         if (logoutText) {
             logoutText.textContent =
-                "Đăng xuất";
+                "Sign Out";
         }
 
 
         if (!database) {
 
             displayName.textContent =
-                "Người chơi";
+                "Player";
 
             if (menuName) {
                 menuName.textContent =
-                    "Người chơi";
+                    "Player";
             }
 
             return;
@@ -1182,7 +1182,7 @@
 
                     const username =
                         data.username ||
-                        "Người chơi";
+                        "Player";
 
 
                     displayName.textContent =
@@ -1249,17 +1249,17 @@
                 error => {
 
                     console.warn(
-                        "TienHuB profile lỗi:",
+                        "TienHub profile error:",
                         error
                     );
 
 
                     displayName.textContent =
-                        "Người chơi";
+                        "Player";
 
                     if (menuName) {
                         menuName.textContent =
-                            "Người chơi";
+                            "Player";
                     }
 
                 }
@@ -1382,7 +1382,7 @@
 
                     if (message) {
                         message.textContent =
-                            "Firebase Auth chưa sẵn sàng.";
+                            "Firebase Auth is not ready.";
                     }
 
                     return;
@@ -1393,7 +1393,7 @@
                 if (guestButton) {
 
                     guestButton.disabled = true;
-                    guestButton.textContent = "Đang vào...";
+                    guestButton.textContent = "Entering...";
 
                 }
 
@@ -1459,10 +1459,10 @@
                 if (message) {
 
                     message.textContent =
-                        "Không thể vào khách: " +
+                        "Unable to enter guest mode: " +
                         (
                             error.message ||
-                            "Lỗi không xác định."
+                            "Unknown error."
                         );
 
                 }
@@ -1472,7 +1472,7 @@
                 if (guestButton) {
 
                     guestButton.disabled = false;
-                    guestButton.textContent = "👤 Chơi khách";
+                    guestButton.textContent = "👤 Play as Guest";
 
                 }
 
@@ -1533,7 +1533,7 @@
 
                         if (message) {
                             message.textContent =
-                                "Vui lòng nhập tên người dùng và mật khẩu.";
+                                "Enter your username and password.";
                         }
 
                         return;
@@ -1545,7 +1545,7 @@
 
                         loginButton.disabled = true;
                         loginButton.textContent =
-                            "Đang đăng nhập...";
+                            "Signing in...";
 
 
                         const email =
@@ -1597,13 +1597,13 @@
                             ) {
 
                                 message.textContent =
-                                    "Tên người dùng hoặc mật khẩu không đúng.";
+                                    "Incorrect username or password.";
 
                             } else {
 
                                 message.textContent =
                                     error.message ||
-                                    "Đăng nhập thất bại.";
+                                    "Sign-in failed.";
 
                             }
 
@@ -1613,7 +1613,7 @@
 
                         loginButton.disabled = false;
                         loginButton.textContent =
-                            "Đăng nhập";
+                            "Sign In";
 
                     }
 
@@ -1659,7 +1659,7 @@
 
                         if (message) {
                             message.textContent =
-                                "Tên người dùng phải có 3–20 ký tự, chỉ gồm chữ, số và _.";
+                                "Username must be 3–20 characters: letters, numbers and _.";
                         }
 
                         return;
@@ -1671,7 +1671,7 @@
 
                         if (message) {
                             message.textContent =
-                                "Mật khẩu phải có ít nhất 6 ký tự.";
+                                "Password must be at least six characters.";
                         }
 
                         return;
@@ -1683,7 +1683,7 @@
 
                         if (message) {
                             message.textContent =
-                                "Mật khẩu xác nhận không khớp.";
+                                "Passwords do not match.";
                         }
 
                         return;
@@ -1695,7 +1695,7 @@
 
                         registerButton.disabled = true;
                         registerButton.textContent =
-                            "Đang tạo tài khoản...";
+                            "Creating account...";
 
 
                         const normalized =
@@ -1751,7 +1751,7 @@
                             await user.delete();
 
                             throw new Error(
-                                "Tên người dùng này đã được sử dụng."
+                                "This username is taken."
                             );
 
                         }
@@ -1811,13 +1811,13 @@
                             ) {
 
                                 message.textContent =
-                                    "Tên người dùng này đã được sử dụng.";
+                                    "This username is taken.";
 
                             } else {
 
                                 message.textContent =
                                     error.message ||
-                                    "Đăng ký thất bại.";
+                                    "Registration failed.";
 
                             }
 
@@ -1827,7 +1827,7 @@
 
                         registerButton.disabled = false;
                         registerButton.textContent =
-                            "Đăng ký";
+                            "Sign Up";
 
                     }
 
@@ -1865,7 +1865,7 @@
         if (typeof firebase === "undefined") {
 
             console.error(
-                "TienHuB: Firebase SDK chưa tải."
+                "TienHub: Firebase SDK failed to load."
             );
 
             return false;
@@ -1992,7 +1992,7 @@
                             await auth.signOut();
                         } catch (error) {
                             console.warn(
-                                "TienHuB: Không thể xóa Guest cũ:",
+                                "TienHub: unable to remove legacy guest:",
                                 error
                             );
                         }
@@ -2071,7 +2071,7 @@
         } catch (error) {
 
             console.warn(
-                "TienHuB presence update lỗi:",
+                "TienHub presence update error:",
                 error
             );
 
@@ -2121,7 +2121,7 @@
         } catch (error) {
 
             console.warn(
-                "TienHuB onDisconnect lỗi:",
+                "TienHub onDisconnect error:",
                 error
             );
 
@@ -2169,7 +2169,7 @@
                         } catch (error) {
 
                             console.warn(
-                                "TienHuB reconnect lỗi:",
+                                "TienHub reconnect error:",
                                 error
                             );
 
@@ -2558,7 +2558,7 @@
         },
 
         chess: {
-            name: "Cờ vua",
+            name: "Chess",
             icon: "♞"
         },
 
@@ -2568,12 +2568,12 @@
         },
 
         ludo: {
-            name: "Cờ cá ngựa",
+            name: "Ludo",
             icon: "🎲"
         },
 
         racing: {
-            name: "Đua xe",
+            name: "Racing",
             icon: "🏎️"
         },
 
@@ -2598,7 +2598,7 @@
         },
 
         chess: {
-            name: "Cờ vua",
+            name: "Chess",
             url: "./games/chess/index.html"
         },
 
@@ -2608,12 +2608,12 @@
         },
 
         ludo: {
-            name: "Cờ cá ngựa",
+            name: "Ludo",
             url: "#"
         },
 
         racing: {
-            name: "Đua xe",
+            name: "Racing",
             url: "./games/racing/index.html"
         },
 
@@ -2692,7 +2692,7 @@
 
             container.innerHTML = `
                 <div class="analytics-loading">
-                    Chưa có lượt chơi nào.
+                    No games played yet.
                 </div>
             `;
 
@@ -2728,7 +2728,7 @@
                         </strong>
 
                         <span>
-                            Lượt chơi đã ghi nhận
+                            Games recorded
                         </span>
 
                     </div>
@@ -2983,7 +2983,7 @@
 
                 chart.innerHTML = `
                     <div class="analytics-error">
-                        Không thể tải dữ liệu thống kê.
+                        Unable to load statistics.
                     </div>
                 `;
 
@@ -2994,7 +2994,7 @@
 
                 games.innerHTML = `
                     <div class="analytics-error">
-                        Không thể tải dữ liệu Firebase.
+                        Unable to load game data.
                     </div>
                 `;
 
@@ -3624,7 +3624,7 @@
 
                 <div class="empty-game-state">
 
-                    Hiện chưa có game nào đang có người chơi.
+                    No games are currently active.
 
                 </div>
 
@@ -3642,7 +3642,7 @@
 
                     /*
                      * Clone để game không bị
-                     * di chuyển khỏi Tất cả game.
+                     * di chuyển khỏi All game.
                      */
 
                     const clone =
@@ -3688,7 +3688,7 @@
 
         /*
          * Khu vực này là khu vực riêng.
-         * Không áp dụng filter của Tất cả game
+         * Không áp dụng filter của All game
          * vào đây.
          */
 
@@ -3881,7 +3881,7 @@
         } catch (error) {
 
             console.warn(
-                "TienHuB Firebase play record lỗi:",
+                "TienHub Firebase play record error:",
                 error
             );
 
@@ -4542,11 +4542,11 @@
 
         button.setAttribute(
             "aria-label",
-            "Bật hoặc tắt nhạc"
+            "Toggle Music"
         );
 
         button.title =
-            "Bật / tắt nhạc";
+            "Toggle Music";
 
 
         actions.appendChild(
@@ -4600,11 +4600,11 @@
 
                 soundButton.setAttribute(
                     "aria-label",
-                    "Tắt nhạc"
+                    "Mute Music"
                 );
 
                 soundButton.title =
-                    "Tắt nhạc";
+                    "Mute Music";
 
             } else {
 
@@ -4621,11 +4621,11 @@
 
                 soundButton.setAttribute(
                     "aria-label",
-                    "Bật nhạc"
+                    "Play Music"
                 );
 
                 soundButton.title =
-                    "Bật nhạc";
+                    "Play Music";
 
             }
 

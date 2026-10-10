@@ -1,6 +1,6 @@
 /* =========================================================
    LUDO MULTIPLAYER
-   CỜ CÁ NGỰA ONLINE
+   LUDO ONLINE
 
    Phụ trách:
    - Kết nối Firebase Realtime Database
@@ -8,9 +8,9 @@
    - Đồng bộ game state
    - Đồng bộ lượt
    - Đồng bộ xúc xắc
-   - Đồng bộ quân cờ
+   - Đồng bộ quân chess
    - Theo dõi online / offline
-   - Disconnect 30 giây
+   - Disconnect 30 seconds
    - AI takeover
    - Host migration
    - Không cho người khác điều khiển quân của mình
@@ -90,7 +90,7 @@ function initLudoMultiplayer(database) {
     if (!database) {
 
         console.error(
-            "Ludo Multiplayer: thiếu Firebase Database."
+            "Ludo Multiplayer: missing Firebase Database."
         );
 
         return false;
@@ -174,7 +174,7 @@ function setupMultiplayerEvents() {
 
 
     /*
-        Khi thắng.
+        Khi wins.
     */
 
     document.addEventListener(
@@ -245,7 +245,7 @@ async function createLudoRoom(
     ) {
 
         throw new Error(
-            "Firebase Database chưa được khởi tạo."
+            "Firebase Database has not been initialized."
         );
 
     }
@@ -254,7 +254,7 @@ async function createLudoRoom(
     if (!roomId) {
 
         throw new Error(
-            "Thiếu mã phòng."
+            "Room code missing."
         );
 
     }
@@ -263,7 +263,7 @@ async function createLudoRoom(
     if (!player?.id) {
 
         throw new Error(
-            "Thiếu player ID."
+            "Player ID missing."
         );
 
     }
@@ -303,7 +303,7 @@ async function createLudoRoom(
     ) {
 
         throw new Error(
-            "Phòng đã tồn tại."
+            "Room already exists."
         );
 
     }
@@ -334,7 +334,7 @@ async function createLudoRoom(
 
                 name:
                     player.name ||
-                    "Khách",
+                    "Guest",
 
                 color:
                     player.color ||
@@ -401,7 +401,7 @@ async function joinLudoRoom(
     ) {
 
         throw new Error(
-            "Firebase Database chưa được khởi tạo."
+            "Firebase Database has not been initialized."
         );
 
     }
@@ -410,7 +410,7 @@ async function joinLudoRoom(
     if (!roomId) {
 
         throw new Error(
-            "Thiếu mã phòng."
+            "Room code missing."
         );
 
     }
@@ -419,7 +419,7 @@ async function joinLudoRoom(
     if (!player?.id) {
 
         throw new Error(
-            "Thiếu player ID."
+            "Player ID missing."
         );
 
     }
@@ -442,7 +442,7 @@ async function joinLudoRoom(
     ) {
 
         throw new Error(
-            "Không tìm thấy phòng."
+            "Room not found."
         );
 
     }
@@ -463,7 +463,7 @@ async function joinLudoRoom(
     ) {
 
         throw new Error(
-            "Phòng này đã kết thúc."
+            "This room has ended."
         );
 
     }
@@ -489,7 +489,7 @@ async function joinLudoRoom(
     ) {
 
         throw new Error(
-            "Phòng đã đủ 4 người."
+            "Room is full (4 players)."
         );
 
     }
@@ -515,7 +515,7 @@ async function joinLudoRoom(
     if (duplicateName) {
 
         throw new Error(
-            "Tên này đang được sử dụng trong phòng."
+            "This name is already used in this room."
         );
 
     }
@@ -541,7 +541,7 @@ async function joinLudoRoom(
     if (!color) {
 
         throw new Error(
-            "Không còn vị trí."
+            "No available slots."
         );
 
     }
@@ -570,7 +570,7 @@ async function joinLudoRoom(
 
         name:
             player.name ||
-            "Khách",
+            "Guest",
 
         color,
 
@@ -1007,7 +1007,7 @@ async function startRoom() {
     ) {
 
         throw new Error(
-            "Chưa kết nối phòng."
+            "Not connected to a room."
         );
 
     }
@@ -1018,7 +1018,7 @@ async function startRoom() {
     ) {
 
         throw new Error(
-            "Chỉ Host được bắt đầu."
+            "Only the host can start."
         );
 
     }
@@ -1037,7 +1037,7 @@ async function startRoom() {
     if (!room) {
 
         throw new Error(
-            "Phòng không tồn tại."
+            "Room does not exist."
         );
 
     }
@@ -1055,7 +1055,7 @@ async function startRoom() {
     ) {
 
         throw new Error(
-            "Cần ít nhất 2 người chơi."
+            "At least two players are required."
         );
 
     }
@@ -1416,7 +1416,7 @@ async function syncCurrentGame() {
     } catch (error) {
 
         console.error(
-            "Lỗi sync game:",
+            "Game sync error:",
             error
         );
 
@@ -1746,7 +1746,7 @@ async function leaveRoom() {
     } catch (error) {
 
         console.error(
-            "Lỗi rời phòng:",
+            "Error leaving room:",
             error
         );
 
@@ -2104,16 +2104,16 @@ function getColorName(
     const names = {
 
         red:
-            "Đỏ",
+            "Red",
 
         green:
-            "Xanh lá",
+            "Green",
 
         yellow:
-            "Vàng",
+            "Yellow",
 
         blue:
-            "Xanh dương"
+            "Blue"
 
     };
 

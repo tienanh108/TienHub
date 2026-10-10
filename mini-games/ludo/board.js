@@ -1,19 +1,19 @@
 /* =========================================================
    LUDO BOARD ENGINE
-   CỜ CÁ NGỰA
+   LUDO
    ---------------------------------
    Phụ trách:
-   - Bàn cờ 4 màu
+   - Board 4 màu
    - 4 quân / người
    - Xúc xắc
    - Ra chuồng
-   - Di chuyển
+   - Move
    - Ăn quân
    - Ô an toàn
    - Về đích
    - Đổi lượt
-   - Thưởng khi đổ 6
-   - Trạng thái quân
+   - Thưởng khirolled 6
+   - Status quân
    - AI có thể điều khiển thông qua API
    ---------------------------------
    Firebase KHÔNG nằm trong file này.
@@ -65,34 +65,34 @@ const LUDO_CONFIG = {
 
 const LUDO_PLAYERS = [
 
-    // Vàng: cửa ra phía trên
+    // Yellow: cửa ra phía trên
     {
         id: "yellow",
-        name: "Vàng",
+        name: "Yellow",
         color: "#facc15",
         start: 0
     },
 
-    // Xanh lá: cửa ra phía bên phải
+    // Green: cửa ra phía bên phải
     {
         id: "green",
-        name: "Xanh lá",
+        name: "Green",
         color: "#22c55e",
         start: 42
     },
 
-    // Đỏ: cửa ra phía dưới
+    // Red: cửa ra phía dưới
     {
         id: "red",
-        name: "Đỏ",
+        name: "Red",
         color: "#ef4444",
         start: 28
     },
 
-    // Xanh dương: cửa ra phía bên trái
+    // Blue: cửa ra phía bên trái
     {
         id: "blue",
-        name: "Xanh dương",
+        name: "Blue",
         color: "#3b82f6",
         start: 14
     }
@@ -139,7 +139,7 @@ const LUDO_TRACK = [
 
 const HOME_PATHS = {
 
-    /* Vàng: đi lên theo lane phía trên */
+    /* Yellow: đi lên theo lane phía trên */
     yellow: [
         // Finish 1 -> 6 ô màu đậm đầu tiên dưới mũi tên.
         [1, 7],
@@ -150,7 +150,7 @@ const HOME_PATHS = {
         [6, 7]
     ],
 
-    /* Xanh lá: đi sang trái theo lane bên phải */
+    /* Green: đi sang trái theo lane bên phải */
     green: [
         [7, 13],
         [7, 12],
@@ -160,7 +160,7 @@ const HOME_PATHS = {
         [7, 8]
     ],
 
-    /* Đỏ: đi lên theo lane phía dưới */
+    /* Red: đi lên theo lane phía dưới */
     red: [
         [13, 7],
         [12, 7],
@@ -170,7 +170,7 @@ const HOME_PATHS = {
         [8, 7]
     ],
 
-    /* Xanh dương: đi sang phải theo lane giữa bên trái.
+    /* Blue: đi sang phải theo lane giữa bên trái.
        Sáu ô màu đậm là [7,1] -> [7,6].
        Ô [7,1] chính là finish 1.
     */
@@ -336,7 +336,7 @@ function initLudoBoard() {
     if (!board) {
 
         console.warn(
-            "Không tìm thấy #ludoBoard"
+            "#ludoBoard not found"
         );
 
         return;
@@ -990,7 +990,7 @@ function selectPiece(
     ) {
 
         showBoardMessage(
-            "Chưa tới lượt của người này."
+            "It’s not this player’s turn."
         );
 
         return;
@@ -1003,7 +1003,7 @@ function selectPiece(
     ) {
 
         showBoardMessage(
-            "Hãy tung xúc xắc trước."
+            "Roll the dice first."
         );
 
         return;
@@ -1032,7 +1032,7 @@ function selectPiece(
     ) {
 
         showBoardMessage(
-            "Quân này không thể đi."
+            "This piece can’t move."
         );
 
         return;
@@ -1079,13 +1079,13 @@ function selectPiece(
 
 /*
    Luật:
-   - Khi đang ở bất kỳ ô nào trên vòng ngoài và đổ 1,
+   - Khi đang ở bất kỳ ô nào trên vòng ngoài vàrolled 1,
      nếu đường từ vị trí hiện tại tới MŨI TÊN TIẾP THEO
      hoàn toàn không có quân cản, quân được "bay" thẳng tới
      mũi tên đó.
    - Nếu có bất kỳ quân nào trên đường, không bay; đi đúng 1 ô.
    - Luật này áp dụng không giới hạn số lần:
-       ô thường -> mũi tên -> đổ 1 -> mũi tên kế tiếp -> ...
+       ô thường -> mũi tên ->rolled 1 -> mũi tên kế tiếp -> ...
    - Khi đã vào đường về đích (position >= HOME_PATH_START),
      tuyệt đối KHÔNG được bay ra ngoài nữa.
 
@@ -1293,7 +1293,7 @@ function canPassThroughTrack(player, piece, fromPosition, toPosition) {
     // another piece (including its own) on an intermediate outer-track cell.
     // IMPORTANT: different players have different relative positions, so
     // blocking must be checked by absolute board coordinate, not by the
-    // other player's relative position number.
+    // other player’s relative position number.
     for (let pos = fromPosition + 1; pos < toPosition; pos++) {
         const absoluteIndex = getAbsoluteTrackIndex(player, pos);
         const blocker = getPieceAtAbsoluteTrackIndex(absoluteIndex, piece);
@@ -1319,7 +1319,7 @@ function getHomeTargetPosition(player, piece, dice) {
         return null;
     }
 
-    // A piece on the player's arrow is NOT on the home lane yet.
+    // A piece on the player’s arrow is NOT on the home lane yet.
     // Its first roll inside the finish lane may jump directly to the
     // matching numbered home cell (1..6).
     if (piece.position === LUDO_CONFIG.TRACK_LENGTH - 1) {
@@ -1413,7 +1413,7 @@ function canMovePiece(player, piece, dice) {
     }
 
     // In the stable: a 6 is required. The spawn cell is blocked only by
-    // THIS player's own piece. An opponent on the spawn can be landed on.
+    // THIS player’s own piece. An opponent on the spawn can be landed on.
     if (piece.position === -1) {
         if (dice !== 6) return false;
 
@@ -1423,7 +1423,7 @@ function canMovePiece(player, piece, dice) {
         return !occupant || occupant.player.id !== player.id;
     }
 
-    // The player's arrow is the special entry point into the finish lane.
+    // The player’s arrow is the special entry point into the finish lane.
     // IMPORTANT: handle this before the 1-step "fly to next arrow" rule.
     if (piece.position === LUDO_CONFIG.TRACK_LENGTH - 1) {
         return getHomeTargetPosition(player, piece, dice) !== null;
@@ -1444,7 +1444,7 @@ function canMovePiece(player, piece, dice) {
 
     const newPosition = piece.position + dice;
 
-    // Reaching the player's arrow with a normal move is allowed, but the
+    // Reaching the player’s arrow with a normal move is allowed, but the
     // arrow itself is still an outer-track cell. The next roll enters home.
     if (newPosition > LUDO_CONFIG.TRACK_LENGTH - 1) {
         return false;
@@ -1563,7 +1563,7 @@ async function movePiece(player, piece, steps) {
 
     if (steps === LUDO_CONFIG.EXTRA_TURN_ROLL) {
         LudoBoard.diceValue = 0;
-        showBoardMessage(`${player.name} được đi thêm lượt!`);
+        showBoardMessage(`${player.name} gets an extra turn!`);
         updateDiceUI();
 
         emitBoardEvent(
@@ -1674,7 +1674,7 @@ function captureOpponents(
 
 
                         showBoardMessage(
-                            `${player.name} ăn một quân ${opponent.name}!`
+                            `${player.name} captured a piece from ${opponent.name}!`
                         );
 
                     }
@@ -1846,7 +1846,7 @@ function rollDice() {
 
 function randomDice() {
 
-    // Uniform 1..6 using the browser's cryptographic RNG.
+    // Uniform 1..6 using the browser’s cryptographic RNG.
     // This avoids depending on Math.random() while keeping each face
     // at exactly the same probability.
     if (window.crypto?.getRandomValues) {
@@ -1899,7 +1899,7 @@ function handleDiceResult(
     ) {
 
         showBoardMessage(
-            `${player.name} không có quân có thể đi.`
+            `${player.name} has no legal moves.`
         );
 
 
@@ -1921,12 +1921,12 @@ function handleDiceResult(
                 LudoBoard.diceValue = 0;
                 updateDiceUI();
 
-                // Theo luật: đổ 6 vẫn được tung tiếp,
+                // Theo luật:rolled 6 vẫn được tung tiếp,
                 // kể cả khi không có quân hợp lệ để đi.
                 if (value === LUDO_CONFIG.EXTRA_TURN_ROLL) {
 
                     showBoardMessage(
-                        `${player.name} được tung lại vì đã đổ 6!`
+                        `${player.name} rolls again after rolling a six!`
                     );
 
                     updateTurnUI();
@@ -1964,13 +1964,13 @@ function handleDiceResult(
     ) {
 
         showBoardMessage(
-            `${player.name} đổ 6 — có thể đưa quân ra!`
+            `${player.name} rolled a six — a piece can leave home!`
         );
 
     } else {
 
         showBoardMessage(
-            `${player.name} đổ ${value} — chọn quân để đi.`
+            `${player.name}rolled ${value} — choose a piece to move.`
         );
 
     }
@@ -2029,7 +2029,7 @@ function handleWinner(
 ) {
 
     showBoardMessage(
-        `🎉 ${player.name} đã thắng!`
+        `🎉 ${player.name} wins!`
     );
 
 
@@ -2128,7 +2128,7 @@ function updateTurnUI() {
     if (element) {
 
         element.textContent =
-            `Lượt của ${player.name}`;
+            `Turn: ${player.name}`;
 
         element.style.color =
             player.color;
@@ -2137,7 +2137,7 @@ function updateTurnUI() {
 
 
     showBoardMessage(
-        `Lượt của ${player.name}`
+        `Turn: ${player.name}`
     );
 
 }
@@ -2816,7 +2816,7 @@ function testLudoCoordinates() {
         results.blue.finishFirst[0] === 7 &&
         results.blue.finishFirst[1] === 1;
 
-    // Kiểm tra điểm chuyển: position 43 là ô cuối đường vòng,
+    // Kiểm tra points chuyển: position 43 là ô cuối đường vòng,
     // position 44 phải là ô đầu tiên của đường về đích.
     const finishTransition = {};
     for (const player of LUDO_PLAYERS) {

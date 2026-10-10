@@ -1,16 +1,16 @@
 /* =========================================================
 
-   CỜ CÁ NGỰA — MAIN.JS
+   LUDO — MAIN.JS
 
    - Không hỏi nhập tên.
 
-   - Tài khoản TienHub -> dùng tên tài khoản.
+   - TienHub Account -> dùng tên tài khoản.
 
-   - Khách -> dùng "Khách".
+   - Guest -> dùng "Guest".
 
-   - Tạo phòng -> vào lobby ngay.
+   - Create Room -> vào lobby ngay.
 
-   - Vào phòng -> chỉ nhập mã.
+   - Join Room -> chỉ nhập mã.
 
    - Lobby: mã phòng -> 4 slot -> bắt đầu.
 
@@ -29,7 +29,7 @@ let db = null;
 let serverTimestamp = null;
 
 let currentUser = null;
-let currentUsername = "Khách";
+let currentUsername = "Guest";
 let currentRoomCode = null;
 let roomListener = null;
 let startedRoomCode = null;
@@ -61,7 +61,7 @@ function createDatabaseFacade(firebaseDatabase, api) {
         return {
             async once(eventType) {
                 if (eventType !== "value") {
-                    throw new Error(`Ludo chỉ hỗ trợ once("value").`);
+                    throw new Error(`Ludo only supports once("value").`);
                 }
                 return await get(databaseRef);
             },
@@ -88,7 +88,7 @@ function createDatabaseFacade(firebaseDatabase, api) {
 
             on(eventType, callback) {
                 if (eventType !== "value") {
-                    throw new Error(`Ludo chỉ hỗ trợ on("value", ...).`);
+                    throw new Error(`Ludo only supports on("value", ...).`);
                 }
                 return onValue(databaseRef, callback);
             },
@@ -131,11 +131,11 @@ function createDatabaseFacade(firebaseDatabase, api) {
         const firebaseDatabase = core.db;
 
         if (!auth) {
-            throw new Error("Không lấy được Firebase Auth của TienHub.");
+            throw new Error("Unable to access TienHub authentication.");
         }
 
         if (!firebaseDatabase) {
-            throw new Error("Không lấy được Firebase Database của TienHub.");
+            throw new Error("Unable to access the TienHub game database.");
         }
 
         const databaseApi = await import(
@@ -172,17 +172,17 @@ function createDatabaseFacade(firebaseDatabase, api) {
                             user.displayName ||
                             user.email?.split("@")[0] ||
                             localStorage.getItem("tienhub_username") ||
-                            "Người chơi";
+                            "Player";
                     } catch (error) {
                         console.warn("LUDO LOAD USERNAME ERROR:", error);
                         currentUsername =
                             user.displayName ||
                             user.email?.split("@")[0] ||
                             localStorage.getItem("tienhub_username") ||
-                            "Người chơi";
+                            "Player";
                     }
                 } else {
-                    currentUsername = "Khách";
+                    currentUsername = "Guest";
                 }
 
                 console.log(
@@ -220,18 +220,18 @@ async function ensureUser() {
 
     if (!user) {
         throw new Error(
-            "Bạn chưa đăng nhập TienHub. Vui lòng đăng nhập trước khi chơi Ludo."
+            "Sign in to TienHub to play Ludo online."
         );
     }
 
     currentUser = user;
 
-    if (!currentUsername || currentUsername === "Khách") {
+    if (!currentUsername || currentUsername === "Guest") {
         currentUsername =
             user.displayName ||
             user.email?.split("@")[0] ||
             localStorage.getItem("tienhub_username") ||
-            "Người chơi";
+            "Player";
     }
 
     return user;
@@ -347,7 +347,7 @@ document
 
             alert(
 
-                "Không thể tạo phòng.\n\n" +
+                "Unable to create room.\n\n" +
 
                 error.message
 
@@ -409,7 +409,7 @@ async function createRoom() {
 
         throw new Error(
 
-            "Firebase Database chưa khởi tạo."
+            "Game database is not initialized."
 
         );
 
@@ -595,7 +595,7 @@ async function joinRoom() {
 
             throw new Error(
 
-                "Firebase Database chưa khởi tạo."
+                "Game database is not initialized."
 
             );
 
@@ -619,7 +619,7 @@ async function joinRoom() {
 
             alert(
 
-                "Mã phòng phải gồm đúng 6 ký tự."
+                "Room code must be exactly six characters."
 
             );
 
@@ -653,7 +653,7 @@ async function joinRoom() {
 
             alert(
 
-                "Không tìm thấy phòng này."
+                "Room not found."
 
             );
 
@@ -667,7 +667,7 @@ async function joinRoom() {
 
             alert(
 
-                "Trận đấu trong phòng đã bắt đầu."
+                "The game in this room has already started."
 
             );
 
@@ -723,7 +723,7 @@ async function joinRoom() {
 
             alert(
 
-                "Phòng đã đủ 4 người."
+                "Room is full (4 players)."
 
             );
 
@@ -739,7 +739,7 @@ async function joinRoom() {
 
          * Chọn màu và thêm người chơi trong cùng một transaction trên
 
-         * node players. Như vậy 2 người vào cùng lúc cũng không thể lấy
+         * node players. Như vậy Two Players vào cùng lúc cũng không thể lấy
 
          * trùng màu và không còn lỗi "Không thể nhận màu" do transaction
 
@@ -909,7 +909,7 @@ async function joinRoom() {
 
                                 currentUsername ||
 
-                                "Khách",
+                                "Guest",
 
                             color,
 
@@ -1005,7 +1005,7 @@ async function joinRoom() {
 
                 throw new Error(
 
-                    "Phòng không còn tồn tại."
+                    "Room no longer exists."
 
                 );
 
@@ -1017,7 +1017,7 @@ async function joinRoom() {
 
                 throw new Error(
 
-                    "Trận đấu đã bắt đầu."
+                    "Match has already started."
 
                 );
 
@@ -1065,7 +1065,7 @@ async function joinRoom() {
 
                 throw new Error(
 
-                    "Phòng đã đủ 4 người."
+                    "Room is full (4 players)."
 
                 );
 
@@ -1097,7 +1097,7 @@ async function joinRoom() {
 
                 throw new Error(
 
-                    "Không thể nhận màu. Hãy thử lại."
+                    "Couldn’t assign a color. Please try again."
 
                 );
 
@@ -1173,7 +1173,7 @@ async function joinRoom() {
 
         alert(
 
-            "Không thể vào phòng.\n\n" +
+            "Unable to join room.\n\n" +
 
             error.message
 
@@ -1482,7 +1482,7 @@ function updateLobby(room) {
 
                         player.name ||
 
-                        "Khách"
+                        "Guest"
 
                     )}
 
@@ -1496,13 +1496,13 @@ function updateLobby(room) {
 
                         player.host
 
-                            ? "CHỦ PHÒNG"
+                            ? "HOST"
 
                             : player.type === "ai"
 
-                                ? "MÁY"
+                                ? "COMPUTER"
 
-                                : "NGƯỜI CHƠI"
+                                : "PLAYERS"
 
                     }
 
@@ -1516,9 +1516,9 @@ function updateLobby(room) {
 
                         player.host
 
-                            ? "CHỦ PHÒNG"
+                            ? "HOST"
 
-                            : "ĐÃ SẴN SÀNG"
+                            : "READY"
 
                     }
 
@@ -1554,7 +1554,7 @@ function updateLobby(room) {
 
                 <strong>
 
-                    Đang chờ...
+                    Waiting for...
 
                 </strong>
 
@@ -1562,7 +1562,7 @@ function updateLobby(room) {
 
                 <small>
 
-                    CHỜ NGƯỜI CHƠI
+                    WAITING FOR PLAYERS
 
                 </small>
 
@@ -1594,9 +1594,9 @@ function updateLobby(room) {
 
             players.length >= 4
 
-                ? "Phòng đã đủ 4 người."
+                ? "Room is full (4 players)."
 
-                : "Đang chờ người chơi...";
+                : "Waiting for players...";
 
     }
 
@@ -1736,7 +1736,7 @@ async function startRoomGame() {
 
             alert(
 
-                "Chỉ chủ phòng mới có thể bắt đầu."
+                "Only the host can start."
 
             );
 
@@ -1836,7 +1836,7 @@ async function startRoomGame() {
 
                 name:
 
-                    `Máy ${aiIndex}`,
+                    `Computer ${aiIndex}`,
 
                 color,
 
@@ -1898,7 +1898,7 @@ async function startRoomGame() {
 
         alert(
 
-            "Không thể bắt đầu trận.\n\n" +
+            "Unable to start the match.\n\n" +
 
             error.message
 
@@ -1950,7 +1950,7 @@ async function copyRoomCode() {
 
             button.textContent =
 
-                "✓ ĐÃ SAO CHÉP";
+                "✓ COPIED";
 
 
 
@@ -1970,7 +1970,7 @@ async function copyRoomCode() {
 
         alert(
 
-            `Mã phòng: ${currentRoomCode}`
+            `Room Code: ${currentRoomCode}`
 
         );
 
@@ -2160,7 +2160,7 @@ document
 
         async () => {
 
-            // Hiện MENU ngay lập tức.
+            // Show MENU ngay lập tức.
             showScreen("menuScreen");
 
             try {
@@ -2629,7 +2629,7 @@ function addHomeCard(
 
         <div class="home-title">
 
-            CỜ CÁ NGỰA
+            LUDO
 
         </div>
 
@@ -2825,7 +2825,7 @@ function buildVisualBoard() {
 
         "yellow",
 
-        "LUYỆN",
+        "PRACTICE",
 
         "top-left"
 
@@ -2867,7 +2867,7 @@ function buildVisualBoard() {
 
         "red",
 
-        "LIÊN",
+        "TEAM",
 
         "bottom-right"
 
@@ -3027,7 +3027,7 @@ function showLudoWinnerModal(
 
         )?.name ||
 
-        "Người chơi";
+        "Player";
 
 
 
@@ -3247,7 +3247,7 @@ function startGame(
 
                 players[0]?.name ||
 
-                "Bạn"
+                "You"
 
         });
 
@@ -3299,7 +3299,7 @@ function startGame(
 
                     player.name ||
 
-                    "Khách",
+                    "Guest",
 
 
 
@@ -3559,7 +3559,7 @@ function renderGamePlayers(
 
                             player.name ||
 
-                            "Khách"
+                            "Guest"
 
                         )}
 
