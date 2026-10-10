@@ -10,7 +10,7 @@
     if (!window.ChessCore) {
 
         console.error(
-            "❌ ChessCore chưa được tải."
+            "❌ ChessCore failed to load."
         );
 
         return;
@@ -91,7 +91,7 @@
     let difficulty = "medium";
 
     /*
-     * Thời gian mặc định của game bình thường.
+     * Time mặc định của game bình thường.
      * KHÔNG phải thời gian của ghép ngẫu nhiên.
      */
     let timeLimit = 300;
@@ -171,9 +171,9 @@
     /*
      * QUAN TRỌNG:
      *
-     * Ghép ngẫu nhiên luôn cố định 10 phút.
+     * Quick Match luôn cố định 10 minutes.
      *
-     * 600 giây = 10 phút.
+     * 600 seconds = 10 minutes.
      */
     const RANDOM_MATCH_TIME = 600;
 
@@ -490,7 +490,7 @@
         if (searching) {
 
             setMatchmakingStatus(
-                "Đang tìm đối thủ...",
+                "Finding an opponent...",
                 true
             );
 
@@ -655,7 +655,7 @@
 
 
         /*
-         * Hiện UI ngay.
+         * Show UI ngay.
          */
 
         setMatchmakingUI(
@@ -664,13 +664,13 @@
 
 
         setMatchmakingStatus(
-            "⏳ Đang kết nối máy chủ...",
+            "⏳ Connecting to server...",
             true
         );
 
 
         setRoomMessage(
-            "🎲 Đang kết nối máy chủ..."
+            "🎲 Connecting to server..."
         );
 
 
@@ -688,7 +688,7 @@
             ) {
 
                 throw new Error(
-                    "Không xác định được người chơi."
+                    "Unable to identify player."
                 );
             }
 
@@ -696,10 +696,10 @@
             /*
              * QUAN TRỌNG:
              *
-             * Ghép ngẫu nhiên KHÔNG lấy
+             * Quick Match KHÔNG lấy
              * thời gian từ #timeControl.
              *
-             * Luôn luôn là 600 giây = 10 phút.
+             * Luôn luôn là 600 seconds = 10 minutes.
              */
 
             const randomTimeLimit =
@@ -708,7 +708,7 @@
 
             /*
              * Gán timeLimit để đồng hồ
-             * online dùng đúng 10 phút.
+             * online dùng đúng 10 minutes.
              */
 
             timeLimit =
@@ -716,13 +716,13 @@
 
 
             setMatchmakingStatus(
-                "🔎 Đang tìm đối thủ ...",
+                "🔎 Finding an opponent...",
                 true
             );
 
 
             setRoomMessage(
-                "🎲 Đang tìm người chơi khác..."
+                "🎲 Searching for another player..."
             );
 
 
@@ -818,7 +818,7 @@
 
 
                         /*
-                         * Xóa người chờ quá 2 phút.
+                         * Xóa người chờ quá 2 minutes.
                          */
 
                         Object.keys(queue)
@@ -876,7 +876,7 @@
 
                         /*
                          * Tìm người đang chờ
-                         * cùng chế độ 10 phút.
+                         * cùng chế độ 10 minutes.
                          */
 
                         let opponentUid =
@@ -930,7 +930,7 @@
 
                                     /*
                                      * Chỉ ghép người
-                                     * cũng đang tìm 10 phút.
+                                     * cũng đang tìm 10 minutes.
                                      */
 
                                     if (
@@ -1080,7 +1080,7 @@
             ) {
 
                 throw new Error(
-                    "Không thể tham gia hàng chờ."
+                    "Couldn’t join matchmaking queue."
                 );
             }
 
@@ -1121,16 +1121,16 @@
 
 
             setRoomMessage(
-                "❌ Không thể ghép ngẫu nhiên: " +
+                "❌ Quick match failed: " +
                 (
                     error?.message ||
-                    "Lỗi không xác định"
+                    "Unknown error"
                 )
             );
 
 
             setMatchmakingStatus(
-                "❌ Không thể ghép trận",
+                "❌ Matchmaking failed",
                 true
             );
 
@@ -1210,7 +1210,7 @@
 
 
         /*
-         * Ghép ngẫu nhiên luôn 10 phút.
+         * Quick Match luôn 10 minutes.
          */
 
         timeLimit =
@@ -1218,13 +1218,13 @@
 
 
         setMatchmakingStatus(
-            "🎉 Đã tìm thấy đối thủ!",
+            "🎉 Opponent found!",
             true
         );
 
 
         setRoomMessage(
-            "🎉 Đã tìm thấy đối thủ! Đang vào bàn cờ..."
+            "🎉 Opponent found! Opening the board..."
         );
 
 
@@ -1340,7 +1340,7 @@
 
 
         /*
-         * Người Trắng tạo phòng.
+         * Người White tạo phòng.
          */
 
         if (
@@ -1363,11 +1363,11 @@
 
 
         /*
-         * Người Đen chờ phòng.
+         * Người Black chờ phòng.
          */
 
         setRoomMessage(
-            "🎉 Đã ghép được đối thủ. Đang vào bàn cờ..."
+            "🎉 Opponent matched. Entering the game..."
         );
 
 
@@ -1419,7 +1419,7 @@
     ) {
 
         /*
-         * Ghép ngẫu nhiên luôn dùng 600.
+         * Quick Match luôn dùng 600.
          */
 
         time =
@@ -1508,7 +1508,7 @@
 
 
         setRoomMessage(
-            "🎉 Đã ghép được đối thủ!"
+            "🎉 Opponent matched!"
         );
     }
 
@@ -1548,7 +1548,7 @@
 
 
         setRoomMessage(
-            "Đã hủy tìm trận."
+            "Matchmaking canceled."
         );
     }
 
@@ -1665,7 +1665,7 @@
                 return {
                     once(event) {
                         if (event !== "value") {
-                            throw new Error("Chess chỉ hỗ trợ once('value').");
+                            throw new Error("Chess only supports once('value').");
                         }
                         return get(databaseRef);
                     },
@@ -1684,7 +1684,7 @@
 
                     on(event, callback) {
                         if (event !== "value") {
-                            throw new Error("Chess chỉ hỗ trợ on('value').");
+                            throw new Error("Chess only supports on('value').");
                         }
                         return onValue(databaseRef, callback);
                     },
@@ -1740,7 +1740,7 @@
 
             if (!auth || !firebaseDatabase) {
                 throw new Error(
-                    "Không lấy được Firebase Auth/Database của TienHub."
+                    "Unable to access TienHub authentication/database."
                 );
             }
 
@@ -1777,13 +1777,13 @@
 
             if (!currentUser) {
                 throw new Error(
-                    "Bạn chưa đăng nhập TienHub. Vui lòng đăng nhập trước khi chơi online."
+                    "Sign in to TienHub before playing online."
                 );
             }
 
             if (currentUser.isAnonymous) {
                 throw new Error(
-                    "Chess không hỗ trợ tài khoản khách."
+                    "Chess doesn’t support guest accounts."
                 );
             }
 
@@ -2015,22 +2015,22 @@
         $("whiteStatus")
             .textContent =
             state.turn === "w"
-                ? "Đang đi"
-                : "Chờ lượt";
+                ? "Playing"
+                : "Waiting";
 
 
         $("blackStatus")
             .textContent =
             state.turn === "b"
-                ? "Đang đi"
-                : "Chờ lượt";
+                ? "Playing"
+                : "Waiting";
 
 
         $("turnPill")
             .textContent =
             state.turn === "w"
-                ? "Lượt Trắng"
-                : "Lượt Đen";
+                ? "White’s Turn"
+                : "Black’s Turn";
 
 
         $("whitePlayer")
@@ -3043,13 +3043,13 @@
         ) {
 
             setMessage(
-                "Bạn cầm Trắng. Chọn quân cờ để đi."
+                "You are White. Select a piece to move."
             );
 
         } else {
 
             setMessage(
-                "Trắng đi trước."
+                "White moves first."
             );
         }
 
@@ -3072,12 +3072,12 @@
 
             $("whiteName")
                 .textContent =
-                "Bạn";
+                "You";
 
 
             $("blackName")
                 .textContent =
-                "Máy";
+                "Computer";
 
 
         } else if (
@@ -3086,12 +3086,12 @@
 
             $("whiteName")
                 .textContent =
-                "Trắng";
+                "White";
 
 
             $("blackName")
                 .textContent =
-                "Đen";
+                "Black";
 
 
         } else {
@@ -3099,15 +3099,15 @@
             $("whiteName")
                 .textContent =
                 onlineColor === "w"
-                    ? "Bạn • Trắng"
-                    : "Đối thủ • Trắng";
+                    ? "You • White"
+                    : "Opponent • White";
 
 
             $("blackName")
                 .textContent =
                 onlineColor === "b"
-                    ? "Bạn • Đen"
-                    : "Đối thủ • Đen";
+                    ? "You • Black"
+                    : "Opponent • Black";
         }
     }
 
@@ -3120,7 +3120,7 @@
 
             $("sideModeText")
                 .textContent =
-                "Đấu với máy";
+                "Play vs Computer";
 
         } else if (
             mode === "local"
@@ -3128,13 +3128,13 @@
 
             $("sideModeText")
                 .textContent =
-                "2 người";
+                "Two Players";
 
         } else {
 
             $("sideModeText")
                 .textContent =
-                "Chơi online";
+                "Play Online";
         }
     }
 
@@ -3192,7 +3192,7 @@
 
 
         setMessage(
-            "Đã từ chối yêu cầu hòa."
+            "Draw offer declined."
         );
     }
 
@@ -3221,7 +3221,7 @@
 
 
             setRoomMessage(
-                "⏳ Đang tạo phòng..."
+                "⏳ Creating room..."
             );
 
 
@@ -3275,7 +3275,7 @@
             ) {
 
                 throw new Error(
-                    "Không tạo được mã phòng."
+                    "Could not generate room code."
                 );
             }
 
@@ -3393,7 +3393,7 @@
 
 
             setRoomMessage(
-                "✅ Đã tạo phòng. Gửi mã cho đối thủ."
+                "✅ Room created. Send the code to your opponent."
             );
 
 
@@ -3409,7 +3409,7 @@
 
 
             setRoomMessage(
-                "❌ Không thể tạo phòng: " +
+                "❌ Unable to create room: " +
                 error.message
             );
 
@@ -3451,7 +3451,7 @@
             ) {
 
                 setRoomMessage(
-                    "❌ Mã phòng phải gồm 6 ký tự."
+                    "❌ Room code must be six characters."
                 );
 
                 return;
@@ -3463,7 +3463,7 @@
 
 
             setRoomMessage(
-                "⏳ Đang tìm phòng..."
+                "⏳ Finding room..."
             );
 
 
@@ -3496,7 +3496,7 @@
             ) {
 
                 setRoomMessage(
-                    "❌ Không tìm thấy phòng."
+                    "❌ Room not found."
                 );
 
                 return;
@@ -3509,7 +3509,7 @@
             ) {
 
                 setRoomMessage(
-                    "❌ Phòng đã bắt đầu hoặc đã đóng."
+                    "❌ The room has started or is closed."
                 );
 
                 return;
@@ -3522,7 +3522,7 @@
             ) {
 
                 setRoomMessage(
-                    "❌ Đây là phòng bạn vừa tạo."
+                    "❌ You created this room."
                 );
 
                 return;
@@ -3534,7 +3534,7 @@
             ) {
 
                 setRoomMessage(
-                    "❌ Phòng đã đủ người."
+                    "❌ Room is full."
                 );
 
                 return;
@@ -3617,7 +3617,7 @@
 
 
             setRoomMessage(
-                "✅ Đã vào phòng!"
+                "✅ Joined room!"
             );
 
 
@@ -3633,7 +3633,7 @@
 
 
             setRoomMessage(
-                "❌ Không thể vào phòng: " +
+                "❌ Unable to join room: " +
                 error.message
             );
 
@@ -3717,7 +3717,7 @@
         ) {
 
             setRoomMessage(
-                "❌ Phòng không còn tồn tại."
+                "❌ Room no longer exists."
             );
 
             return;
@@ -3792,7 +3792,7 @@
 
             $("waitingText")
                 .textContent =
-                "⏳ Đang chờ đối thủ...";
+                "⏳ Waiting for an opponent...";
 
 
             return;
@@ -3820,7 +3820,7 @@
         ) {
 
             setMessage(
-                "Phòng đã đóng."
+                "Room closed."
             );
         }
     }
@@ -3933,7 +3933,7 @@
     } else {
 
         console.warn(
-            "⚠️ Clock Firebase không hợp lệ:",
+            "⚠️ Invalid Firebase clock:",
             remote.clocks
         );
 
@@ -3993,7 +3993,7 @@
     } else {
 
         console.error(
-            "❌ Board Firebase không hợp lệ:",
+            "❌ Invalid Firebase board:",
             remote.board
         );
 
@@ -4006,7 +4006,7 @@
     ) {
 
         console.error(
-            "❌ Board phải có đúng 64 ô:",
+            "❌ Board must have exactly 64 squares:",
             remoteBoard
         );
 
@@ -4188,13 +4188,13 @@
         ) {
 
             setMessage(
-                "🟢 Đến lượt bạn."
+                "🟢 Your turn."
             );
 
         } else {
 
             setMessage(
-                "🟡 Đang chờ đối thủ đi..."
+                "🟡 Waiting for opponent’s move..."
             );
         }
     }
@@ -4224,7 +4224,7 @@
         ) {
 
             setMessage(
-                "Chưa đến lượt bạn."
+                "It’s not your turn."
             );
 
             return;
@@ -4406,7 +4406,7 @@
         ) {
 
             console.warn(
-                "⚠️ Nước đi không hợp lệ:",
+                "⚠️ Invalid move:",
                 move
             );
 
@@ -4447,12 +4447,12 @@
         ) {
 
             console.error(
-                "❌ ChessCore trả về state không hợp lệ:",
+                "❌ ChessCore returned invalid state:",
                 next
             );
 
             throw new Error(
-                "Trạng thái bàn cờ sau nước đi không hợp lệ."
+                "Invalid board state after move."
             );
         }
 
@@ -4525,7 +4525,7 @@
         ================================================== */
 
         if (!firebaseDatabaseRaw || !databaseApi?.ref || !databaseApi?.update) {
-            throw new Error("Firebase Database chưa sẵn sàng để gửi nước đi.");
+            throw new Error("Game database is not ready to send moves.");
         }
 
         const gameRef =
@@ -4619,7 +4619,7 @@
                 : "";
 
         setMessage(
-            `❌ Không thể gửi nước đi.${code}${detail}`
+            `❌ Unable to send move.${code}${detail}`
         );
 
     } finally {
@@ -4678,7 +4678,7 @@
             ) {
 
                 setMessage(
-                    "Đang có yêu cầu hòa."
+                    "A draw offer is already pending."
                 );
 
                 return;
@@ -4701,7 +4701,7 @@
 
 
             setMessage(
-                "🤝 Đã gửi yêu cầu hòa."
+                "🤝 Draw offer sent."
             );
 
 
@@ -4714,7 +4714,7 @@
 
 
             setMessage(
-                "❌ Không thể gửi yêu cầu hòa."
+                "❌ Unable to send draw offer."
             );
 
 
@@ -4748,7 +4748,7 @@
         ) {
 
             setMessage(
-                "🤝 Đang chờ đối thủ trả lời yêu cầu hòa."
+                "🤝 Waiting for opponent to respond to the draw offer."
             );
 
             return;
@@ -4872,7 +4872,7 @@
 
 
                 setMessage(
-                    "Đã từ chối yêu cầu hòa."
+                    "Draw offer declined."
                 );
             }
 
@@ -4970,11 +4970,11 @@
 
 
         let title =
-            "Hòa cờ";
+            "Draw";
 
 
         let text =
-            "Ván cờ kết thúc với kết quả hòa.";
+            "The game ended in a draw.";
 
 
         let icon =
@@ -4991,7 +4991,7 @@
         ) {
 
             title =
-                "Chiếu hết!";
+                "Checkmate!";
 
 
             icon =
@@ -5001,10 +5001,10 @@
             text =
                 (
                     winner === "w"
-                        ? "Trắng"
-                        : "Đen"
+                        ? "White"
+                        : "Black"
                 ) +
-                " thắng.";
+                " wins.";
 
 
             analyticsResult =
@@ -5020,7 +5020,7 @@
         ) {
 
             title =
-                "Hết giờ!";
+                "Time’s Up!";
 
 
             icon =
@@ -5030,10 +5030,10 @@
             text =
                 (
                     winner === "w"
-                        ? "Trắng"
-                        : "Đen"
+                        ? "White"
+                        : "Black"
                 ) +
-                " thắng do đối thủ hết thời gian.";
+                " wins because the opponent ran out of time.";
 
 
             analyticsResult =
@@ -5059,10 +5059,10 @@
             text =
                 (
                     winner === "w"
-                        ? "Trắng"
-                        : "Đen"
+                        ? "White"
+                        : "Black"
                 ) +
-                " thắng.";
+                " wins.";
 
 
             analyticsResult =
@@ -5146,11 +5146,11 @@
 
 
         let title =
-            "Hòa cờ";
+            "Draw";
 
 
         let text =
-            "Ván cờ hòa.";
+            "The game is a draw.";
 
 
         let icon =
@@ -5167,7 +5167,7 @@
         ) {
 
             title =
-                "Chiếu hết!";
+                "Checkmate!";
 
 
             icon =
@@ -5177,10 +5177,10 @@
             text =
                 (
                     winner === "w"
-                        ? "Trắng"
-                        : "Đen"
+                        ? "White"
+                        : "Black"
                 ) +
-                " thắng.";
+                " wins.";
 
 
             if (
@@ -5208,7 +5208,7 @@
         ) {
 
             title =
-                "Hết giờ!";
+                "Time’s Up!";
 
 
             icon =
@@ -5218,10 +5218,10 @@
             text =
                 (
                     winner === "w"
-                        ? "Trắng"
-                        : "Đen"
+                        ? "White"
+                        : "Black"
                 ) +
-                " thắng.";
+                " wins.";
 
 
             if (
@@ -5256,10 +5256,10 @@
             text =
                 (
                     winner === "w"
-                        ? "Trắng"
-                        : "Đen"
+                        ? "White"
+                        : "Black"
                 ) +
-                " thắng.";
+                " wins.";
 
 
             if (
@@ -5530,7 +5530,7 @@
 
 
         setRoomMessage(
-            "Đã rời phòng."
+            "Left the room."
         );
     }
 
@@ -5552,14 +5552,14 @@ const VALUES = {
 
 
 /*
- * Điểm vị trí.
+ * Score vị trí.
  *
- * Bàn cờ:
+ * Board:
  *
  * 0  1  2  3  4  5  6  7
  * a8 b8 c8 d8 e8 f8 g8 h8
  *
- * AI là Đen nên sẽ đảo bảng khi đánh giá vị trí.
+ * AI là Black nên sẽ đảo bảng khi đánh giá vị trí.
  */
 
 const PST = {
@@ -5654,7 +5654,7 @@ function aiMove() {
 
 
     setMessage(
-        "🤖 Máy đang suy nghĩ..."
+        "🤖 Computer is thinking..."
     );
 
 
@@ -5885,11 +5885,11 @@ function minimax(
         ) {
 
             /*
-             * Nếu Đen bị chiếu hết:
-             * điểm cực thấp.
+             * Nếu Black bị chiếu hết:
+             * points cực thấp.
              *
-             * Nếu Trắng bị chiếu hết:
-             * điểm cực cao.
+             * Nếu White bị chiếu hết:
+             * points cực cao.
              */
 
             return currentState.turn === "b"
@@ -6177,7 +6177,7 @@ function orderMoves(
 
                 /*
                  * Một chút ngẫu nhiên để
-                 * các nước bằng điểm không
+                 * các nước bằng points không
                  * luôn giống hệt nhau.
                  */
 
@@ -6284,9 +6284,9 @@ function evaluatePosition(
 
             /*
              * PST được viết theo
-             * góc nhìn Trắng.
+             * góc nhìn White.
              *
-             * Đen phải đảo index.
+             * Black phải đảo index.
              */
 
             const pstIndex =
@@ -6637,13 +6637,13 @@ function evaluatePosition(
 
 
                     setRoomMessage(
-                        "✅ Đã copy mã phòng."
+                        "✅ Room code copied."
                     );
 
                 } catch {
 
                     setRoomMessage(
-                        "Mã phòng: " +
+                        "Room Code: " +
                         roomId
                     );
                 }
@@ -6673,13 +6673,13 @@ function evaluatePosition(
 
 
                     setMessage(
-                        "✅ Đã copy mã phòng."
+                        "✅ Room code copied."
                     );
 
                 } catch {
 
                     setMessage(
-                        "Mã phòng: " +
+                        "Room Code: " +
                         roomId
                     );
                 }
@@ -6719,7 +6719,7 @@ function evaluatePosition(
                 ) {
 
                     setMessage(
-                        "Không thể xin hòa khi đấu với máy."
+                        "You can’t offer a draw against the computer."
                     );
 
                     return;
@@ -6841,7 +6841,7 @@ function evaluatePosition(
                 ) {
 
                     setMessage(
-                        "Ván online hiện tại đang trong phòng."
+                        "Your current online game is in a room."
                     );
 
                     return;
@@ -6882,7 +6882,7 @@ function evaluatePosition(
                 ) {
 
                     setMessage(
-                        "Chỉ chủ phòng có thể bắt đầu ván mới."
+                        "Only the host can start a new game."
                     );
 
                     return;
