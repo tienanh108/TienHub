@@ -121,15 +121,15 @@ function startOfflineGame(mode) {
      */
     resetBoard();
     /*
-     * Hiện game.
+     * Show game.
      */
     showGame();
     /*
-     * Hiện / ẩn độ khó AI.
+     * Show / ẩn độ khó AI.
      */
     updateAIDifficultyVisibility();
     /*
-     * Bắt đầu lượt X.
+     * Start lượt X.
      */
     currentPlayer = "X";
     gameOver = false;
@@ -163,7 +163,7 @@ function renderBoard() {
     }
     /*
      * Xóa hoàn toàn bàn cũ.
-     * Điều này rất quan trọng khi bấm Chơi lại.
+     * Điều này rất quan trọng khi bấm Play Again.
      */
     boardElement.innerHTML = "";
     /*
@@ -314,7 +314,7 @@ function handleCellClick(event) {
     }
     /*
      * AI:
-     * Người chơi là X.
+     * Player là X.
      * Không cho người dùng click khi O đang suy nghĩ.
      */
     if (
@@ -353,7 +353,7 @@ function makeMove(index) {
      */
     renderBoard();
     /*
-     * Kiểm tra thắng.
+     * Kiểm tra wins.
      */
     const row =
         Math.floor(index / boardSize);
@@ -369,7 +369,7 @@ function makeMove(index) {
         gameOver = true;
         stopTimer();
         /*
-         * Tăng điểm.
+         * Tăng points.
          */
         if (player === "X") {
             scoreX++;
@@ -381,7 +381,7 @@ function makeMove(index) {
             winningCells
         );
         showResult(
-            `${player} thắng!`
+            `${player}wins!`
         );
         return true;
     }
@@ -395,7 +395,7 @@ function makeMove(index) {
     ) {
         gameOver = true;
         stopTimer();
-        showResult("Hòa!");
+        showResult("Draw!");
         return true;
     }
     /*
@@ -446,7 +446,7 @@ function scheduleAIMove() {
                 "function"
             ) {
                 console.error(
-                    "Không tìm thấy getAIMove(). Kiểm tra ai.js."
+                    "getAIMove() not found. Check ai.js."
                 );
                 return;
             }
@@ -737,7 +737,7 @@ function handleTimeOut() {
     }
     updateScoreDisplay();
     showResult(
-        `${loser} hết giờ — ${winner} thắng!`
+        `${loser}ran out of time — ${winner}wins!`
     );
 }
 function updateTimerDisplay() {
@@ -767,10 +767,10 @@ function updateTurnDisplay() {
         currentPlayer === "O"
     ) {
         turnText.textContent =
-            "Máy đang đi...";
+            "Computer is thinking...";
     } else {
         turnText.textContent =
-            `Lượt của ${currentPlayer}`;
+            `Turn: ${currentPlayer}`;
     }
 }
 /* =========================================================
@@ -805,7 +805,7 @@ function startNewOfflineGame() {
     /*
      * Tạo bàn hoàn toàn mới.
      *
-     * Không reset điểm.
+     * Không reset points.
      */
     resetBoard();
     currentPlayer = "X";
@@ -947,7 +947,7 @@ function createAIDifficultySelector() {
     label.htmlFor =
         "aiDifficulty";
     label.textContent =
-        "Độ khó";
+        "Difficulty";
     const select =
         document.createElement(
             "select"
@@ -957,19 +957,19 @@ function createAIDifficultySelector() {
     const levels = [
         {
             value: "easy",
-            text: "🟢 Dễ"
+            text: "🟢 Easy"
         },
         {
             value: "medium",
-            text: "🟡 Trung bình"
+            text: "🟡 Medium"
         },
         {
             value: "hard",
-            text: "🔴 Khó"
+            text: "🔴 Hard"
         },
         {
             value: "extreme",
-            text: "🔥 Siêu khó"
+            text: "🔥 Extreme"
         }
     ];
     for (
@@ -1024,7 +1024,7 @@ function createAIDifficultySelector() {
     } else {
         /*
          * Fallback:
-         * chèn trước nút Chơi.
+         * chèn trước nút Play.
          */
         const playButton =
             document.getElementById(
@@ -1129,7 +1129,7 @@ function initGame() {
         handleResize
     );
     /*
-     * Trạng thái ban đầu.
+     * Status ban đầu.
      */
     setGameMode(
         gameMode

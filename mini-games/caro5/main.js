@@ -251,8 +251,8 @@
         caroSoundButton.setAttribute(
             "aria-label",
             caroSoundEnabled
-                ? "Tắt âm thanh"
-                : "Bật âm thanh"
+                ? "Turn Sound Off"
+                : "Turn Sound On"
         );
 
         caroSoundButton.classList.toggle(
@@ -283,7 +283,7 @@
                 return;
             }
         } catch (error) {
-            console.warn("Không thể phát âm thanh:", error);
+            console.warn("Unable to play sound:", error);
         }
     }
 
@@ -388,7 +388,7 @@
 
         finishGame(
             winner,
-            `${winner} thắng! ${loser} đã hết thời gian.`
+            `${winner}wins! ${loser}ran out of time.`
         );
     }
 
@@ -407,18 +407,18 @@
 
         if (isOnline) {
             if (onlinePlayer === currentPlayer) {
-                turnText.textContent = `Lượt của ${currentPlayer} — Bạn`;
+                turnText.textContent = `Turn: ${currentPlayer} — You`;
             } else {
-                turnText.textContent = `Lượt của ${currentPlayer}`;
+                turnText.textContent = `Turn: ${currentPlayer}`;
             }
         } else {
             if (
                 gameMode === "ai" &&
                 currentPlayer === "O"
             ) {
-                turnText.textContent = "Lượt của máy";
+                turnText.textContent = "Computer’s turn";
             } else {
-                turnText.textContent = `Lượt của ${currentPlayer}`;
+                turnText.textContent = `Turn: ${currentPlayer}`;
             }
         }
     }
@@ -764,7 +764,7 @@
 
         playSound("draw");
 
-        showResult("🤝 Hòa! Bàn cờ đã kín.");
+        showResult("🤝 Draw! The board is full.");
 
         if (isOnline) {
             updateOnlineRoomAfterGame(null);
@@ -800,7 +800,7 @@
         if (checkWin(index, player)) {
             finishGame(
                 player,
-                `🎉 ${player} thắng!`
+                `🎉 ${player}wins!`
             );
 
             return true;
@@ -1516,7 +1516,7 @@
             // session riêng và không nhìn thấy tài khoản đang đăng nhập
             // trên TienHub. Đây là nguyên nhân Caro có thể báo chưa kết nối.
             if (!window.firebase) {
-                throw new Error("Firebase Compat SDK chưa được tải.");
+                throw new Error("Firebase Compat SDK failed to load.");
             }
 
             try {
@@ -1534,7 +1534,7 @@
             }
 
             if (!firebaseAuth || !firebaseDB) {
-                throw new Error("Không khởi tạo được Firebase TienHub.");
+                throw new Error("Could not initialize TienHub Firebase.");
             }
 
             // Chờ Firebase khôi phục tài khoản thật trên máy.
@@ -1554,7 +1554,7 @@
             // Không tự tạo một anonymous session mới vì session đó không
             // phải tài khoản người dùng và có thể bị Firebase Rules chặn.
             if (!firebaseUser) {
-                throw new Error("Chưa đăng nhập TienHub.");
+                throw new Error("Not signed in to TienHub.");
             }
 
             // Global presence: cả tài khoản thật và khách đều được tính.
@@ -1581,11 +1581,11 @@
                 console.warn("Caro5 presence error:", presenceError);
             }
 
-            setStatus("🟢 Đã kết nối online");
+            setStatus("🟢 Online connected");
             return true;
         } catch (error) {
             console.error("Firebase initialization error:", error);
-            setStatus("🔴 Chưa kết nối online");
+            setStatus("🔴 Offline");
             return false;
         }
     }
@@ -1633,7 +1633,7 @@
 
             if (!ok) {
                 alert(
-                    "Không thể kết nối Firebase."
+                    "Unable to connect to the authentication service."
                 );
 
                 return;
@@ -1736,7 +1736,7 @@
             resetTimer();
 
             setOnlineNotice(
-                `Phòng ${roomCode} đang chờ người chơi O...`,
+                `Room ${roomCode}is waiting for player O...`,
                 true
             );
 
@@ -1758,7 +1758,7 @@
             isOnline = false;
 
             alert(
-                "Không thể tạo phòng. Vui lòng thử lại."
+                "Unable to create room. Please try again."
             );
         }
     }
@@ -1771,7 +1771,7 @@
         code = normalizeRoomCode(code);
 
         if (!code) {
-            alert("Hãy nhập mã phòng.");
+            alert("Enter a room code.");
 
             return;
         }
@@ -1781,7 +1781,7 @@
 
             if (!ok) {
                 alert(
-                    "Không thể kết nối Firebase."
+                    "Unable to connect to the authentication service."
                 );
 
                 return;
@@ -1804,7 +1804,7 @@
 
             if (!snapshot.exists()) {
                 alert(
-                    "Không tìm thấy phòng này."
+                    "Room not found."
                 );
 
                 return;
@@ -1817,7 +1817,7 @@
 
             if (players.O) {
                 alert(
-                    "Phòng đã đủ 2 người."
+                    "The room already has two players."
                 );
 
                 return;
@@ -1895,7 +1895,7 @@
             resetTimer();
 
             setOnlineNotice(
-                "🟢 Đã vào phòng. Chờ lượt của bạn.",
+                "🟢 Joined room. Wait for your turn.",
                 true
             );
 
@@ -1917,7 +1917,7 @@
             isOnline = false;
 
             alert(
-                "Không thể vào phòng."
+                "Unable to join room."
             );
         }
     }
@@ -2053,11 +2053,11 @@
                 addScore(winner);
 
                 showResult(
-                    `🎉 ${winner} thắng!`
+                    `🎉 ${winner}wins!`
                 );
             } else {
                 showResult(
-                    `😔 ${winner} thắng.`
+                    `😔 ${winner} wins.`
                 );
             }
 
@@ -2081,7 +2081,7 @@
             stopTimer();
 
             showResult(
-                "🤝 Ván đấu hòa!"
+                "🤝 Match drawn!"
             );
 
             renderBoard();
@@ -2110,19 +2110,19 @@
             ) {
                 setOnlineNotice(
                     currentPlayer === onlinePlayer
-                        ? `🟢 Đến lượt bạn (${onlinePlayer})`
-                        : `⏳ Đang chờ ${currentPlayer} đi...`,
+                        ? `🟢 Your turn (${onlinePlayer})`
+                        : `⏳ Waiting for ${currentPlayer}to move...`,
                     true
                 );
             }
         } else if (hasX && !hasO) {
             setOnlineNotice(
-                `Phòng ${roomCode} đang chờ người chơi O...`,
+                `Room ${roomCode}is waiting for player O...`,
                 true
             );
         } else if (!hasX && hasO) {
             setOnlineNotice(
-                `Phòng ${roomCode} đang chờ người chơi X...`,
+                `Room ${roomCode}is waiting for player X...`,
                 true
             );
         }
@@ -2156,7 +2156,7 @@
         if (roomInfo) {
             if (roomCode) {
                 roomInfo.textContent =
-                    ` • Phòng ${roomCode} • ${onlinePlayer}`;
+                    `• Room ${roomCode} • ${onlinePlayer}`;
             } else {
                 roomInfo.textContent = "";
             }
@@ -2428,7 +2428,7 @@
             renderBoard();
 
             setOnlineNotice(
-                "🔄 Ván mới bắt đầu!",
+                "🔄 New game started!",
                 true
             );
 
@@ -2455,12 +2455,12 @@
         gameOver = true;
 
         setOnlineNotice(
-            "⚠️ Người chơi còn lại đã rời phòng.",
+            "⚠️ The other player has left the room.",
             true
         );
 
         showResult(
-            "Người chơi còn lại đã rời phòng."
+            "The other player has left the room."
         );
     }
 
@@ -2612,8 +2612,8 @@
 
                 copyRoomButton.textContent =
                     success
-                        ? "✅ Đã sao chép!"
-                        : "❌ Không thể sao chép";
+                        ? "✅ Copied!"
+                        : "❌ Copy failed";
 
                 setTimeout(() => {
                     copyRoomButton.textContent =
@@ -2651,8 +2651,8 @@
 
                 copyLinkButton.textContent =
                     success
-                        ? "✅ Đã sao chép!"
-                        : "❌ Không thể sao chép";
+                        ? "✅ Copied!"
+                        : "❌ Copy failed";
 
                 setTimeout(() => {
                     copyLinkButton.textContent =
@@ -2739,7 +2739,7 @@
             "online-btn";
 
         randomMatchButton.textContent =
-            "🎲 Tìm người chơi ngẫu nhiên";
+            "🎲 Find Random Player";
 
         randomMatchButton.addEventListener(
             "click",
@@ -2787,7 +2787,7 @@ function getOwnMatchmakingRef() {
 }
 
 // ---------------------------------------------------------
-// Bắt đầu tìm trận
+// Start tìm trận
 // ---------------------------------------------------------
 
 async function startRandomMatch() {
@@ -2804,7 +2804,7 @@ async function startRandomMatch() {
 
         if (!ok) {
             alert(
-                "Không thể kết nối Firebase."
+                "Unable to connect to the authentication service."
             );
 
             return;
@@ -2813,7 +2813,7 @@ async function startRandomMatch() {
 
     if (isOnline) {
         alert(
-            "Bạn đang ở trong một phòng."
+            "You’re already in a room."
         );
 
         return;
@@ -2824,7 +2824,7 @@ async function startRandomMatch() {
 
     if (randomMatchButton) {
         randomMatchButton.textContent =
-            "⏹ Hủy tìm trận";
+            "⏹ Cancel Matchmaking";
     }
 
     if (createRoomButton) {
@@ -2836,7 +2836,7 @@ async function startRandomMatch() {
     }
 
     setStatus(
-        "🔎 Đang tìm người chơi..."
+        "🔎 Finding players..."
     );
 
     const ownRef =
@@ -2889,7 +2889,7 @@ async function startRandomMatch() {
                     !matchmakingProcessing
                 ) {
                     setStatus(
-                        "⏳ Chưa tìm thấy đối thủ."
+                        "⏳ No opponent found yet."
                     );
                 }
             }, MATCHMAKING_TIMEOUT);
@@ -2903,7 +2903,7 @@ async function startRandomMatch() {
         cancelMatchmaking();
 
         alert(
-            "Không thể bắt đầu tìm trận."
+            "Unable to start matchmaking."
         );
     }
 }
@@ -3064,7 +3064,7 @@ function listenForMatch() {
 }
 
 // ---------------------------------------------------------
-// Ghép 2 người bằng TRANSACTION ở toàn bộ queue
+// Ghép Two Players bằng TRANSACTION ở toàn bộ queue
 // ---------------------------------------------------------
 
 async function tryMatchCandidate(
@@ -3110,7 +3110,7 @@ async function tryMatchCandidate(
         // =====================================================
         // TRANSACTION TOÀN BỘ QUEUE
         //
-        // Hai người cùng tranh nhau sẽ không thể
+        // Two Players cùng tranh nhau sẽ không thể
         // cùng ghép một người.
         // =====================================================
 
@@ -3217,7 +3217,7 @@ async function tryMatchCandidate(
             result[opponentUid] || {};
 
         // =====================================================
-        // Vào phòng
+        // Join Room
         // =====================================================
 
         await enterMatchedRoom(
@@ -3238,7 +3238,7 @@ async function tryMatchCandidate(
 }
 
 // ---------------------------------------------------------
-// Vào phòng sau khi match
+// Join Room sau khi match
 // ---------------------------------------------------------
 
 async function enterMatchedRoom(
@@ -3397,7 +3397,7 @@ async function enterMatchedRoom(
             !roomSnapshot.exists()
         ) {
             throw new Error(
-                "Không tìm thấy room sau khi tạo."
+                "Room not found after creation."
             );
         }
 
@@ -3531,7 +3531,7 @@ async function enterMatchedRoom(
 
         if (randomMatchButton) {
             randomMatchButton.textContent =
-                "🎲 Tìm người chơi ngẫu nhiên";
+                "🎲 Find Random Player";
         }
 
         if (createRoomButton) {
@@ -3561,7 +3561,7 @@ async function enterMatchedRoom(
         resetTimer();
 
         setOnlineNotice(
-            `🎲 Đã tìm thấy đối thủ! Bạn là ${onlinePlayer}.`,
+            `🎲 Opponent found! You are ${onlinePlayer}.`,
             true
         );
 
@@ -3583,13 +3583,13 @@ async function enterMatchedRoom(
             false;
 
         setStatus(
-            "❌ Không thể vào trận."
+            "❌ Unable to join match."
         );
     }
 }
 
 // ---------------------------------------------------------
-// Hủy tìm trận
+// Cancel Matchmaking
 // ---------------------------------------------------------
 
 function cancelMatchmaking() {
@@ -3648,7 +3648,7 @@ function cancelMatchmaking() {
 
     if (randomMatchButton) {
         randomMatchButton.textContent =
-            "🎲 Tìm người chơi ngẫu nhiên";
+            "🎲 Find Random Player";
     }
 
     if (createRoomButton) {
@@ -3662,7 +3662,7 @@ function cancelMatchmaking() {
     }
 
     setStatus(
-        "🟢 Đã kết nối online"
+        "🟢 Online connected"
     );
 }
 
@@ -3700,7 +3700,7 @@ function cancelMatchmaking() {
         typeof window.GameHub.start !== "function"
     ) {
         console.warn(
-            "Caro5: GameHub chưa sẵn sàng để ghi lượt chơi."
+            "Caro5: GameHub is not ready to record the match."
         );
 
         return;
@@ -3740,7 +3740,7 @@ function cancelMatchmaking() {
     } catch (error) {
 
         console.warn(
-            "Caro5 analytics start lỗi:",
+            "Caro5 analytics start error:",
             error
         );
 
@@ -3793,7 +3793,7 @@ function cancelMatchmaking() {
 
         if (!firebaseReady) {
             setStatus(
-                "🔴 Offline — không dùng được phòng online"
+                "🔴 Offline — online rooms unavailable"
             );
         }
 
