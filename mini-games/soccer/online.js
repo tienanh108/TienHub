@@ -48,7 +48,7 @@ import {
   }
 
   async function ensureUser() {
-    if (!api.user) throw new Error('Bạn cần đăng nhập TienHub để chơi online.');
+    if (!api.user) throw new Error('Sign in to TienHub to play online.');
     if (!api.displayName) api.displayName = await loadDisplayName(api.user);
     if (!api.displayName) api.displayName = 'Player';
     return { uid: api.user.uid, displayName: api.displayName };
@@ -101,7 +101,7 @@ import {
     clearListeners();
     const roomId = String(code || code6()).toUpperCase();
     const existing = await get(roomRef(roomId));
-    if (existing.exists()) throw new Error('Mã phòng đã tồn tại. Hãy tạo lại.');
+    if (existing.exists()) throw new Error('Room code already exists. Create another.');
 
     const slots = emptySlots();
     slots[0] = {
@@ -132,14 +132,14 @@ import {
   async function getRoomInfo(roomId) {
     await ensureUser();
     roomId = String(roomId || '').trim().toUpperCase();
-    if (!roomId) throw new Error('Chưa nhập mã phòng.');
+    if (!roomId) throw new Error('Room code required.');
     const snap = await get(roomRef(roomId));
-    if (!snap.exists()) throw new Error('Không tìm thấy phòng.');
+    if (!snap.exists()) throw new Error('Room not found.');
     const room = snap.val();
-    if (room.game !== 'soccer5v5') throw new Error('Mã phòng không phải Soccer 5v5.');
-    if (room.status !== 'waiting') throw new Error('Phòng đã bắt đầu hoặc đã kết thúc.');
+    if (room.game !== 'soccer5v5') throw new Error('Room is not a Soccer 5v5 room.');
+    if (room.status !== 'waiting') throw new Error('Room has started or ended.');
     const roster = normalizeRoster(room.players);
-    if (!roster.some(s => s.type === 'empty')) throw new Error('Phòng đã đủ 10 người.');
+    if (!roster.some(s => s.type === 'empty')) throw new Error('Room is full (10 players).');
     return { room, roster, takenNumbers: roster.map(s => Number(s.number)).filter(Number.isInteger) };
   }
 
@@ -147,12 +147,12 @@ import {
     const me = await ensureUser();
     clearListeners();
     roomId = String(roomId || '').trim().toUpperCase();
-    if (!roomId) throw new Error('Chưa nhập mã phòng.');
+    if (!roomId) throw new Error('Room code required.');
     const snap = await get(roomRef(roomId));
-    if (!snap.exists()) throw new Error('Không tìm thấy phòng.');
+    if (!snap.exists()) throw new Error('Room not found.');
     const room = snap.val();
-    if (room.game !== 'soccer5v5') throw new Error('Mã phòng không phải Soccer 5v5.');
-    if (room.status !== 'waiting') throw new Error('Phòng đã bắt đầu hoặc đã kết thúc.');
+    if (room.game !== 'soccer5v5') throw new Error('Room is not a Soccer 5v5 room.');
+    if (room.status !== 'waiting') throw new Error('Room has started or ended.');
 
     const roster = normalizeRoster(room.players);
     const already = roster.find(s => s.uid === me.uid && s.type === 'human');
@@ -161,7 +161,7 @@ import {
     // the old code found the host by UID and updated that slot with the new jersey.
     if (already) {
       if (already.online !== false) {
-        throw new Error('Tài khoản này đã ở trong phòng trên một thiết bị khác.');
+        throw new Error('This account has joined on another device.');
       }
       // A stale/offline slot can be reclaimed by the same account.
       await remove(slotPath(roomId, already.slot));
@@ -173,9 +173,9 @@ import {
       const preferredTeam = blueCount <= redCount ? 'blue' : 'red';
       slot = roster.findIndex(s => s.type === 'empty' && s.team === preferredTeam);
       if (slot < 0) slot = roster.findIndex(s => s.type === 'empty');
-      if (slot < 0) throw new Error('Phòng đã đủ 10 người.');
+      if (slot < 0) throw new Error('Room is full (10 players).');
       const usedNumbers = new Set(roster.map(s => Number(s.number)).filter(Boolean));
-      if (usedNumbers.has(Number(jerseyNumber))) throw new Error(`Số áo ${jerseyNumber} đã có trong phòng.`);
+      if (usedNumbers.has(Number(jerseyNumber))) throw new Error(`Jersey number ${jerseyNumber} is already taken in the room.`);
       await set(slotPath(roomId, slot), {
         slot, team: slot < 5 ? 'blue' : 'red', type: 'human', uid: me.uid,
         displayName: me.displayName, number: Number(jerseyNumber), online: true, host: false
@@ -249,19 +249,19 @@ import {
     if (!api.roomId || api.slot == null) return;
     const roomSnap = await get(roomRef(api.roomId));
     const room = roomSnap.val();
-    if (!room || room.status !== 'waiting') throw new Error('Chỉ có thể đổi đội trước khi bắt đầu trận.');
+    if (!room || room.status !== 'waiting') throw new Error('You can only switch teams before the match starts.');
 
     const roster = normalizeRoster(room.players);
     const current = roster[api.slot];
     const target = roster[Number(targetSlot)];
     if (!current || current.type !== 'human' || current.uid !== api.uid) {
-      throw new Error('Không tìm thấy cầu thủ của bạn trong phòng.');
+      throw new Error('Your player was not found in this room.');
     }
     if (!target || target.type !== 'empty') {
-      throw new Error('Slot này vừa được người khác chọn.');
+      throw new Error('Another player just took this slot.');
     }
     if (current.team === target.team) {
-      throw new Error('Hãy chọn slot trống ở đội còn lại.');
+      throw new Error('Select an empty slot on the other team.');
     }
 
     // The target is written first so the player never disappears from the
@@ -305,7 +305,7 @@ import {
     const roster = normalizeRoster(room.players);
     const blue = roster.filter(s => s.team === 'blue' && s.type !== 'empty');
     const red = roster.filter(s => s.team === 'red' && s.type !== 'empty');
-    if (!blue.length || !red.length) throw new Error('Cần ít nhất 1 người/cầu thủ ở mỗi đội để bắt đầu.');
+    if (!blue.length || !red.length) throw new Error('Each team needs at least one player to start.');
     const initial = {
       blueScore: 0, redScore: 0, timeLeft: [180,300,420,600].includes(Number(room.duration)) ? Number(room.duration) : 180,
       players: {},

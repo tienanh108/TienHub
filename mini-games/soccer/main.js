@@ -47,7 +47,7 @@ import './online.js';
     r1: [1320, 450], r2: [1140, 220], r3: [1080, 680], r4: [1140, 360], r5: [1080, 540]
   };
   const players = [
-    { id:'b1', team:'blue', uid:null, active:true, x:280, y:450, vx:0, vy:0, name:'Bạn', human:true, r:23, number:null, role:'attack', home:HOME.b1, faceX:1, faceY:0 },
+    { id:'b1', team:'blue', uid:null, active:true, x:280, y:450, vx:0, vy:0, name:'You', human:true, r:23, number:null, role:'attack', home:HOME.b1, faceX:1, faceY:0 },
     { id:'b2', team:'blue', uid:null, active:true, x:460, y:220, vx:0, vy:0, name:'AI', human:false, r:23, number:2, role:'attack', home:HOME.b2, faceX:1, faceY:0 },
     { id:'b3', team:'blue', uid:null, active:true, x:520, y:680, vx:0, vy:0, name:'AI', human:false, r:23, number:3, role:'defend', home:HOME.b3, faceX:1, faceY:0 },
     { id:'b4', team:'blue', uid:null, active:true, x:460, y:360, vx:0, vy:0, name:'AI', human:false, r:23, number:4, role:'attack', home:HOME.b4, faceX:1, faceY:0 },
@@ -122,9 +122,9 @@ import './online.js';
     if (!state.running || state.paused || state.goalPause > 0) return;
     state.timeLeft = Math.max(0, state.timeLeft - dt);
     $('#gameTimer').textContent = formatTime(state.timeLeft);
-    if (state.timeLeft <= 0) endMatch('Hết giờ');
+    if (state.timeLeft <= 0) endMatch('Time’s up');
   }
-  function endMatch(reason = 'Trận đấu kết thúc') {
+  function endMatch(reason = 'Match Ended') {
     if (!state.running) return;
     state.running = false;
     $('#gameStatus').textContent = reason;
@@ -141,7 +141,7 @@ import './online.js';
         const x = state.stats[p.id] || createStat(p);
         const row = document.createElement('div');
         row.className = 'stat-player';
-        row.innerHTML = `<div class="stat-player-head"><span class="stat-ball ${team}"></span><b>#${x.number ?? ''} ${x.name}</b></div><div class="stat-grid"><span>Ghi bàn <b>${x.goals}</b></span><span>Kiến tạo <b>${x.assists}</b></span><span>Sút <b>${x.shots}</b></span><span>Chuyền <b>${x.passes}</b></span><span>Cứu thua <b>${x.saves}</b></span></div>`;
+        row.innerHTML = `<div class="stat-player-head"><span class="stat-ball ${team}"></span><b>#${x.number ?? ''} ${x.name}</b></div><div class="stat-grid"><span>Goals <b>${x.goals}</b></span><span>Assists <b>${x.assists}</b></span><span>Shots <b>${x.shots}</b></span><span>Passes <b>${x.passes}</b></span><span>Saves <b>${x.saves}</b></span></div>`;
         root.appendChild(row);
       });
     };
@@ -149,7 +149,7 @@ import './online.js';
     renderTeam('red', $('#redStats'));
     $('#finalBlueScore').textContent = state.blueScore;
     $('#finalRedScore').textContent = state.redScore;
-    $('#finalResult').textContent = state.blueScore === state.redScore ? 'Hòa' : state.blueScore > state.redScore ? 'Đội Xanh thắng' : 'Đội Đỏ thắng';
+    $('#finalResult').textContent = state.blueScore === state.redScore ? 'Draw' : state.blueScore > state.redScore ? 'Blue Team Wins' : 'Red Team Wins';
   }
 
   function resetPlayers() {
@@ -175,7 +175,7 @@ import './online.js';
   }
   function validateJersey(raw) {
     const n = Number(raw);
-    if (!Number.isInteger(n) || n < 1 || n > 99) return { ok:false, message:'Số áo phải từ 1 đến 99.' };
+    if (!Number.isInteger(n) || n < 1 || n > 99) return { ok:false, message:'Jersey number must be between 1 and 99.' };
 
     // Online join uses the numbers actually read from Firebase.
     // Creating a room must NOT compare against the local solo AI roster: those
@@ -188,7 +188,7 @@ import './online.js';
         ? new Set()
         : getTakenNumbers();
 
-    if (taken.has(n)) return { ok:false, message:`Số áo ${n} đã có trong phòng.` };
+    if (taken.has(n)) return { ok:false, message:`Jersey number ${n} is already taken in the room.` };
     return { ok:true, number:n };
   }
   function openNumberEntry(action, taken = []) {
@@ -197,8 +197,8 @@ import './online.js';
     $('#jerseyNumber').value = '';
     $('#numberError').textContent = '';
     $('#numberTakenHint').textContent = state.takenNumbers.length
-      ? `Số đã có trong phòng: ${state.takenNumbers.join(', ')}`
-      : 'Chọn số áo từ 1 đến 99.';
+      ? `Numbers taken: ${state.takenNumbers.join(', ')}`
+      : 'Choose a number from 1 to 99.';
     show('number');
     setTimeout(() => $('#jerseyNumber').focus(), 50);
   }
@@ -230,7 +230,7 @@ import './online.js';
     const a = b.dataset.action;
     if (a === 'solo') openNumberEntry('solo');
     if (['create','join'].includes(a) && !state.authenticated) {
-      alert('Bạn cần đăng nhập TienHub để chơi online.');
+      alert('Sign in to TienHub to play online.');
       return;
     }
     if (a === 'create') { setRoomCode(); show('create'); }
@@ -240,14 +240,14 @@ import './online.js';
   $('#createConfirm').onclick = () => openNumberEntry('create');
   $('#joinConfirm').onclick = async () => {
     const c = $('#joinCode').value.trim().toUpperCase();
-    if (c.length < 6) { $('#joinError').textContent = 'Mã phòng chưa đủ 6 ký tự.'; $('#joinCode').focus(); return; }
+    if (c.length < 6) { $('#joinError').textContent = 'Room code must be six characters.'; $('#joinCode').focus(); return; }
     $('#joinError').textContent = '';
     try {
       const info = await window.TienHubSoccerOnline.getRoomInfo(c);
       state.roomCode = c;
       openNumberEntry('join', info.takenNumbers);
     } catch (e) {
-      $('#joinError').textContent = e.message || 'Không thể kiểm tra phòng.';
+      $('#joinError').textContent = e.message || 'Unable to check room.';
     }
   };
   $('#numberConfirm').onclick = submitNumber;
@@ -276,7 +276,7 @@ import './online.js';
     const blue = $('#blueSlots'), red = $('#redSlots');
     blue.innerHTML = ''; red.innerHTML = '';
     const slots = [
-      {team:'blue', label:'Bạn', type:'human', number:state.jerseyNumber},
+      {team:'blue', label:'You', type:'human', number:state.jerseyNumber},
       {team:'blue', label:'', type:'empty'}, {team:'blue', label:'', type:'empty'}, {team:'blue', label:'', type:'empty'}, {team:'blue', label:'', type:'empty'},
       {team:'red', label:'', type:'empty'}, {team:'red', label:'', type:'empty'}, {team:'red', label:'', type:'empty'}, {team:'red', label:'', type:'empty'}, {team:'red', label:'', type:'empty'}
     ];
@@ -285,14 +285,14 @@ import './online.js';
     slots.forEach((s, i) => {
       const el = document.createElement('div'); el.className = 'slot ' + (s.type === 'empty' ? 'empty' : 'filled');
       if (s.type === 'empty') {
-        const btn = document.createElement('button'); btn.className='slot-plus'; btn.textContent='+'; btn.title='Thêm AI';
+        const btn = document.createElement('button'); btn.className='slot-plus'; btn.textContent='+'; btn.title='Add AI';
         btn.onclick=()=>{const arr=readAI();if(!arr.includes(i))arr.push(i);writeAI(arr);buildLobby();}; el.append(btn);
       } else {
         const number=document.createElement('div');number.className='slot-number';number.textContent=s.number??'—';
         const av=document.createElement('div');av.className='slot-avatar';av.textContent=s.type==='ai'?'🤖':'👤';
         const name=document.createElement('div');name.className='slot-name';name.textContent=s.label;
         const tag=document.createElement('div');tag.className='slot-tag';tag.textContent=s.type==='ai'?'AI':'PLAYER';
-        const kick=document.createElement('button');kick.className='kick';kick.textContent='×';kick.title='Kick / xóa';
+        const kick=document.createElement('button');kick.className='kick';kick.textContent='×';kick.title='Kick / remove';
         kick.onclick=()=>{const arr=readAI().filter(x=>x!==i);writeAI(arr);buildLobby();}; el.append(number,av,name,tag,kick);
       }
       (i<5?blue:red).append(el);
@@ -317,7 +317,7 @@ import './online.js';
         const actions=document.createElement('div');
         actions.className='slot-actions';
         if(window.TienHubSoccerOnline?.isHost()){
-          const btn=document.createElement('button');btn.className='slot-plus';btn.textContent='+';btn.title='Thêm AI';btn.onclick=()=>window.TienHubSoccerOnline.addAI(i).catch(showOnlineError);actions.append(btn);
+          const btn=document.createElement('button');btn.className='slot-plus';btn.textContent='+';btn.title='Add AI';btn.onclick=()=>window.TienHubSoccerOnline.addAI(i).catch(showOnlineError);actions.append(btn);
         }
         // Any human player can move to an empty slot on the opposite team.
         // The arrow is deliberately placed inside the empty slot so the player
@@ -326,7 +326,7 @@ import './online.js';
           const swap=document.createElement('button');
           swap.className='slot-switch';
           swap.textContent='↔';
-          swap.title=s.team==='blue'?'Đổi sang đội Xanh':'Đổi sang đội Đỏ';
+          swap.title=s.team==='blue'?'Switch to Blue Team':'Switch to Red Team';
           swap.setAttribute('aria-label', swap.title);
           swap.onclick=()=>window.TienHubSoccerOnline.switchTeam(i).catch(showOnlineError);
           actions.append(swap);
@@ -338,7 +338,7 @@ import './online.js';
         const av=document.createElement('div');av.className='slot-avatar';av.textContent=s.type==='ai'?'🤖':'👤';
         const name=document.createElement('div');name.className='slot-name';name.textContent=s.displayName||(s.uid===window.TienHubSoccerOnline?.getUid()?window.TienHubSoccerOnline?.getDisplayName?.():'Player')||'Player';
         const tag=document.createElement('div');tag.className='slot-tag';tag.textContent=s.type==='ai'?'AI':(s.online?'PLAYER':'OFFLINE');
-        const kick=document.createElement('button');kick.className='kick';kick.textContent='×';kick.title='Kick / xóa';
+        const kick=document.createElement('button');kick.className='kick';kick.textContent='×';kick.title='Kick / remove';
         kick.disabled=!(window.TienHubSoccerOnline?.isHost() || s.uid===window.TienHubSoccerOnline?.getUid());
         kick.onclick=()=>window.TienHubSoccerOnline.removeSlot(i).catch(showOnlineError);
         el.append(number,av,name,tag,kick);
@@ -348,25 +348,25 @@ import './online.js';
     const bc=roster.filter(s=>s.team==='blue'&&s.type!=='empty').length;
     const rc=roster.filter(s=>s.team==='red'&&s.type!=='empty').length;
     $('#blueCount').textContent=`${bc}/5`;$('#redCount').textContent=`${rc}/5`;
-    $('#lobbyHint').textContent=window.TienHubSoccerOnline?.isHost()?`Bạn là chủ phòng · + để thêm AI · ${({180:'3 phút',300:'5 phút',420:'7 phút',600:'10 phút'})[Number(room.duration)]||'3 phút'}`:`Đang chờ chủ phòng bắt đầu trận · ${({180:'3 phút',300:'5 phút',420:'7 phút',600:'10 phút'})[Number(room.duration)]||'3 phút'}`;
+    $('#lobbyHint').textContent=window.TienHubSoccerOnline?.isHost()?`You are the host · + to add AI · ${({180:'3 minutes',300:'5 minutes',420:'7 minutes',600:'10 minutes'})[Number(room.duration)]||'3 minutes'}`:`Waiting for host to start the match · ${({180:'3 minutes',300:'5 minutes',420:'7 minutes',600:'10 minutes'})[Number(room.duration)]||'3 minutes'}`;
   }
 
   function showOnlineError(error){
     console.error(error);
-    $('#lobbyHint').textContent=error?.message||'Không thể thực hiện thao tác online.';
+    $('#lobbyHint').textContent=error?.message||'Unable to complete online action.';
   }
 
   async function onlineCreate(){
     try {
-      if (!state.authenticated) throw new Error('Bạn cần đăng nhập TienHub để chơi online.');
+      if (!state.authenticated) throw new Error('Sign in to TienHub to play online.');
       state.online=true;
       const id=await window.TienHubSoccerOnline.createRoom({code:state.roomCode,jerseyNumber:state.jerseyNumber,duration:Number($('#matchDuration')?.value||180)});
-      state.roomCode=id; enterLobby('Phòng của bạn');
-    } catch(e){state.online=false;show('menu');alert(e.message||'Không thể tạo phòng.');}
+      state.roomCode=id; enterLobby('Your Room');
+    } catch(e){state.online=false;show('menu');alert(e.message||'Unable to create room.');}
   }
   async function onlineJoin(){
-    try { if (!state.authenticated) throw new Error('Bạn cần đăng nhập TienHub để chơi online.'); state.online=true; await window.TienHubSoccerOnline.joinRoom(state.roomCode,state.jerseyNumber); enterLobby('Phòng '+state.roomCode); }
-    catch(e){state.online=false;$('#joinError').textContent=e.message||'Không thể vào phòng.';show('join');}
+    try { if (!state.authenticated) throw new Error('Sign in to TienHub to play online.'); state.online=true; await window.TienHubSoccerOnline.joinRoom(state.roomCode,state.jerseyNumber); enterLobby('Room '+state.roomCode); }
+    catch(e){state.online=false;$('#joinError').textContent=e.message||'Unable to join room.';show('join');}
   }
   $('#startLobby').onclick = () => {
     if(state.online) window.TienHubSoccerOnline.startRoom().catch(showOnlineError);
@@ -407,7 +407,7 @@ import './online.js';
     resetStats();
     resetPlayers();
     $('#blueScore').textContent='0'; $('#redScore').textContent='0';
-    $('#gameTimer').textContent=formatTime(state.matchDuration); $('#gameStatus').textContent='Đang online';
+    $('#gameTimer').textContent=formatTime(state.matchDuration); $('#gameStatus').textContent='Online';
     show('game'); requestAnimationFrame(resizeCanvas);
     state.last = performance.now(); state.onlinePublishAt = 0;
     requestAnimationFrame(loop);
@@ -429,7 +429,7 @@ import './online.js';
       const nx = Number(d.x ?? p.x), ny = Number(d.y ?? p.y);
       const mine = p.uid === window.TienHubSoccerOnline?.getUid();
       if (mine) {
-        // Keep the local player's movement predicted locally. The host snapshot
+        // Keep the local player’s movement predicted locally. The host snapshot
         // is used only as a gentle correction so network jitter does not make
         // the mobile joystick feel like it is dragging the player backwards.
         const err = Math.hypot(nx - p.x, ny - p.y);
@@ -483,10 +483,10 @@ import './online.js';
         const onlineButtons = document.querySelectorAll('[data-action="create"],[data-action="join"]');
         onlineButtons.forEach(btn => {
           btn.disabled = !user;
-          btn.title = user ? '' : 'Đăng nhập TienHub để chơi online';
+          btn.title = user ? '' : 'Sign in to TienHub for online play';
         });
-        if (!user) $('#lobbyHint').textContent='Chưa đăng nhập: chỉ có thể chơi đơn.';
-        else if (!displayName) $('#lobbyHint').textContent='Tên hiển thị sẽ dùng username của bạn.';
+        if (!user) $('#lobbyHint').textContent='Not signed in: solo mode only.';
+        else if (!displayName) $('#lobbyHint').textContent='Your username will be used as your display name.';
       },
       room: ({room,roster}) => {
         state.roomCode=room.roomId || state.roomCode;
@@ -508,7 +508,7 @@ import './online.js';
     state.matchDuration = 180; state.timeLeft = 180; resetStats(); state.passRequestFor = null; state.passRequestAt = 0;
     state.running = true; state.paused = false; state.goalPause = 0;
     resetPlayers();
-    $('#blueScore').textContent = '0'; $('#redScore').textContent = '0'; $('#gameTimer').textContent = formatTime(state.timeLeft); $('#gameStatus').textContent = 'Trận đấu';
+    $('#blueScore').textContent = '0'; $('#redScore').textContent = '0'; $('#gameTimer').textContent = formatTime(state.timeLeft); $('#gameStatus').textContent = 'Match';
     show('game'); requestAnimationFrame(() => { resizeCanvas(); }); state.last = performance.now(); requestAnimationFrame(loop);
   }
 
@@ -968,10 +968,10 @@ import './online.js';
       stat(scorer, 'goals');
       if (ball.lastPasser && ball.lastPasser !== scorer && ball.lastPasser.team === team) stat(ball.lastPasser, 'assists');
     }
-    $('#gameStatus').textContent=team==='blue'?'Xanh ghi bàn!':'Đỏ ghi bàn!';
+    $('#gameStatus').textContent=team==='blue'?'Blue scores!':'Red scores!';
     $('#goalFlash').classList.remove('show');void $('#goalFlash').offsetWidth;$('#goalFlash').classList.add('show');
     state.goalPause=1.4;
-    if(state.blueScore>=5||state.redScore>=5){state.goalPause=1.6;setTimeout(()=>endMatch('Đạt 5 bàn'),1600);}
+    if(state.blueScore>=5||state.redScore>=5){state.goalPause=1.6;setTimeout(()=>endMatch('Reached five goals'),1600);}
   }
   function resetRound(){resetPlayers();}
 
