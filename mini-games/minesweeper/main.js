@@ -72,7 +72,7 @@ function setup(levelName = level) {
   stopTimer();
   timerEl.textContent = "000";
   mineCountEl.textContent = pad(mineTotal);
-  statusEl.textContent = "CHỌN MỘT Ô ĐỂ BẮT ĐẦU";
+  statusEl.textContent = "SELECT A TILE TO BEGIN";
   overlay.classList.add("hidden");
 
   loadBest();
@@ -205,7 +205,7 @@ function buildMines(firstCell) {
 function startGame(firstCell) {
   buildMines(firstCell);
   started = true;
-  statusEl.textContent = "DÒ MÌN...";
+  statusEl.textContent = "CLEARING MINES...";
   startTimer();
 }
 
@@ -272,7 +272,7 @@ function toggleFlag(r, c) {
   mineCountEl.textContent = pad(Math.max(0, mineTotal - flags));
 
   if (!started) {
-    statusEl.textContent = "CỜ ĐÃ ĐẶT — CHỌN Ô ĐỂ BẮT ĐẦU";
+    statusEl.textContent = "FLAG PLACED — SELECT A TILE TO START";
   }
 
   checkWin();
@@ -341,7 +341,7 @@ function lose() {
 
   resultIcon.textContent = "💥";
   resultTitle.textContent = "GAME OVER";
-  resultText.textContent = `Bạn đã dò trúng mìn sau ${elapsed} giây.`;
+  resultText.textContent = `You hit a mine after ${elapsed} seconds.`;
   statusEl.textContent = "GAME OVER";
   overlay.classList.remove("hidden");
 }
@@ -367,8 +367,8 @@ function win() {
 
   resultIcon.textContent = "🏆";
   resultTitle.textContent = "YOU WIN";
-  resultText.textContent = `Bạn hoàn thành ${LEVELS[level].label} trong ${elapsed} giây.`;
-  statusEl.textContent = "HOÀN THÀNH!";
+  resultText.textContent = `You completed ${LEVELS[level].label} trong ${elapsed} seconds.`;
+  statusEl.textContent = "COMPLETED!";
   overlay.classList.remove("hidden");
 }
 
