@@ -91,7 +91,7 @@ let leaderboardAuthReady = null;
 let leaderboardPlayers = [];
 let leaderboardExpanded = false;
 
-let currentUsername = "Người chơi";
+let currentUsername = "Player";
 
 /* =====================================================
    TienHub Firebase — MODULAR ONLY
@@ -120,7 +120,7 @@ async function initFlappyFirebase() {
 
         if (!leaderboardAuth || !leaderboardDatabase) {
             throw new Error(
-                "Không lấy được Firebase Auth/Database của TienHub."
+                "Unable to access TienHub authentication/database."
             );
         }
 
@@ -183,7 +183,7 @@ async function getFlappyAuthUser() {
 
 async function ensureFlappyUserRecord(user, username) {
     if (!user || user.isAnonymous) {
-        throw new Error("Chưa có tài khoản TienHub hợp lệ.");
+        throw new Error("No valid TienHub account available.");
     }
 
     const { ref, get, set } = await initFlappyFirebase();
@@ -205,7 +205,7 @@ async function ensureFlappyUserRecord(user, username) {
 
     if (!cleanUsername) {
         throw new Error(
-            "Không xác định được username của tài khoản."
+            "Unable to determine the account username."
         );
     }
 
@@ -294,7 +294,7 @@ async function getFlappyDisplayName(user) {
         return username.trim();
     }
 
-    return "Người chơi";
+    return "Player";
 }
 
 /* =====================================================
@@ -309,7 +309,7 @@ profilePanel.className =
 
 
 profilePanel.innerHTML = `
-    <h2 class="side-title">👤 Hồ sơ</h2>
+    <h2 class="side-title">👤 Profile</h2>
 
     <div class="profile-user">
 
@@ -318,14 +318,14 @@ profilePanel.innerHTML = `
         <div class="profile-name">
 
             <strong id="flappyProfileName">
-                Khách
+                Guest
             </strong>
 
             <div
                 class="profile-status"
                 id="flappyProfileStatus"
             >
-                Chơi khách
+                Play as Guest
             </div>
 
         </div>
@@ -340,22 +340,22 @@ profilePanel.innerHTML = `
 
 
     <div class="profile-stat">
-        <span>🎮 Đã chơi</span>
+        <span>🎮 Games Played</span>
         <strong id="flappyProfileGames">0</strong>
     </div>
 
 
     <div class="profile-stat">
-        <span>⭐ Điểm hiện tại</span>
+        <span>⭐ Current Score</span>
         <strong id="flappyProfileScore">0</strong>
     </div>
     <div class="profile-stat">
-    <span>🏅 Xếp hạng</span>
+    <span>🏅 Rank</span>
     <strong id="flappyProfileRank">—</strong>
 </div>
 
 <div class="profile-stat">
-    <span>⬆️ Cần thêm</span>
+    <span>⬆️ Need</span>
     <strong id="flappyProfileNeed">—</strong>
 </div>
 `;
@@ -373,7 +373,7 @@ leaderboardPanel.className =
 
 
 leaderboardPanel.innerHTML = `
-    <h2 class="side-title">🏆 BXH Flappy</h2>
+    <h2 class="side-title">🏆 Flappy Leaderboard</h2>
 
     <div id="flappyLeaderboardList" class="leaderboard-list"></div>
 
@@ -647,11 +647,11 @@ async function loadFlappyUser() {
                 currentUsername = savedUsername.trim();
                 updateFlappyProfileName(
                     currentUsername,
-                    "Đang chờ tài khoản"
+                    "Waiting for account"
                 );
             } else {
-                currentUsername = "Khách";
-                updateFlappyProfileName("Khách", "Chưa đăng nhập");
+                currentUsername = "Guest";
+                updateFlappyProfileName("Guest", "Not signed in");
             }
 
             /* Không xóa highScore ở đây.
@@ -666,7 +666,7 @@ async function loadFlappyUser() {
 
         updateFlappyProfileName(
             currentUsername,
-            "Đã đăng nhập"
+            "Signed in"
         );
 
         const { ref, get } = await initFlappyFirebase();
@@ -698,12 +698,12 @@ async function loadFlappyUser() {
             currentUsername = savedUsername.trim();
             updateFlappyProfileName(
                 currentUsername,
-                "Không xác minh được tài khoản"
+                "Account verification failed"
             );
         } else {
             updateFlappyProfileName(
-                "Lỗi",
-                "Không tải được tài khoản"
+                "Error",
+                "Unable to load account"
             );
         }
 
@@ -724,7 +724,7 @@ async function setupFlappyLeaderboard() {
         console.error("FLAPPY LEADERBOARD INIT ERROR:", error);
     }
 
-    /* Hồ sơ và BXH phải được thử độc lập. */
+    /* Profile và BXH phải được thử độc lập. */
     await loadFlappyUser();
     await loadFlappyLeaderboard();
 }
@@ -747,7 +747,7 @@ function isFlappyScorePlausible(submittedScore) {
 
     if (submittedScore > allowedScore) {
         console.warn(
-            "FLAPPY: score không hợp lệ.",
+            "FLAPPY: invalid score.",
             { score: submittedScore, elapsed: elapsedSeconds, allowed: allowedScore }
         );
         return false;
@@ -777,7 +777,7 @@ async function saveFlappyLeaderboardScore(newScore) {
         const user = await getFlappyAuthUser();
 
         if (!user || user.isAnonymous) {
-            console.warn("FLAPPY: chưa có tài khoản TienHub.");
+            console.warn("FLAPPY: no TienHub account.");
             return;
         }
 
@@ -802,11 +802,11 @@ async function saveFlappyLeaderboardScore(newScore) {
         const username = await getFlappyUsername(user);
 
         if (!username) {
-            throw new Error("Không xác định được username TienHub.");
+            throw new Error("Unable to identify TienHub username.");
         }
 
         if (existingScore !== null && newScore <= existingScore) {
-            // Không cần ghi lại nếu điểm mới không vượt Best.
+            // Không cần ghi lại nếu points mới không vượt Best.
             // Chỉ đồng bộ username nếu bản ghi cũ bị thiếu/sai.
             if (existing?.username !== username) {
                 await set(scoreRef, {
@@ -844,7 +844,7 @@ async function saveFlappyLeaderboardScore(newScore) {
             typeof verified.score !== "number" ||
             verified.score !== newScore
         ) {
-            throw new Error("Firebase ghi điểm nhưng không xác minh được dữ liệu.");
+            throw new Error("Score was saved but could not be verified.");
         }
 
         currentUsername = username;
@@ -896,7 +896,7 @@ async function loadFlappyLeaderboard() {
                 uid: child.key,
                 username: typeof data.username === "string" && data.username.trim()
                     ? data.username.trim()
-                    : "Người chơi",
+                    : "Player",
                 score: typeof data.score === "number"
                     ? data.score
                     : Number(data.score) || 0
@@ -913,7 +913,7 @@ async function loadFlappyLeaderboard() {
 
         listElement.innerHTML = `
             <div class="leaderboard-empty">
-                Không tải được BXH
+                Leaderboard unavailable
             </div>
         `;
     }
@@ -934,7 +934,7 @@ function renderFlappyLeaderboard() {
     if (visiblePlayers.length === 0) {
         listElement.innerHTML = `
             <div class="leaderboard-empty">
-                Chưa có người chơi
+                No players yet
             </div>
         `;
 
@@ -973,7 +973,7 @@ function renderFlappyLeaderboard() {
 
                 <span class="leaderboard-name">
                     @${escapeLeaderboardText(player.username)}
-                    ${isMe ? '<small>Bạn</small>' : ""}
+                    ${isMe ? '<small>You</small>' : ""}
                 </span>
 
                 <strong class="leaderboard-score">
@@ -1033,7 +1033,7 @@ function updateFlappyRank(
             "—";
 
         needElement.textContent =
-            "Đăng nhập";
+            "Sign In";
 
         return;
 
@@ -1045,7 +1045,7 @@ function updateFlappyRank(
 
 
     /*
-     * Sắp xếp điểm cao → thấp
+     * Sắp xếp points cao → thấp
      */
 
     const sorted =
@@ -1059,7 +1059,7 @@ function updateFlappyRank(
      * Tìm vị trí của tài khoản hiện tại.
      *
      * Nếu chưa có trong BXH thì vẫn tính
-     * hạng dựa trên số người có điểm cao hơn.
+     * hạng dựa trên số người có points cao hơn.
      */
 
     let rank =
@@ -1118,13 +1118,13 @@ function updateFlappyRank(
 
 
     /*
-     * Đang đứng đầu
+     * You’re in first place
      */
 
     if (!playerAbove) {
 
         needElement.textContent =
-            "🥇 Đang đứng đầu";
+            "🥇 You’re in first place";
 
         return;
 
@@ -1132,7 +1132,7 @@ function updateFlappyRank(
 
 
     /*
-     * Số điểm cần thêm để vượt người phía trên.
+     * Số points cần thêm để vượt người phía trên.
      */
 
     const need =
@@ -1145,7 +1145,7 @@ function updateFlappyRank(
 
 
     needElement.textContent =
-        `+${need} điểm`;
+        `+${need} points`;
 
 }
 
@@ -1587,7 +1587,7 @@ function escapeLeaderboardText(
         ) {
 
             console.warn(
-                "Flappy: GameHub không tồn tại."
+                "Flappy: GameHub is missing."
             );
 
             return false;
@@ -1599,7 +1599,7 @@ function escapeLeaderboardText(
         ) {
 
             console.warn(
-                "Flappy: GameHub.ready không tồn tại."
+                "Flappy: GameHub.ready is missing."
             );
 
             return false;
@@ -1645,7 +1645,7 @@ function escapeLeaderboardText(
         } catch (error) {
 
             console.warn(
-                "Flappy GameHub init lỗi:",
+                "Flappy GameHub initialization error:",
                 error
             );
 
@@ -1753,7 +1753,7 @@ function escapeLeaderboardText(
 
 
             console.warn(
-                "Flappy game_start lỗi:",
+                "Flappy game_start error:",
                 error
             );
 
@@ -1829,7 +1829,7 @@ function escapeLeaderboardText(
         } catch (error) {
 
             console.warn(
-                "Flappy game_end lỗi:",
+                "Flappy game_end error:",
                 error
             );
 
@@ -2675,7 +2675,7 @@ function escapeLeaderboardText(
             void saveFlappyLeaderboardScore(score);
         } else {
             console.warn(
-                "FLAPPY: score bị từ chối:",
+                "FLAPPY: score rejected:",
                 score
             );
         }
