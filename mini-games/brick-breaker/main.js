@@ -68,7 +68,7 @@ menuBtn.className = "pause-btn";
 
 menuBtn.textContent = "⌂";
 
-menuBtn.title = "Quay về menu";
+menuBtn.title = "Back to Menu";
 
 
 
@@ -4496,7 +4496,7 @@ function gameOver() {
 
     menuText.textContent =
 
-        `Bạn đạt ${score} điểm.`;
+        `You scored ${score} points.`;
 
 
 
@@ -4574,7 +4574,7 @@ function togglePause() {
 
         menuText.textContent =
 
-            "Game đang tạm dừng.";
+            "Game Paused.";
 
 
 
