@@ -106,11 +106,11 @@
     modeButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.mode === mode));
     rightLabel.textContent = mode === "ai" ? "MACHINE" : "PLAYER 2";
     if (mode === "ai") {
-      controlsNote.textContent = "PC: W / S hoặc A / D • Mobile: kéo vợt bên trái";
-      hint.textContent = isMobile() ? "Kéo nửa trái màn hình để điều khiển" : "W / S hoặc A / D để điều khiển vợt trái";
+      controlsNote.textContent = "PC: W / S or A / D • Mobile: drag the left paddle";
+      hint.textContent = isMobile() ? "Drag on the left half to control your paddle" : "W / S or A / D to control the left paddle";
     } else {
-      controlsNote.textContent = "PC: P1 W / S hoặc A / D • P2 ↑ / ↓ • Mobile: mỗi người một nửa màn hình";
-      hint.textContent = isMobile() ? "P1 kéo bên trái • P2 kéo bên phải" : "P1: W / S hoặc A / D • P2: ↑ / ↓ hoặc ← / →";
+      controlsNote.textContent = "PC: P1 W / S or A / D • P2 ↑ / ↓ • Mobile: one half of the screen per player";
+      hint.textContent = isMobile() ? "P1 drag left • P2 drag right" : "P1: W / S or A / D • P2: ↑ / ↓ or ← / →";
     }
   }
 
@@ -165,7 +165,7 @@
     state.gameOver = true;
     pauseBtn.disabled = true;
     const leftWon = state.scoreLeft > state.scoreRight;
-    document.getElementById("resultTitle").textContent = leftWon ? "PLAYER 1 THẮNG" : (state.mode === "ai" ? "MACHINE THẮNG" : "PLAYER 2 THẮNG");
+    document.getElementById("resultTitle").textContent = leftWon ? "PLAYER 1 WINS" : (state.mode === "ai" ? "COMPUTER WINS" : "PLAYER 2 WINS");
     document.getElementById("resultScore").textContent = `${state.scoreLeft} : ${state.scoreRight}`;
     resultPanel.hidden = false;
     menuPanel.style.display = "none";
