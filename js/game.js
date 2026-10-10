@@ -5,7 +5,7 @@ const MINI_GAMES = [
         category: "board",
         categoryName: "Board Game",
         image: "assets/games/caro5.png",
-        description: "Đặt 5 quân liên tiếp để chiến thắng.",
+        description: "Connect five pieces in a row to win.",
         status: "play",
         path: "mini-games/caro5/index.html"
     },
@@ -15,7 +15,7 @@ const MINI_GAMES = [
         category: "board",
         categoryName: "Board Game",
         image: "assets/games/chess.png",
-        description: "Đấu trí và chiếu hết đối thủ.",
+        description: "Outwit your opponent and deliver checkmate.",
         status: "play",
         path: "mini-games/chess/index.html"
     },
@@ -25,7 +25,7 @@ const MINI_GAMES = [
         category: "arcade",
         categoryName: "Arcade",
         image: "assets/games/flappy.png",
-        description: "Bay càng xa càng tốt.",
+        description: "Fly as far as you can.",
         status: "play",
         path: "mini-games/flappy/index.html"
     },
@@ -35,7 +35,7 @@ const MINI_GAMES = [
         category: "board",
         categoryName: "Board Game",
         image: "assets/games/ludo.png",
-        description: "Đưa quân về đích trước đối thủ.",
+        description: "Get your pieces home before your opponents.",
         status: "play",
         path: "mini-games/ludo/index.html"
     },
@@ -45,7 +45,7 @@ const MINI_GAMES = [
         category: "arcade",
         categoryName: "Arcade",
         image: "assets/games/snake.png",
-        description: "Ăn thức ăn và trở thành con rắn dài nhất.",
+        description: "Eat food and become the longest snake.",
         status: "play",
         path: "mini-games/snake/index.html"
     },
@@ -55,7 +55,7 @@ const MINI_GAMES = [
         category: "arcade",
         categoryName: "Arcade",
         image: "assets/games/stickman.png",
-        description: "Vượt chướng ngại vật và tiến về phía trước.",
+        description: "Dodge obstacles and keep moving forward.",
         status: "play",
         path: "mini-games/stickman/index.html"
     },
@@ -65,7 +65,7 @@ const MINI_GAMES = [
         category: "arcade",
         categoryName: "Arcade",
         image: "assets/games/brick-breaker.png",
-        description: "Phá toàn bộ những viên gạch bằng quả bóng.",
+        description: "Break every brick with your ball.",
         status: "play",
         path: "mini-games/brick-breaker/index.html"
     },
@@ -75,7 +75,7 @@ const MINI_GAMES = [
         category: "puzzle",
         categoryName: "Puzzle",
         image: "assets/games/minesweeper.png",
-        description: "Tìm những ô an toàn và tránh bom.",
+        description: "Find safe tiles and avoid mines.",
         status: "play",
         path: "mini-games/minesweeper/index.html"
     },
@@ -85,7 +85,7 @@ const MINI_GAMES = [
         category: "card",
         categoryName: "Card Game",
         image: "assets/games/blackjack.png",
-        description: "Cố đạt gần 21 điểm hơn dealer.",
+        description: "Get closer to 21 than the dealer.",
         status: "play",
         path: "mini-games/blackjack/index.html"
     },
@@ -95,14 +95,14 @@ const MINI_GAMES = [
         category: "arcade",
         categoryName: "Arcade",
         image: "assets/games/pong.png",
-        description: "Đánh bóng và vượt qua đối thủ.",
+        description: "Return the ball and outscore your opponent.",
         status: "play",
         path: "mini-games/pong/index.html"
     }
 ];
 
 const GAME_CATEGORIES = [
-    { id: "all", name: "Tất cả" },
+    { id: "all", name: "All" },
     { id: "arcade", name: "Arcade" },
     { id: "board", name: "Board Game" },
     { id: "card", name: "Card Game" },
@@ -162,12 +162,12 @@ function openGame(gameId) {
     const game = getGameById(gameId);
 
     if (!game) {
-        console.warn(`[TienHub] Không tìm thấy game: ${gameId}`);
+        console.warn(`[TienHub] Game not found: ${gameId}`);
         return;
     }
 
     if (game.status !== "play") {
-        console.log(`[TienHub] Game "${game.name}" chưa mở.`);
+        console.log(`[TienHub] Game "${game.name}"is not available yet.`);
         return;
     }
 

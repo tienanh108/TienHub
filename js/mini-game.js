@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
                     <span class="play-button">
-                        Chơi
+                        Play
                     </span>
                 </div>
             `;

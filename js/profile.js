@@ -40,15 +40,15 @@ if (!window.TienHubShowDeviceKickModal) {
 
             <div class="tienhub-device-kick-card" role="dialog" aria-modal="true" aria-labelledby="tienhubDeviceKickTitle">
 
-                <button type="button" class="tienhub-device-kick-x" aria-label="Đóng">×</button>
+                <button type="button" class="tienhub-device-kick-x" aria-label="Close">×</button>
 
                 <div class="tienhub-device-kick-icon">⚠</div>
 
-                <h2 id="tienhubDeviceKickTitle">Tài khoản đã đăng nhập ở thiết bị khác</h2>
+                <h2 id="tienhubDeviceKickTitle">Account signed in on another device</h2>
 
-                <p>Tài khoản này vừa được đăng nhập trên một thiết bị khác. Phiên đăng nhập trên thiết bị này đã kết thúc.</p>
+                <p>This account was signed in on another device. Your session on this device has ended.</p>
 
-                <button type="button" class="tienhub-device-kick-close">Đóng</button>
+                <button type="button" class="tienhub-device-kick-close">Close</button>
 
             </div>
 
@@ -273,13 +273,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (profileMenu) {
         const card = document.createElement("div");
         card.className = "tienhub-wallet-card";
-        card.setAttribute("aria-label", "Ví TienHub Coin");
+        card.setAttribute("aria-label", "TienHub Coin Wallet");
         card.innerHTML = `
             <span class="tienhub-wallet-coin" aria-hidden="true">T</span>
             <div class="tienhub-wallet-details">
-                <span class="tienhub-wallet-label">Số dư TienHub Coin</span>
+                <span class="tienhub-wallet-label">TienHub Coin Balance</span>
                 <strong class="tienhub-wallet-balance" aria-live="polite">— THC</strong>
-                <span class="tienhub-wallet-status">Chưa kết nối ví</span>
+                <span class="tienhub-wallet-status">Wallet not connected</span>
             </div>
         `;
         const profileLink = profileMenu.querySelector(".profile-menu-profile");
@@ -295,7 +295,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function resetWallet() {
         if (walletBalance) walletBalance.textContent = "— THC";
-        if (walletStatus) walletStatus.textContent = "Chưa kết nối ví";
+        if (walletStatus) walletStatus.textContent = "Wallet not connected";
     }
 
     async function refreshWallet(user) {
@@ -309,7 +309,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Recheck on reopening the account menu, not on every click or auth callback.
         if (Date.now() - walletLastFetch < 30_000) return;
         walletLastFetch = Date.now();
-        if (walletStatus) walletStatus.textContent = "Đang đồng bộ...";
+        if (walletStatus) walletStatus.textContent = "Syncing...";
 
         const expectedUid = user.uid;
         const task = (async () => {
@@ -322,19 +322,19 @@ document.addEventListener("DOMContentLoaded", async () => {
                 if (result?.status === "connected" &&
                     Number.isSafeInteger(balance) && balance >= 0) {
                     walletBalance.textContent = `${new Intl.NumberFormat("vi-VN").format(balance)} THC`;
-                    if (walletStatus) walletStatus.textContent = "Ví THC dùng chung";
+                    if (walletStatus) walletStatus.textContent = "Shared THC wallet";
                 } else {
                     walletBalance.textContent = "— THC";
                     if (walletStatus) {
                         walletStatus.textContent = result?.status === "not-configured"
-                            ? "Chưa kết nối ví"
-                            : "Không tải được số dư";
+                            ? "Wallet not connected"
+                            : "Unable to load balance";
                     }
                 }
             } catch (error) {
                 if (currentUser?.uid !== expectedUid || walletUid !== expectedUid) return;
                 walletBalance.textContent = "— THC";
-                if (walletStatus) walletStatus.textContent = "Không tải được số dư";
+                if (walletStatus) walletStatus.textContent = "Unable to load balance";
                 console.warn("TienHub wallet read error:", error);
             }
         })();
@@ -667,11 +667,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         closeProfile();
 
-        profileName.textContent = "Đăng nhập";
+        profileName.textContent = "Sign In";
 
         profileAvatar.textContent = "→";
 
-        profileButton.setAttribute("aria-label", "Đăng nhập TienHub");
+        profileButton.setAttribute("aria-label", "Sign in to TienHub");
 
         if (profileMenu) profileMenu.hidden = true;
 
@@ -699,7 +699,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             user.email?.split("@")[0] ||
 
-            "Người chơi";
+            "Player";
 
 
 
@@ -727,7 +727,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (profileMenu) profileMenu.hidden = false;
 
-        profileButton.setAttribute("aria-label", `Tài khoản ${username}`);
+        profileButton.setAttribute("aria-label", `Account ${username}`);
 
 
 
@@ -835,7 +835,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (!auth) {
 
-            throw new Error("Không lấy được Firebase Auth của TienHub.");
+            throw new Error("Unable to access TienHub authentication.");
 
         }
 

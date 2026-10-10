@@ -37,12 +37,12 @@ function ensureOverlay() {
         <div class="th-reward-backdrop"></div>
         <section class="th-reward-panel" role="dialog" aria-modal="true" aria-labelledby="th-reward-title" tabindex="-1">
             <span class="th-reward-eyebrow">TIENHUB COIN</span>
-            <h2 id="th-reward-title">🎁 Quà đăng nhập</h2>
-            <p class="th-reward-subtitle">Nhận quà mỗi ngày bạn ghé TienHub. Nghỉ ngày nào vẫn giữ tiến độ!</p>
-            <div class="th-reward-slots" aria-label="Chu kỳ nhận thưởng 7 ngày"></div>
+            <h2 id="th-reward-title">🎁 Daily Rewards</h2>
+            <p class="th-reward-subtitle">Claim rewards whenever you visit TienHub. Missing a day won’t reset your progress!</p>
+            <div class="th-reward-slots" aria-label="7-day reward cycle"></div>
             <p class="th-reward-message" aria-live="polite"></p>
-            <button type="button" class="th-reward-claim">Nhận thưởng</button>
-            <p class="th-reward-footnote">Mỗi ngày nhận tối đa 1 ô · Giờ Việt Nam</p>
+            <button type="button" class="th-reward-claim">Claim Reward</button>
+            <p class="th-reward-footnote">One reward per day · Vietnam time (UTC+7)</p>
         </section>`;
     // The player must claim first; backdrop and Escape never dismiss the modal.
     overlay.querySelector('.th-reward-claim').addEventListener('click', claim);
@@ -70,18 +70,18 @@ function redraw() {
         if (i <= progress) card.classList.add('is-done');
         if (i === next && !claimedToday) card.classList.add('is-current');
         if (i === 3 || i === 7) card.classList.add('is-bonus');
-        const label = document.createElement('span'); label.textContent = `Ngày ${i}`;
+        const label = document.createElement('span'); label.textContent = `Day ${i}`;
         const icon = document.createElement('strong'); icon.textContent = i <= progress ? '✓' : (i === 3 || i === 7 ? '🎁' : '🪙');
         const reward = document.createElement('b'); reward.textContent = amount(schedule[i-1]);
         card.append(label, icon, reward); grid.append(card);
     }
     const msg = ui.querySelector('.th-reward-message');
     msg.textContent = claimedToday
-        ? `Hôm nay bạn đã nhận quà. Hẹn gặp lại ngày mai!`
-        : `Đang chờ nhận: Ngày ${next} — ${amount(schedule[next-1])}`;
+        ? `You’ve claimed today’s reward. See you tomorrow!`
+        : `Next reward: Day ${next} — ${amount(schedule[next-1])}`;
     const btn = ui.querySelector('.th-reward-claim');
     btn.disabled = loading;
-    btn.textContent = claimedToday ? 'Tiếp tục ✓' : (loading ? 'Đang xử lý...' : `Nhận ${amount(schedule[next-1])}`);
+    btn.textContent = claimedToday ? 'Continue ✓' : (loading ? 'Processing...' : `Claim ${amount(schedule[next-1])}`);
 }
 async function claim() {
     if (!activeUser || loading || !status) return;
@@ -98,18 +98,18 @@ async function claim() {
         redraw();
         const msg = overlay.querySelector('.th-reward-message');
         msg.textContent = result.awarded
-            ? `🎉 Đã cộng ${amount(result.rewardThc)} vào ví! Số dư: ${amount(result.balance)}.`
-            : 'Bạn đã nhận thưởng hôm nay rồi.';
+            ? `🎉 Added ${amount(result.rewardThc)} to your wallet! Balance: ${amount(result.balance)}.`
+            : 'You’ve already claimed today’s reward.';
         if (result.awarded) window.dispatchEvent(new Event('tienhub:wallet-changed'));
     } catch (error) {
         if (isCurrent(uid)) {
-            overlay.querySelector('.th-reward-message').textContent = 'Chưa xác nhận được phần thưởng. Kiểm tra kết nối và nhấn lại để thử.';
+            overlay.querySelector('.th-reward-message').textContent = 'Reward not confirmed. Check your connection and try again.';
             // Avoid accidental double awards: the Worker validates one claim per day.
             try {
                 const latest = await api(activeUser, '/api/v1/rewards/login');
                 if (isCurrent(uid)) {
                     status = latest;
-                    if (!status.canClaim) overlay.querySelector('.th-reward-message').textContent = 'Bạn đã nhận phần thưởng hôm nay. Nhấn Tiếp tục để vào TienHub.';
+                    if (!status.canClaim) overlay.querySelector('.th-reward-message').textContent = 'Today’s reward claimed. Select Continue to enter TienHub.';
                 }
             } catch (_) { /* Keep the claim button available for a retry. */ }
         }
@@ -120,20 +120,20 @@ function redrawButtonOnly() {
     const button = overlay?.querySelector('.th-reward-claim');
     if (button) {
         button.disabled = !status;
-        button.textContent = status?.canClaim ? `Nhận ${amount(schedule[status.nextSlot-1])}` : 'Tiếp tục ✓';
+        button.textContent = status?.canClaim ? `Claim ${amount(schedule[status.nextSlot-1])}` : 'Continue ✓';
     }
 }
 function showWelcome() {
     const node = document.createElement('div');
     node.className = 'th-welcome-overlay';
     node.innerHTML = `<div class="th-reward-backdrop"></div>
-        <section class="th-welcome-card" role="dialog" aria-modal="true" aria-label="Quà chào mừng TienHub">
+        <section class="th-welcome-card" role="dialog" aria-modal="true" aria-label="TienHub Welcome Reward">
           <div class="th-welcome-icon">🎉</div>
-          <h2>Chào mừng đến TienHub!</h2>
-          <p>Quà đăng ký tài khoản mới</p>
+          <h2>Welcome to TienHub!</h2>
+          <p>New account welcome bonus</p>
           <strong>+200 THC</strong>
-          <span>Đã cộng vào ví TienHub của bạn</span>
-          <button type="button">Tuyệt vời! Tiếp tục</button>
+          <span>Added to your TienHub wallet</span>
+          <button type="button">Awesome! Continue</button>
         </section>`;
     document.body.append(node);
     return new Promise(resolve => {
@@ -171,6 +171,6 @@ export async function showForUser(user) {
 }
 export function hideForGuest() {
     activeUser = null; currentUid = null; status = null; runningFor = null;
-    // Signing out always closes the old account's modal.
+    // Signing out always closes the old account’s modal.
     if (overlay) overlay.hidden = true;
 }

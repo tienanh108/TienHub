@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const heroGames = [
         {
             title: "Racing",
-            description: "Những cuộc đua tốc độ cao đang được phát triển cho TienHub.",
+            description: "High-speed racing adventures are in development for TienHub.",
             icon: "🏁",
             images: [
                 "assets/images/games/racing/sunset-coast.png",
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         {
             title: "Soul Fighters",
-            description: "Trải nghiệm những trận đấu võ thuật 3D trên đấu trường TienHub.",
+            description: "Experience thrilling 3D martial arts battles in TienHub’s arena.",
             icon: "⚔️",
             images: ["assets/images/games/stickman-3d/training-arena.png"]
         }
@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderTimer = window.setTimeout(() => {
             if (heroImage) {
                 heroImage.src = photo;
-                heroImage.alt = `${game.title} - hình giới thiệu ${photoIndex + 1}`;
+                heroImage.alt = `${game.title} -preview image ${photoIndex + 1}`;
                 heroImage.classList.remove("is-changing");
             }
             renderTimer = null;

@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (emailField) emailField.hidden = !ENABLE_VERIFIED_EMAIL_SIGNUP;
     if (registerEmail) registerEmail.required = ENABLE_VERIFIED_EMAIL_SIGNUP;
     const loginUsernameLabel = document.querySelector('label[for="loginUsername"]');
-    if (loginUsernameLabel) loginUsernameLabel.textContent = "Username hoặc email";
+    if (loginUsernameLabel) loginUsernameLabel.textContent = "Username or email";
 
     // =========================================================
     // ACCOUNT RECOVERY: email OTP -> verify code -> set new password.
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         let result = {};
         try { result = await response.json(); } catch (_) {}
-        if (!response.ok) throw new Error(result.error || "Không thể kết nối dịch vụ khôi phục mật khẩu.");
+        if (!response.ok) throw new Error(result.error || "Couldn’t connect to password recovery.");
         return result;
     }
     function setRecoveryStep(step) {
@@ -53,16 +53,16 @@ document.addEventListener("DOMContentLoaded", () => {
             recoverySubmit.hidden = false;
             recoverySubmit.disabled = false;
             recoverySubmit.innerHTML = step === "email"
-                ? 'Gửi mã xác minh <span aria-hidden="true">→</span>'
+                ? 'Send Verification Code <span aria-hidden="true">→</span>'
                 : step === "code"
-                    ? 'Xác minh mã <span aria-hidden="true">→</span>'
-                    : 'Đặt mật khẩu mới <span aria-hidden="true">→</span>';
+                    ? 'Verify Code <span aria-hidden="true">→</span>'
+                    : 'Set New Password <span aria-hidden="true">→</span>';
         }
         if (authSubtitle) authSubtitle.textContent = step === "email"
-            ? "Nhập email đã đăng ký hoặc liên kết với TienHub."
+            ? "Enter the email registered or linked to TienHub."
             : step === "code"
-                ? "Nhập mã 6 số đã gửi đến email của bạn."
-                : "Mã hợp lệ. Hãy đặt mật khẩu mới cho tài khoản.";
+                ? "Enter the 6-digit code sent to your email."
+                : "Code verified. Set a new password for your account.";
         if (step === "code") recoveryCode?.focus();
         if (step === "password") recoveryNewPassword?.focus();
     }
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!recoveryResend) return;
             const remaining = Math.max(0, Math.ceil((recoveryResendUntil - Date.now()) / 1000));
             recoveryResend.disabled = remaining > 0;
-            recoveryResend.textContent = remaining ? `Gửi lại (${remaining}s)` : "Gửi lại mã";
+            recoveryResend.textContent = remaining ? `Resend (${remaining}s)` : "Resend Code";
             if (!remaining) clearInterval(recoveryResendTimer);
         };
         tick(); recoveryResendTimer = setInterval(tick, 1000);
@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (loginForm) loginForm.hidden = true;
         if (registerForm) registerForm.hidden = true;
         if (recoveryForm) recoveryForm.hidden = false;
-        if (authTitle) authTitle.textContent = "Quên mật khẩu";
+        if (authTitle) authTitle.textContent = "Forgot Password";
         if (switchAuth) switchAuth.hidden = true;
         if (switchText) switchText.hidden = true;
         setRecoveryStep("email");
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             await resetApi("send", {email:recoveryActiveEmail});
             cooldownRecovery();
-            showMessage(recoveryMessage, "Mã xác minh mới đã được gửi. Hãy kiểm tra email và thư Spam.", "success");
+            showMessage(recoveryMessage, "A new verification code was sent. Check your inbox and spam folder.", "success");
         } catch (error) {
             recoveryResend.disabled = false;
             showMessage(recoveryMessage, error.message, "error");
@@ -124,35 +124,35 @@ document.addEventListener("DOMContentLoaded", () => {
             if (recoveryStep === "email") {
                 const email = recoveryEmail?.value.trim().toLowerCase() || "";
                 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.endsWith("@auth.tienhub.vn")) {
-                    throw new Error("Hãy nhập email thật đã đăng ký hoặc liên kết.");
+                    throw new Error("Enter your registered or linked email address.");
                 }
                 await resetApi("send", { email });
                 recoveryActiveEmail = email;
                 setRecoveryStep("code");
                 cooldownRecovery();
-                showMessage(recoveryMessage, "Mã xác minh đã được gửi. Hãy kiểm tra email và thư Spam.", "success");
+                showMessage(recoveryMessage, "Verification code sent. Check your inbox and spam folder.", "success");
             } else if (recoveryStep === "code") {
                 const code = recoveryCode?.value.trim() || "";
-                if (!/^\d{6}$/.test(code)) throw new Error("Nhập đủ mã xác minh 6 số.");
+                if (!/^\d{6}$/.test(code)) throw new Error("Enter all six digits of the verification code.");
                 await resetApi("check", { email: recoveryActiveEmail, code });
                 setRecoveryStep("password");
-                showMessage(recoveryMessage, "Xác minh thành công. Hãy nhập mật khẩu mới.", "success");
+                showMessage(recoveryMessage, "Verification successful. Enter your new password.", "success");
             } else {
                 const nextPassword = recoveryNewPassword?.value || "";
                 const confirmation = recoveryConfirmPassword?.value || "";
-                if (nextPassword.length < 10 || nextPassword.length > 128) throw new Error("Mật khẩu mới cần từ 10 đến 128 ký tự.");
-                if (nextPassword !== confirmation) throw new Error("Hai mật khẩu mới không khớp.");
+                if (nextPassword.length < 10 || nextPassword.length > 128) throw new Error("Your new password must be 10–128 characters long.");
+                if (nextPassword !== confirmation) throw new Error("The new passwords do not match.");
                 await resetApi("confirm", {email:recoveryActiveEmail,code:recoveryCode.value.trim(),newPassword:nextPassword});
                 recoveryNewPassword.value = "";
                 recoveryConfirmPassword.value = "";
                 if (recoveryPasswordStep) recoveryPasswordStep.hidden = true;
                 if (recoverySubmit) recoverySubmit.hidden = true;
-                if (authSubtitle) authSubtitle.textContent = "Bạn có thể quay lại đăng nhập bằng mật khẩu mới.";
-                showMessage(recoveryMessage, "Đổi mật khẩu thành công! Hãy quay lại đăng nhập.", "success");
+                if (authSubtitle) authSubtitle.textContent = "You can now sign in with your new password.";
+                showMessage(recoveryMessage, "Password updated! Please sign in again.", "success");
                 return;
             }
         } catch (error) {
-            showMessage(recoveryMessage, error.message || "Không thể xử lý yêu cầu.", "error");
+            showMessage(recoveryMessage, error.message || "Unable to process your request.", "error");
         } finally {
             if (recoverySubmit && !recoverySubmit.hidden) recoverySubmit.disabled = false;
         }
@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         let data = {};
         try { data = await response.json(); } catch (_) {}
-        if (!response.ok) throw new Error(data.error || "Dịch vụ gửi mã chưa sẵn sàng. Vui lòng thử lại sau.");
+        if (!response.ok) throw new Error(data.error || "Verification service unavailable. Please try again later.");
         return data;
     }
     function startCooldown(email) {
@@ -184,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const seconds = Math.max(0, Math.ceil((until - Date.now()) / 1000));
             if (!sendRegisterCodeBtn) return;
             sendRegisterCodeBtn.disabled = seconds > 0;
-            sendRegisterCodeBtn.textContent = seconds ? `Gửi lại (${seconds}s)` : "Gửi lại mã";
+            sendRegisterCodeBtn.textContent = seconds ? `Resend (${seconds}s)` : "Resend Code";
             if (!seconds) clearInterval(cooldownTimer);
         };
         tick();
@@ -198,24 +198,24 @@ document.addEventListener("DOMContentLoaded", () => {
             const tick = () => {
                 const seconds = Math.max(0, Math.ceil((until - Date.now()) / 1000));
                 sendRegisterCodeBtn.disabled = seconds > 0;
-                sendRegisterCodeBtn.textContent = seconds ? `Gửi lại (${seconds}s)` : "Gửi mã";
+                sendRegisterCodeBtn.textContent = seconds ? `Resend (${seconds}s)` : "Send Code";
                 if (!seconds) clearInterval(cooldownTimer);
             };
             tick(); cooldownTimer = setInterval(tick, 1000);
         } else if (sendRegisterCodeBtn) {
-            sendRegisterCodeBtn.disabled = false; sendRegisterCodeBtn.textContent = "Gửi mã";
+            sendRegisterCodeBtn.disabled = false; sendRegisterCodeBtn.textContent = "Send Code";
         }
     });
     sendRegisterCodeBtn?.addEventListener("click", async () => {
         const email = registerEmail?.value.trim().toLowerCase() || "";
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            showMessage(codeMessage, "Vui lòng nhập email hợp lệ trước.", "error"); return;
+            showMessage(codeMessage, "Enter a valid email first.", "error"); return;
         }
         sendRegisterCodeBtn.disabled = true;
         try {
             await otpRequest("send", { email, purpose: "signup" });
             startCooldown(email);
-            showMessage(codeMessage, "Đã gửi mã 6 số. Kiểm tra hộp thư và Spam.", "success");
+            showMessage(codeMessage, "Six-digit code sent. Check your inbox and spam folder.", "success");
         } catch (error) {
             sendRegisterCodeBtn.disabled = false;
             showMessage(codeMessage, error.message, "error");
@@ -390,7 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (authTitle) {
 
-            authTitle.textContent = "Đăng nhập";
+            authTitle.textContent = "Sign In";
 
         }
 
@@ -400,7 +400,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             authSubtitle.textContent =
 
-                "Đăng nhập vào tài khoản TienHub của bạn.";
+                "Sign in to your TienHub account.";
 
         }
 
@@ -408,7 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (switchAuth) {
 
-            switchAuth.textContent = "Đăng ký";
+            switchAuth.textContent = "Sign Up";
 
         }
 
@@ -456,7 +456,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (authTitle) {
 
-            authTitle.textContent = "Đăng ký";
+            authTitle.textContent = "Sign Up";
 
         }
 
@@ -466,7 +466,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             authSubtitle.textContent =
 
-                "Tạo tài khoản TienHub để bắt đầu.";
+                "Create a TienHub account to get started.";
 
         }
 
@@ -474,7 +474,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (switchAuth) {
 
-            switchAuth.textContent = "Đăng nhập";
+            switchAuth.textContent = "Sign In";
 
         }
 
@@ -496,7 +496,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-    // Nút Đăng ký / Đăng nhập
+    // Nút Sign Up / Sign In
 
     if (switchAuth) {
 
@@ -610,7 +610,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 console.error(
 
-                    "Không tìm thấy ô mật khẩu:",
+                    "Password field not found:",
 
                     targetId
 
@@ -636,7 +636,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-                button.textContent = "Ẩn";
+                button.textContent = "Hide";
 
 
 
@@ -644,7 +644,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     "aria-label",
 
-                    "Ẩn mật khẩu"
+                    "Hide password"
 
                 );
 
@@ -664,7 +664,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-                button.textContent = "Hiện";
+                button.textContent = "Show";
 
 
 
@@ -672,7 +672,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     "aria-label",
 
-                    "Hiện mật khẩu"
+                    "Show password"
 
                 );
 
@@ -798,7 +798,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             throw new Error(
 
-                "Không thể kết nối Firebase."
+                "Unable to connect to the authentication service."
 
             );
 
@@ -894,7 +894,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             throw new Error(
 
-                "Không xác định được username của tài khoản."
+                "Unable to determine the account username."
 
             );
 
@@ -950,14 +950,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const normalized = clean.toLowerCase();
         const signupEmail = email.trim().toLowerCase();
         if (!ENABLE_VERIFIED_EMAIL_SIGNUP) {
-            throw new Error("Đăng ký email chưa được bật.");
+            throw new Error("Email registration is not enabled.");
         }
         if (!/^[a-zA-Z0-9_]{3,20}$/.test(clean)) {
-            throw new Error("Tên đăng nhập không hợp lệ.");
+            throw new Error("Invalid username.");
         }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupEmail)
             || signupEmail.endsWith("@auth.tienhub.vn")) {
-            throw new Error("Hãy nhập email thật để nhận thư xác minh.");
+            throw new Error("Enter a valid email address to receive the verification email.");
         }
 
         // The old account UID and username mappings are never altered here.
@@ -985,7 +985,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const record = await get(ref(db, `users/${account.user.uid}`));
                 if (record.exists() && record.val()?.usernameNormalized !== normalized) {
                     await auth.signOut();
-                    throw new Error("Email này thuộc một tài khoản TienHub khác.");
+                    throw new Error("This email belongs to another TienHub account.");
                 }
                 resumed = true;
             }
@@ -1002,7 +1002,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 { applyLocally: false }
             );
             if (!transaction.committed || transaction.snapshot.val() !== user.uid) {
-                const conflict = new Error("Tên đăng nhập đã được sử dụng. Hãy chọn tên khác.");
+                const conflict = new Error("Username already taken. Please choose another.");
                 conflict.code = "tienhub/username-taken";
                 throw conflict;
             }
@@ -1013,7 +1013,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const existingRecord = await get(recordRef);
             if (existingRecord.exists()) {
                 if (existingRecord.val()?.usernameNormalized !== normalized) {
-                    throw new Error("Hồ sơ cũ không khớp tên đăng nhập; dừng để bảo vệ UID.");
+                    throw new Error("Existing profile username mismatch. Operation stopped to protect account integrity.");
                 }
                 // Retry after a failed email claim. Do not rewrite createdAt.
             } else {
@@ -1027,7 +1027,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await updateProfile(user, { displayName: clean });
         } catch (error) {
             if (resumed) {
-                throw new Error(`Không thể tiếp tục đăng ký hiện có: ${error.message}`);
+                throw new Error(`Unable to resume existing registration: ${error.message}`);
             }
             // Roll back ONLY this freshly created account, never existing UIDs.
             // If cleanup itself fails, warn support rather than claiming success.
@@ -1052,18 +1052,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 await auth.signOut().catch(() => {});
             }
             if (cleanupFailed) {
-                throw new Error("Tạo tài khoản chưa hoàn tất. Đừng đăng ký lặp lại; hãy liên hệ quản trị TienHub để kiểm tra.");
+                throw new Error("Account creation is incomplete. Do not sign up again; contact TienHub support.");
             }
             throw error;
         }
 
         // Code is consumed by Worker only after new UID & username persist.
         // If this network call fails, leave the newly created UID intact so
-        // user can retry safely; never replace/change another account's UID.
+        // user can retry safely; never replace/change another account’s UID.
         try {
             await otpRequest("claim", { email: signupEmail, purpose: "signup", code }, user);
         } catch (error) {
-            throw new Error(`Tài khoản đã được tạo nhưng chưa xác minh xong: ${error.message}. Giữ trang này và thử lại.`);
+            throw new Error(`Account created but verification is incomplete: ${error.message}. Keep this page open and try again.`);
         }
         try {
             await acquireAccountDeviceLock(user);
@@ -1150,7 +1150,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-        // Release this browser's lease when Firebase disconnects.
+        // Release this browser’s lease when Firebase disconnects.
         try {
             await onDisconnect(lockRef).remove();
         } catch (error) {
@@ -1185,7 +1185,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!tx.committed) {
 
-            const error = new Error("Không thể nhận quyền đăng nhập trên thiết bị này.");
+            const error = new Error("Unable to authorize sign-in on this device.");
 
             error.code = "tienhub/device-lock-failed";
 
@@ -1271,7 +1271,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-            // Do not remove the new device's lock.
+            // Do not remove the new device’s lock.
 
             localStorage.removeItem("tienhub_logged_in");
 
@@ -1365,7 +1365,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-            // Never delete another device's lease.
+            // Never delete another device’s lease.
 
             await runTransaction(lockRef, existing => {
 
@@ -1427,7 +1427,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     .includes(legacyError?.code)) throw legacyError;
 
                 // Gmail-signup usernames need privileged resolution, but the
-                // account's real email must NEVER be returned to the browser.
+                // account’s real email must NEVER be returned to the browser.
                 // The backend verifies the password with Firebase and creates a
                 // short-lived custom sign-in token for the exact same UID.
                 let response;
@@ -1438,20 +1438,20 @@ document.addEventListener("DOMContentLoaded", () => {
                         body: JSON.stringify({ username: loginInput, password })
                     });
                 } catch (_networkError) {
-                    const error = new Error("Không thể kết nối máy chủ đăng nhập TienHub.");
+                    const error = new Error("Unable to connect to the TienHub sign-in server.");
                     error.code = "tienhub/username-login-unavailable";
                     throw error;
                 }
                 if (!response.ok) {
                     const error = new Error(response.status === 401
-                        ? "Tên người dùng hoặc mật khẩu không đúng."
-                        : "Dịch vụ đăng nhập bằng username tạm thời không khả dụng.");
+                        ? "Incorrect username or password."
+                        : "Username sign-in is temporarily unavailable.");
                     error.code = response.status === 401 ? "auth/invalid-credential" : "tienhub/username-login-unavailable";
                     throw error;
                 }
                 const data = await response.json();
                 if (typeof data.customToken !== "string" || data.customToken.length < 80) {
-                    const error = new Error("Máy chủ trả về dữ liệu đăng nhập không hợp lệ.");
+                    const error = new Error("Sign-in server returned an invalid response.");
                     error.code = "tienhub/username-login-unavailable";
                     throw error;
                 }
@@ -1462,7 +1462,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const legacy = (user.email || "").toLowerCase().endsWith("@auth.tienhub.vn");
         try {
             if (!legacy) {
-                // Either Firebase's native verified flag, or TienHub's
+                // Either Firebase’s native verified flag, or TienHub’s
                 // server-verified 6-digit code is accepted.
                 await reload(user);
                 if (!user.emailVerified) {
@@ -1471,20 +1471,20 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                     const data = response.ok ? await response.json() : {};
                     if (!data.verified) {
-                        const error = new Error("Email chưa được xác minh bằng mã.");
+                        const error = new Error("Email has not been verified with a code.");
                         error.code = "tienhub/email-not-verified";
                         throw error;
                     }
                 }
             }
-            // A new Gmail user's username comes from /users; never infer it
+            // A new Gmail user’s username comes from /users; never infer it
             // from the email address, avoiding orphan/mismatched records.
             if (!legacy) {
                 const { db } = await import("../src/core/firebase.js");
                 const { get, ref } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js");
                 const record = (await get(ref(db, `users/${user.uid}`))).val();
                 if (!record?.username || !record?.usernameNormalized) {
-                    throw new Error("Hồ sơ đăng ký chưa hoàn tất. Hãy liên hệ quản trị TienHub để hỗ trợ.");
+                    throw new Error("Registration profile is incomplete. Please contact TienHub support.");
                 }
             }
             await ensureUserRecord(user, user.displayName || usernameOrEmail);
@@ -1523,19 +1523,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
             case "tienhub/device-limit":
 
-                return "Tài khoản này đang được đăng nhập trên một thiết bị khác.";
+                return "This account is signed in on another device.";
 
 
 
             case "tienhub/device-lock-failed":
 
-                return "Không thể xác nhận phiên đăng nhập. Vui lòng thử lại.";
+                return "Unable to verify your session. Please try again.";
 
 
 
             case "auth/email-already-in-use":
 
-                return "Tên người dùng này đã tồn tại.";
+                return "Username already exists.";
 
 
 
@@ -1543,52 +1543,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
             case "auth/invalid-login-credentials":
 
-                return "Tên người dùng hoặc mật khẩu không đúng.";
+                return "Incorrect username or password.";
 
 
 
             case "auth/user-not-found":
 
-                return "Tài khoản không tồn tại.";
+                return "Account not found.";
 
 
 
             case "auth/wrong-password":
 
-                return "Mật khẩu không đúng.";
+                return "Incorrect password.";
 
 
 
             case "auth/weak-password":
 
-                return "Mật khẩu phải có ít nhất 6 ký tự.";
+                return "Password must be at least six characters.";
 
 
 
             case "auth/network-request-failed":
 
-                return "Không thể kết nối mạng.";
+                return "Network connection failed.";
 
 
 
             case "auth/too-many-requests":
 
-                return "Có quá nhiều lần thử. Hãy thử lại sau.";
+                return "Too many attempts. Please try again later.";
 
 
 
             case "tienhub/username-login-unavailable":
-                return "Máy chủ đăng nhập username tạm thời không khả dụng. Hãy đăng nhập bằng Gmail trong lúc chờ khắc phục.";
+                return "Username sign-in is temporarily unavailable. Please sign in with Gmail instead.";
 
             case "tienhub/email-not-verified":
-                return "Email chưa xác minh. Hãy dùng mã 6 số đã gửi khi đăng ký.";
+                return "Email not verified. Use the six-digit code sent at registration.";
 
             case "tienhub/username-taken":
-                return "Username đã được đăng ký. Hãy chọn tên khác.";
+                return "Username is taken. Choose another.";
 
             case "auth/operation-not-allowed":
 
-                return "Firebase chưa bật Email/Password.";
+                return "Email/password sign-in is not enabled.";
 
 
 
@@ -1598,7 +1598,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     error.message ||
 
-                    "Đã xảy ra lỗi. Hãy thử lại."
+                    "Something went wrong. Please try again."
 
                 );
 
@@ -1682,7 +1682,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         registerMessage,
 
-                        "Tên người dùng phải có 3–20 ký tự, chỉ gồm chữ, số hoặc _.",
+                        "Username must be 3–20 characters, using letters, numbers or _.",
 
                         "error"
 
@@ -1705,13 +1705,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 if (ENABLE_VERIFIED_EMAIL_SIGNUP && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.trim().toLowerCase().endsWith("@auth.tienhub.vn"))) {
-                    showMessage(registerMessage, "Vui lòng nhập email hợp lệ.", "error");
+                    showMessage(registerMessage, "Please enter a valid email address.", "error");
                     registerEmail?.focus();
                     return;
                 }
 
                 if (!/^\d{6}$/.test(code)) {
-                    showMessage(registerMessage, "Nhập mã xác minh gồm 6 số đã gửi đến email.", "error");
+                    showMessage(registerMessage, "Enter the six-digit verification code emailed to you.", "error");
                     registerCode?.focus();
                     return;
                 }
@@ -1724,7 +1724,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         registerMessage,
 
-                        "Mật khẩu phải có ít nhất 6 ký tự.",
+                        "Password must be at least six characters.",
 
                         "error"
 
@@ -1754,7 +1754,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         registerMessage,
 
-                        "Mật khẩu xác nhận không khớp.",
+                        "Passwords do not match.",
 
                         "error"
 
@@ -1798,7 +1798,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     submitButton.textContent =
 
-                        "Đang đăng ký...";
+                        "Signing up...";
 
 
 
@@ -1815,11 +1815,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     const registerResult = await registerUser(username, password, email, code);
                     if (registerResult.pendingVerification) {
                         showMessage(registerMessage, registerResult.verificationSent
-                            ? "Tài khoản đã được tạo. Kiểm tra email (kể cả Spam) để xác minh rồi đăng nhập bằng email."
-                            : "Tài khoản đã được tạo nhưng chưa gửi được thư xác minh. Chọn Đăng nhập rồi dùng Gửi lại email xác minh.", "success");
+                            ? "Account created. Check your inbox (and spam folder), verify your email, and sign in."
+                            : "Account created, but the verification email couldn’t be sent. Sign in and request another verification email.", "success");
                         if (submitButton) {
                             submitButton.disabled = false;
-                            submitButton.textContent = "Đăng ký";
+                            submitButton.textContent = "Sign Up";
                         }
                         return;
                     }
@@ -1832,7 +1832,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         registerMessage,
 
-                        "Đăng ký thành công. Đang vào TienHub...",
+                        "Sign-up successful. Opening TienHub...",
 
                         "success"
 
@@ -1888,7 +1888,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         submitButton.textContent =
 
-                            "Đăng ký";
+                            "Sign Up";
 
 
 
@@ -1968,7 +1968,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         loginMessage,
 
-                        "Tên người dùng không hợp lệ.",
+                        "Invalid username.",
 
                         "error"
 
@@ -1998,7 +1998,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         loginMessage,
 
-                        "Vui lòng nhập mật khẩu.",
+                        "Please enter your password.",
 
                         "error"
 
@@ -2042,7 +2042,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     submitButton.textContent =
 
-                        "Đang đăng nhập...";
+                        "Signing in...";
 
 
 
@@ -2072,7 +2072,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         loginMessage,
 
-                        "Đăng nhập thành công. Đang vào TienHub...",
+                        "Sign-in successful. Opening TienHub...",
 
                         "success"
 
@@ -2128,7 +2128,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         submitButton.textContent =
 
-                            "Đăng nhập";
+                            "Sign In";
 
 
 

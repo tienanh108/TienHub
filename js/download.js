@@ -9,8 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (downloadButton) {
         downloadButton.addEventListener("click", () => {
             window.alert(
-                "TienHub Desktop đang được phát triển.\n\n" +
-                "Nút tải chính thức sẽ được cập nhật tại đây khi phiên bản đầu tiên phát hành."
+                "TienHub Desktop is under development.\n\n" +
+                "The official download button will appear here when the first version launches."
             );
         });
     }
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (searchInput) {
         searchInput.addEventListener("input", () => {
             /*
-             * Trang Tải về chưa có danh sách game để lọc.
+             * Trang Downloads chưa có danh sách game để lọc.
              * Giữ ô tìm kiếm đồng bộ với header của TienHub.
              */
         });

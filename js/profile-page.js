@@ -52,7 +52,7 @@ function setAvatarElement(element, fallback) {
 
 function updatePreview() {
 
-    const name = displayNameInput.value.trim() || "Người chơi";
+    const name = displayNameInput.value.trim() || "Player";
 
     const fallback = selectedAvatar || name.charAt(0).toUpperCase() || "T";
 
@@ -82,7 +82,7 @@ function getUsername(user) {
 
     }
 
-    return localStorage.getItem("tienhub_login_username") || email.split("@")[0] || "Người chơi";
+    return localStorage.getItem("tienhub_login_username") || email.split("@")[0] || "Player";
 
 }
 
@@ -192,7 +192,7 @@ async function initProfile() {
 
         console.error("TienHub profile init error:", error);
 
-        showToast("Không thể tải thông tin hồ sơ.");
+        showToast("Unable to load profile information.");
 
     }
 
@@ -246,12 +246,12 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
     if (!name) {
         displayNameInput.focus();
-        showToast("Vui lòng nhập tên hiển thị.");
+        showToast("Please enter a display name.");
         return;
     }
 
     if (!currentUser) {
-        showToast("Phiên đăng nhập đã hết. Vui lòng đăng nhập lại.");
+        showToast("Your session has expired. Please sign in again.");
         return;
     }
 
@@ -275,7 +275,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
         const reservation = reservationSnapshot.val();
 
         if (reservation && reservation.uid !== currentUser.uid) {
-            showToast("Tên này đã tồn tại.");
+            showToast("This name is already taken.");
             return;
         }
 
@@ -298,7 +298,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
             }
         }
 
-        // Keep Auth, the user's private profile record, and the public profile
+        // Keep Auth, the user’s private profile record, and the public profile
         // used by games in sync. Username/login is never changed here.
         await updateProfile(currentUser, { displayName: name });
 
@@ -325,7 +325,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
         };
 
         updatePreview();
-        showToast("Đã lưu thay đổi.");
+        showToast("Changes saved.");
 
     } catch (error) {
         console.error("TienHub profile save error:", error);
@@ -333,11 +333,11 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
         console.error("TienHub profile save error code:", code);
 
         if (code === "PERMISSION_DENIED" || code === "database/permission-denied") {
-            showToast("Không có quyền lưu. Hãy kiểm tra Firebase Rules.");
+            showToast("Permission denied. Please check access settings.");
         } else if (code === "auth/requires-recent-login") {
-            showToast("Phiên đăng nhập đã cũ. Vui lòng đăng nhập lại rồi thử lại.");
+            showToast("Your session is outdated. Sign in again and retry.");
         } else {
-            showToast("Không thể lưu thay đổi. Vui lòng thử lại.");
+            showToast("Unable to save changes. Please try again.");
         }
     } finally {
         saveBtn.disabled = false;
@@ -363,7 +363,7 @@ document.getElementById("cancelBtn").addEventListener("click", () => {
 
     updatePreview();
 
-    showToast("Đã hủy thay đổi.");
+    showToast("Changes canceled.");
 
 });
 
@@ -453,7 +453,7 @@ passwordForm?.addEventListener("submit", async (event) => {
 
     if (!currentUser || currentUser.isAnonymous) {
 
-        setPasswordMessage("Phiên đăng nhập đã hết. Vui lòng đăng nhập lại.", "error");
+        setPasswordMessage("Your session has expired. Please sign in again.", "error");
 
         return;
 
@@ -463,7 +463,7 @@ passwordForm?.addEventListener("submit", async (event) => {
 
     if (currentPassword.length < 6) {
 
-        setPasswordMessage("Mật khẩu hiện tại phải có ít nhất 6 ký tự.", "error");
+        setPasswordMessage("Current password must contain at least six characters.", "error");
 
         return;
 
@@ -473,7 +473,7 @@ passwordForm?.addEventListener("submit", async (event) => {
 
     if (newPassword.length < 6) {
 
-        setPasswordMessage("Mật khẩu mới phải có ít nhất 6 ký tự.", "error");
+        setPasswordMessage("New password must contain at least six characters.", "error");
 
         return;
 
@@ -483,7 +483,7 @@ passwordForm?.addEventListener("submit", async (event) => {
 
     if (newPassword !== confirmPassword) {
 
-        setPasswordMessage("Mật khẩu mới và xác nhận mật khẩu không khớp.", "error");
+        setPasswordMessage("New password and confirmation do not match.", "error");
 
         return;
 
@@ -493,7 +493,7 @@ passwordForm?.addEventListener("submit", async (event) => {
 
     if (currentPassword === newPassword) {
 
-        setPasswordMessage("Mật khẩu mới phải khác mật khẩu hiện tại.", "error");
+        setPasswordMessage("New password must be different from your current password.", "error");
 
         return;
 
@@ -503,7 +503,7 @@ passwordForm?.addEventListener("submit", async (event) => {
 
     passwordSubmitBtn.disabled = true;
 
-    passwordSubmitBtn.textContent = "Đang đổi...";
+    passwordSubmitBtn.textContent = "Updating...";
 
 
 
@@ -529,7 +529,7 @@ passwordForm?.addEventListener("submit", async (event) => {
 
         // Use the actual Firebase email: legacy technical email or verified Gmail.
         const signInEmail = currentUser.email;
-        if (!signInEmail) throw new Error("Tài khoản không có email để xác thực lại.");
+        if (!signInEmail) throw new Error("This account has no email for reauthentication.");
         const credential = EmailAuthProvider.credential(signInEmail, currentPassword);
 
 
@@ -542,11 +542,11 @@ passwordForm?.addEventListener("submit", async (event) => {
 
 
 
-        setPasswordMessage("Đổi mật khẩu thành công.", "success");
+        setPasswordMessage("Password updated successfully.", "success");
 
         passwordForm.reset();
 
-        showToast("Đã đổi mật khẩu thành công.");
+        showToast("Password updated successfully.");
 
 
 
@@ -558,7 +558,7 @@ passwordForm?.addEventListener("submit", async (event) => {
 
 
 
-        let message = "Không thể đổi mật khẩu. Vui lòng thử lại.";
+        let message = "Unable to change your password. Please try again.";
 
         switch (error?.code) {
 
@@ -568,31 +568,31 @@ passwordForm?.addEventListener("submit", async (event) => {
 
             case "auth/invalid-login-credentials":
 
-                message = "Mật khẩu hiện tại không đúng.";
+                message = "Incorrect current password.";
 
                 break;
 
             case "auth/weak-password":
 
-                message = "Mật khẩu mới phải có ít nhất 6 ký tự.";
+                message = "New password must contain at least six characters.";
 
                 break;
 
             case "auth/too-many-requests":
 
-                message = "Có quá nhiều lần thử. Hãy thử lại sau.";
+                message = "Too many attempts. Please try again later.";
 
                 break;
 
             case "auth/network-request-failed":
 
-                message = "Không thể kết nối mạng.";
+                message = "Network connection failed.";
 
                 break;
 
             case "auth/requires-recent-login":
 
-                message = "Phiên đăng nhập đã cũ. Vui lòng đăng nhập lại rồi thử đổi mật khẩu.";
+                message = "Your session is outdated. Sign in again before changing your password.";
 
                 break;
 
@@ -606,7 +606,7 @@ passwordForm?.addEventListener("submit", async (event) => {
 
         passwordSubmitBtn.disabled = false;
 
-        passwordSubmitBtn.textContent = "Đổi mật khẩu";
+        passwordSubmitBtn.textContent = "Change Password";
 
     }
 
@@ -630,10 +630,10 @@ const emailLinkForm = document.getElementById("emailLinkForm");
 let verifiedLinkedEmail = null;
 function updateLinkedEmailUI(email) {
     verifiedLinkedEmail = email || null;
-    if (emailAccountLabel) emailAccountLabel.textContent = email ? "Đã liên kết" : "Liên kết email";
-    if (emailAccountStatus) emailAccountStatus.textContent = email || "Thêm email liên hệ đã xác minh";
+    if (emailAccountLabel) emailAccountLabel.textContent = email ? "Linked" : "Link Email";
+    if (emailAccountStatus) emailAccountStatus.textContent = email || "Add a verified contact email";
     if (linkedEmailStatus) linkedEmailStatus.textContent = email
-        ? `Đã liên kết: ${email}` : "Chưa có email liên kết.";
+        ? `Linked: ${email}` : "No email linked.";
     if (emailLinkForm) emailLinkForm.hidden = Boolean(email);
     if (email && contactEmail) contactEmail.value = email;
 }
@@ -655,7 +655,7 @@ function closeEmailModal() {
     clearInterval(contactTimer);
 }
 async function emailApi(action, payload=null) {
-    if (!currentUser) throw new Error("Vui lòng đăng nhập lại.");
+    if (!currentUser) throw new Error("Please sign in again.");
     const response = await fetch(`${CONTACT_API}/api/v1/email/${action}`, {
         method: payload ? "POST" : "GET",
         headers: {
@@ -666,24 +666,24 @@ async function emailApi(action, payload=null) {
         cache:"no-store"
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || "Dịch vụ email chưa sẵn sàng.");
+    if (!response.ok) throw new Error(data.error || "Email service is currently unavailable.");
     return data;
 }
 document.getElementById("emailBtn")?.addEventListener("click", async () => {
     // The row itself identifies already-linked emails. No second linking flow.
     if (verifiedLinkedEmail) {
-        showToast(`Email đã liên kết: ${verifiedLinkedEmail}`);
+        showToast(`Linked email: ${verifiedLinkedEmail}`);
         return;
     }
     // Recheck on the server to avoid working with stale state between tabs.
     try {
         await refreshLinkedEmail();
     } catch (_) {
-        showToast("Chưa kiểm tra được email hiện tại. Hãy thử lại.");
+        showToast("Couldn’t verify your current email. Please try again.");
         return;
     }
     if (verifiedLinkedEmail) {
-        showToast(`Email đã liên kết: ${verifiedLinkedEmail}`);
+        showToast(`Linked email: ${verifiedLinkedEmail}`);
         return;
     }
     emailModal.classList.add("show");
@@ -698,18 +698,18 @@ document.querySelector("[data-close-email]")?.addEventListener("click",closeEmai
 contactSendCode?.addEventListener("click",async () => {
     const email = contactEmail?.value.trim().toLowerCase() || "";
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        setEmailMessage("Hãy nhập email hợp lệ.",true); return;
+        setEmailMessage("Please enter a valid email.",true); return;
     }
     contactSendCode.disabled = true;
     try {
         await emailApi("send", {email,purpose:"link"});
-        setEmailMessage("Mã 6 số đã gửi đến email. Hãy kiểm tra hộp thư và Spam.");
+        setEmailMessage("Six-digit code sent. Check your inbox and spam folder.");
         const until=Date.now()+60000;
         clearInterval(contactTimer);
         const update=()=>{
             const remain=Math.max(0,Math.ceil((until-Date.now())/1000));
             contactSendCode.disabled=remain>0;
-            contactSendCode.textContent=remain?`Gửi lại (${remain}s)`:"Gửi lại mã";
+            contactSendCode.textContent=remain?`Resend (${remain}s)`:"Resend Code";
             if(!remain)clearInterval(contactTimer);
         };
         update(); contactTimer=setInterval(update,1000);
@@ -722,13 +722,13 @@ document.getElementById("emailLinkForm")?.addEventListener("submit",async (event
     event.preventDefault();
     const email=contactEmail?.value.trim().toLowerCase() || "";
     const code=contactCode?.value.trim() || "";
-    if(!/^\d{6}$/.test(code)) {setEmailMessage("Mã xác minh gồm 6 số.",true);return;}
+    if(!/^\d{6}$/.test(code)) {setEmailMessage("Verification code must contain six digits.",true);return;}
     emailLinkSubmit.disabled=true;
     try {
         await emailApi("claim",{email,purpose:"link",code});
         updateLinkedEmailUI(email);
-        setEmailMessage("Đã xác minh và liên kết email thành công!");
-        showToast("Đã liên kết email.");
+        setEmailMessage("Email verified and linked successfully!");
+        showToast("Email linked.");
     }catch(error){setEmailMessage(error.message,true);}
     finally{emailLinkSubmit.disabled=false;}
 });
@@ -755,7 +755,7 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 
         console.error("TienHub profile logout error:", error);
 
-        showToast("Không thể đăng xuất.");
+        showToast("Unable to sign out.");
 
     }
 
@@ -774,7 +774,7 @@ document.getElementById("accountTrigger").addEventListener("click", () => {
 initProfile().then(() => {
     if (!currentUser) return;
     refreshLinkedEmail().catch(() => {
-        if (emailAccountLabel) emailAccountLabel.textContent = "Liên kết email";
-        if (emailAccountStatus) emailAccountStatus.textContent = "Không tải được trạng thái email";
+        if (emailAccountLabel) emailAccountLabel.textContent = "Link Email";
+        if (emailAccountStatus) emailAccountStatus.textContent = "Unable to load email status";
     });
 });
